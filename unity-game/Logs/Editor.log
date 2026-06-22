@@ -1,0 +1,678 @@
+Unity Editor version:    6000.5.0f1 (88b47c5e7076)
+Branch:                  6000.5/staging
+Build type:              Release
+Batch mode:              NO
+macOS version:           Version 15.7.7 (Build 24G720)
+Darwin version:          24.6.0
+Architecture:            x86_64
+Running under Rosetta:   NO
+Available memory:        32768 MB
+Date:                    2026-06-22T21:41:03Z
+[Licensing::Module] Trying to connect to existing licensing client channel...
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-velja" at "2026-06-22T21:41:03.56822Z"
+
+COMMAND LINE ARGUMENTS:
+/Applications/Unity/Hub/Editor/6000.5.0f1/Unity.app/Contents/MacOS/Unity
+-projectpath
+/Users/velja/IdeaProjects/from-zero-to-hero/unity-game
+-acceptSoftwareTermsForThisRunOnly
+-useHub
+-hubIPC
+-cloudEnvironment
+production
+-licensingIpc
+LicenseClient-velja
+-hubSessionId
+33f2bc3e-2aa6-44f1-8614-8fc87db80d2f
+-accessToken
+GjP3Qp9Z5gtOc3DV6ySl59nIpkdXayMvV13yT2jfTxs006f
+Successfully changed project path to: /Users/velja/IdeaProjects/from-zero-to-hero/unity-game
+/Users/velja/IdeaProjects/from-zero-to-hero/unity-game
+[UnityMemory] Configuration Parameters - Can be set up in boot.config
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-nav-mesh-worker=65536"
+    "memorysetup-temp-allocator-size-audio-worker=65536"
+    "memorysetup-temp-allocator-size-cloud-worker=32768"
+    "memorysetup-allocator-temp-initial-block-size-main=262144"
+    "memorysetup-allocator-temp-initial-block-size-worker=262144"
+    "memorysetup-temp-allocator-size-preload-manager=33554432"
+    "memorysetup-temp-allocator-size-gfx=262144"
+    "memorysetup-temp-allocator-size-background-worker=32768"
+    "memorysetup-temp-allocator-size-job-worker=262144"
+    "memorysetup-bucket-allocator-granularity=16"
+    "memorysetup-bucket-allocator-bucket-count=8"
+    "memorysetup-bucket-allocator-block-size=33554432"
+    "memorysetup-bucket-allocator-block-count=8"
+    "memorysetup-main-allocator-block-size=16777216"
+    "memorysetup-thread-allocator-block-size=16777216"
+    "memorysetup-main-allocator-mimalloc-enabled=0"
+    "memorysetup-gfx-main-allocator-block-size=16777216"
+    "memorysetup-gfx-thread-allocator-block-size=16777216"
+    "memorysetup-cache-allocator-block-size=4194304"
+    "memorysetup-typetree-allocator-block-size=2097152"
+    "memorysetup-profiler-bucket-allocator-granularity=16"
+    "memorysetup-profiler-bucket-allocator-bucket-count=8"
+    "memorysetup-profiler-bucket-allocator-block-size=33554432"
+    "memorysetup-profiler-bucket-allocator-block-count=8"
+    "memorysetup-profiler-allocator-block-size=16777216"
+    "memorysetup-profiler-editor-allocator-block-size=1048576"
+    "memorysetup-temp-allocator-size-main=16777216"
+    "memorysetup-job-temp-allocator-block-size=2097152"
+    "memorysetup-job-temp-allocator-block-size-background=1048576"
+    "memorysetup-job-temp-allocator-reduction-small-platforms=262144"
+Player connection [140704591782272]  Target information:
+
+Player connection [140704591782272]  * "[IP] 192.168.0.39 [Port] 55504 [Flags] 2 [Guid] 370500137 [EditorId] 370500137 [Version] 1048832 [Id] OSXEditor(0,MacBook-Pro.local) [Debug] 1 [PackageName] OSXEditor [ProjectName] Editor" 
+
+Player connection [140704591782272] Host joined multi-casting on [225.0.0.222:54997]...
+Player connection [140704591782272] Host joined alternative multi-casting on [225.0.0.222:34997]...
+Input System module state changed to: Initialized.
+[Physics::Module] Initialized fallback backend.
+[Physics::Module] Id: 0xdecafbad
+[Package Manager] Connected to IPC stream "Upm-19978" after 0.1 seconds.
+[Licensing::Module] Licensing is not yet initialized.
+[Licensing::Client] Error: HandshakeResponse reported an error:
+	ResponseCode: 505
+	ResponseStatus: Unsupported protocol version '1.18.1'.
+[Licensing::Module] Error: Failed to handshake to channel: "LicenseClient-velja"
+[Licensing::IpcConnector] LicenseClient-velja channel disconnected successfully.
+[Licensing::IpcConnector] Channel LicenseClient-velja-6000.5.0 doesn't exist
+Launching external process: /Applications/Unity/Hub/Editor/6000.5.0f1/Unity.app/Contents/Helpers/UnityLicensingClient.app/Contents/MacOS/Unity.Licensing.Client
+[Licensing::Module] Successfully launched the LicensingClient (PId: 20014)
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-velja-6000.5.0" at "2026-06-22T21:41:04.812322Z"
+[Licensing::Client] Handshaking with LicensingClient:
+  Version:                 1.18.1+9fbee8e
+  Session Id:              dc1c807bef57469fb4a0ce4ddc081471
+  Correlation Id:          ed751bd16aefe15a0b8812543227d915
+  External correlation Id: 391909064774790223
+  Machine Id:              tyoUFa6xZzEd5Kz28NFwySuwbIM=
+[Licensing::Module] Successfully connected to LicensingClient on channel: "LicenseClient-velja-6000.5.0" (connect: 0.38s, validation: 0.05s, handshake: 0.71s)
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-velja-6000.5.0-notifications" at "2026-06-22T21:41:05.571036Z"
+[Licensing::Module] Connected to LicensingClient (PId: 20014, launch time: 0.00, total connection time: 1.14s)
+[Licensing::Client] Successfully updated the access token
+[Licensing::Module] Successfully updated the access token GjP3Qp9Z5g...
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Module] License group:
+  Id: 6872857169415-UnityPersXXXX
+  Product: Unity Personal
+  Type: Assigned
+  Expiration: Unlimited
+[Licensing::Client] Successfully updated license, isAsync: True, time: 0.02
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Module] Licensing Background thread has ended after 2.04s
+[Licensing::Module] Licensing is initialized (took 1.30s).
+[Licensing::Client] Successfully resolved entitlement details
+Library Redirect Path: Library/
+[Physics::Module] Selected backend.
+[Physics::Module] Name: PhysX
+[Physics::Module] Id: 0xf2b8ea05
+[Physics::Module] SDK Version: 4.1.2
+[Physics::Module] Integration Version: 1.0.0
+[Physics::Module] Threading Mode: Multi-Threaded
+Initialize engine version: 6000.5.0f1 (88b47c5e7076)
+[Subsystems] Discovering subsystems at path /Applications/Unity/Hub/Editor/6000.5.0f1/Unity.app/Contents/Resources/UnitySubsystems
+[Subsystems] Discovering subsystems at path /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Assets
+GfxDevice: creating device client; kGfxThreadingModeThreaded
+Color LCD preferred device: AMD Radeon Pro 560X (high power)
+Metal devices available: 2
+0: AMD Radeon Pro 560X (high power)
+1: Intel(R) UHD Graphics 630 (low power)
+Using device AMD Radeon Pro 560X (high power)
+Initializing Metal device caps: AMD Radeon Pro 560X
+Mac GPU Family: 2
+Apple GPU Family: 0
+MSL Version: 3.0
+Has Float MSAA: 1
+Has Float Filtering: 1
+ReadWrite Texture Tier: 2
+Initialize mono
+Mono path[0] = '/Applications/Unity/Hub/Editor/6000.5.0f1/Unity.app/Contents/Resources/Scripting/Managed'
+Mono path[1] = '/Applications/Unity/Hub/Editor/6000.5.0f1/Unity.app/Contents/Resources/Scripting/BCLExtensions/runtime/netstandard2.1'
+Mono path[2] = '/Applications/Unity/Hub/Editor/6000.5.0f1/Unity.app/Contents/Resources/Scripting/MonoBleedingEdge/lib/mono/unityjit-macos'
+Mono config path = '/Applications/Unity/Hub/Editor/6000.5.0f1/Unity.app/Contents/Resources/Scripting/MonoBleedingEdge/etc'
+Using monoOptions --debugger-agent=transport=dt_socket,embedding=1,server=y,suspend=n,address=127.0.0.1:56978
+CodeReloadManager initialized
+ImportWorker Server TCP listen port: 0
+AcceleratorClientConnectionCallback - disconnected - :0
+Begin MonoManager ReloadAssembly
+Registering precompiled unity dll's ...
+Register platform support module: /Applications/Unity/Hub/Editor/6000.5.0f1/PlaybackEngines/WebGLSupport/UnityEditor.WebGL.Extensions.dll
+Register platform support module: /Applications/Unity/Hub/Editor/6000.5.0f1/PlaybackEngines/MacStandaloneSupport/UnityEditor.OSXStandalone.Extensions.dll
+Registered in 0.000757 seconds.
+Native extension for OSXStandalone target not found
+Native extension for WebGL target not found
+Package Manager log level set to [2]
+ScheduleIndexationOnStartup MainProcess:False IndexOnStartup:True
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  0.605 seconds
+Domain Reload Profiling: 1484ms
+	BeginReloadAssembly (167ms)
+		CreateAndSetChildDomain (21ms)
+	RebuildCommonClasses (9ms)
+	RebuildNativeTypeToScriptingClass (32ms)
+	initialDomainReloadingComplete (86ms)
+	LoadAllAssembliesAndSetupDomain (583ms)
+		LoadAssemblies (146ms)
+		AnalyzeDomain (475ms)
+			TypeCache.Refresh (474ms)
+				TypeCache.ScanAssembly (454ms)
+	FinalizeReload (608ms)
+		SetupLoadedEditorAssemblies (0ms)
+			InitializePlatformSupportModulesInManaged (4ms)
+			BeforeProcessingInitializeOnLoad (133ms)
+			ProcessInitializeOnLoadAttributes (151ms)
+			ProcessInitializeOnLoadMethodAttributes (198ms)
+[Licensing::Client] Successfully resolved entitlement details
+Application.AssetDatabase Initial Refresh Start
+[Package Manager] Restoring resolved packages state from cache
+[Licensing::Client] Successfully resolved entitlement details
+[Package Manager] Registered 36 packages:
+  Built-in packages:
+    com.unity.modules.accessibility@1.0.0 (location: /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Library/PackageCache/com.unity.modules.accessibility)
+    com.unity.modules.adaptiveperformance@1.0.0 (location: /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Library/PackageCache/com.unity.modules.adaptiveperformance)
+    com.unity.modules.ai@1.0.0 (location: /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Library/PackageCache/com.unity.modules.ai)
+    com.unity.modules.androidjni@1.0.0 (location: /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Library/PackageCache/com.unity.modules.androidjni)
+    com.unity.modules.animation@1.0.0 (location: /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Library/PackageCache/com.unity.modules.animation)
+    com.unity.modules.assetbundle@1.0.0 (location: /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Library/PackageCache/com.unity.modules.assetbundle)
+    com.unity.modules.audio@1.0.0 (location: /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Library/PackageCache/com.unity.modules.audio)
+    com.unity.modules.cloth@1.0.0 (location: /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Library/PackageCache/com.unity.modules.cloth)
+    com.unity.modules.director@1.0.0 (location: /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Library/PackageCache/com.unity.modules.director)
+    com.unity.modules.imageconversion@1.0.0 (location: /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Library/PackageCache/com.unity.modules.imageconversion)
+    com.unity.modules.imgui@1.0.0 (location: /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Library/PackageCache/com.unity.modules.imgui)
+    com.unity.modules.jsonserialize@1.0.0 (location: /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Library/PackageCache/com.unity.modules.jsonserialize)
+    com.unity.modules.particlesystem@1.0.0 (location: /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Library/PackageCache/com.unity.modules.particlesystem)
+    com.unity.modules.physics@1.0.0 (location: /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Library/PackageCache/com.unity.modules.physics)
+    com.unity.modules.physics2d@1.0.0 (location: /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Library/PackageCache/com.unity.modules.physics2d)
+    com.unity.modules.physicscore2d@1.0.0 (location: /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Library/PackageCache/com.unity.modules.physicscore2d)
+    com.unity.modules.screencapture@1.0.0 (location: /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Library/PackageCache/com.unity.modules.screencapture)
+    com.unity.modules.terrain@1.0.0 (location: /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Library/PackageCache/com.unity.modules.terrain)
+    com.unity.modules.terrainphysics@1.0.0 (location: /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Library/PackageCache/com.unity.modules.terrainphysics)
+    com.unity.modules.tilemap@1.0.0 (location: /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Library/PackageCache/com.unity.modules.tilemap)
+    com.unity.modules.ui@1.0.0 (location: /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Library/PackageCache/com.unity.modules.ui)
+    com.unity.modules.uielements@1.0.0 (location: /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Library/PackageCache/com.unity.modules.uielements)
+    com.unity.modules.umbra@1.0.0 (location: /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Library/PackageCache/com.unity.modules.umbra)
+    com.unity.modules.unityanalytics@1.0.0 (location: /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Library/PackageCache/com.unity.modules.unityanalytics)
+    com.unity.modules.unitywebrequest@1.0.0 (location: /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Library/PackageCache/com.unity.modules.unitywebrequest)
+    com.unity.modules.unitywebrequestassetbundle@1.0.0 (location: /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Library/PackageCache/com.unity.modules.unitywebrequestassetbundle)
+    com.unity.modules.unitywebrequestaudio@1.0.0 (location: /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Library/PackageCache/com.unity.modules.unitywebrequestaudio)
+    com.unity.modules.unitywebrequesttexture@1.0.0 (location: /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Library/PackageCache/com.unity.modules.unitywebrequesttexture)
+    com.unity.modules.unitywebrequestwww@1.0.0 (location: /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Library/PackageCache/com.unity.modules.unitywebrequestwww)
+    com.unity.modules.vectorgraphics@1.0.0 (location: /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Library/PackageCache/com.unity.modules.vectorgraphics)
+    com.unity.modules.vehicles@1.0.0 (location: /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Library/PackageCache/com.unity.modules.vehicles)
+    com.unity.modules.video@1.0.0 (location: /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Library/PackageCache/com.unity.modules.video)
+    com.unity.modules.wind@1.0.0 (location: /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Library/PackageCache/com.unity.modules.wind)
+    com.unity.modules.xr@1.0.0 (location: /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Library/PackageCache/com.unity.modules.xr)
+    com.unity.modules.subsystems@1.0.0 (location: /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Library/PackageCache/com.unity.modules.subsystems)
+    com.unity.modules.hierarchycore@1.0.0 (location: /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Library/PackageCache/com.unity.modules.hierarchycore)
+[Subsystems] No new subsystems found in resolved package list.
+[Package Manager] Done registering packages in 0.01 seconds
+[ScriptCompilation] Requested script compilation because: AssetDatabase observed changes in script compilation related files
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://unix:/tmp/ilpp.sock-deb059b86d63c05b4c245eeab8b6a8ce
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Production
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/velja/IdeaProjects/from-zero-to-hero/unity-game
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/2 POST http://ilpp/UnityILPP.PostProcessing/Ping - application/grpc -
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
+      Executing endpoint 'gRPC - /UnityILPP.PostProcessing/Ping'
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
+      Executed endpoint 'gRPC - /UnityILPP.PostProcessing/Ping'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/2 POST http://ilpp/UnityILPP.PostProcessing/Ping - 200 - application/grpc 53.1166ms
+Starting: /Applications/Unity/Hub/Editor/6000.5.0f1/Unity.app/Contents/Resources/BuildPipeline/bee_backend --ipc --defer-dag-verification --dagfile="Library/Bee/200b0aE.dag" --continue-on-failure --profile="Library/Bee/backend1.traceevents" ScriptAssemblies
+WorkingDir: /Users/velja/IdeaProjects/from-zero-to-hero/unity-game
+ExitCode: 0 Duration: 2s377ms
+[163/169    2s] Csc Library/Bee/artifacts/200b0aE.dag/Assembly-CSharp.dll (+2 others)
+[164/169    0s] CopyFiles Library/ScriptAssemblies/Assembly-CSharp.pdb
+[165/169    0s] CopyFiles Library/ScriptAssemblies/Assembly-CSharp.dll
+[166/169    0s] Csc Library/Bee/artifacts/200b0aE.dag/Assembly-CSharp-Editor.dll (+2 others)
+[167/169    0s] CopyFiles Library/ScriptAssemblies/Assembly-CSharp-Editor.pdb
+[168/169    0s] CopyFiles Library/ScriptAssemblies/Assembly-CSharp-Editor.dll
+*** Tundra build success (2.34 seconds), 6 items updated, 169 evaluated
+AssetDatabase: script compilation time: 3.093534s
+Total cache size 64525408
+Begin MonoManager ReloadAssembly
+Total cache size after purge 64525408, took 00:00:00.0461540
+Native extension for OSXStandalone target not found
+Native extension for WebGL target not found
+ScheduleIndexationOnStartup MainProcess:True IndexOnStartup:True
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  0.652 seconds
+Domain Reload Profiling: 1145ms
+	BeginReloadAssembly (276ms)
+		DisableScriptedObjects (21ms)
+		CreateAndSetChildDomain (80ms)
+	RebuildCommonClasses (19ms)
+	RebuildNativeTypeToScriptingClass (27ms)
+	initialDomainReloadingComplete (46ms)
+	LoadAllAssembliesAndSetupDomain (122ms)
+		LoadAssemblies (102ms)
+		AnalyzeDomain (14ms)
+			TypeCache.Refresh (8ms)
+			BuildScriptInfoCaches (5ms)
+	FinalizeReload (654ms)
+		SetupLoadedEditorAssemblies (0ms)
+			InitializePlatformSupportModulesInManaged (3ms)
+			BeforeProcessingInitializeOnLoad (138ms)
+			ProcessInitializeOnLoadAttributes (152ms)
+			ProcessInitializeOnLoadMethodAttributes (121ms)
+		AwakeInstancesAfterBackupRestoration (20ms)
+Starting new worker id: 0 with log in /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Logs/AssetImportWorkerHW0.log
+
+Asset Pipeline Refresh (id=db944d06510614d78a62bfdd2f9bf9f5): Total: 4.474 seconds - Initiated by InitialRefreshV2(ForceSynchronousImport)
+	(Values over 0.05ms)
+	Summary:
+		Imports: total=0 (actual=0, local cache=0, cache server=0)
+		Asset DB Process Time: managed=0 ms, native=763 ms
+		Asset DB Callback time: managed=89 ms, native=13 ms
+		Scripting: domain reloads=1, domain reload time=510 ms, compile time=3096 ms, other=1 ms
+		Project Asset Count: scripts=105, non-scripts=62
+		Asset File Changes: new=0, changed=1, moved=0, deleted=0
+		Scan Filter Count: 1
+	InvokePackagesCallback: 9.935ms
+	ApplyChangesToAssetFolders: 0.263ms
+	Scan: 73.001ms
+	Collect global state as custom dependencies: 0.479ms
+	OnSourceAssetsModified: 0.920ms
+	CategorizeScriptCompilationAssets: 0.147ms
+	ProcessAssetsWithTransientArtifactChanges: 0.890ms
+	CategorizeAssets: 1.098ms
+	CompileScripts: 3095.676ms
+	ImportOutOfDateAssets: 659.195ms (656.313ms without children)
+		UnloadImportedAssets: 0.310ms
+		ImportSchedulerStart: 2.523ms
+	PostProcessAllAssets: 90.016ms
+		VCAutoAddAssetPostprocess 1.243ms
+		MonoPostProcessAllAssets: 88.313ms
+			StyleCatalogPostProcessor.OnPostprocessAllAssets 16.896ms
+			AssetPostprocessor.OnPostprocessAllAssets 13.810ms
+			AssetChangedListener.OnPostprocessAllAssets 11.509ms
+			WindowAssetPostprocessingWatcher.OnPostprocessAllAssets 11.457ms
+			BuilderAssetPostprocessor.OnPostprocessAllAssets 7.887ms
+			SyncVS.PostprocessSyncProject 3.063ms
+			RetainedModeAssetPostprocessor.OnPostprocessAllAssets 2.836ms
+			SpeedTree9Postprocessor.OnPostprocessAllAssets 1.408ms
+			TextAssetPostProcessor.OnPostprocessAllAssets 1.002ms
+			ArtifactBrowserPostProcessor.OnPostprocessAllAssets 0.668ms
+			ReferencedClipsPostProcessor.OnPostprocessAllAssets 0.467ms
+			AudioMixerPostprocessor.OnPostprocessAllAssets 0.361ms
+			TerrainToolbarOverlayPostProcessor.OnPostprocessAllAssets 0.312ms
+			AssetEvents.OnPostprocessAllAssets 0.298ms
+			SpeedTreePostProcessor.OnPostprocessAllAssets 0.266ms
+			RenderPipelineGlobalSettingsPostprocessor.OnPostprocessAllAssets 0.229ms
+			AssetDatabaseCallbacks.OnPostprocessAllAssets 0.195ms
+			ConfigAssetsTracker.OnPostprocessAllAssets 0.170ms
+			ScenarioDriftAssetsTracker.OnPostprocessAllAssets 0.161ms
+			AudioContainerPostProcessor.OnPostprocessAllAssets 0.101ms
+	PostAssetChangesProfiler: 2.890ms
+	UnloadStreamsBegin: 1.956ms
+	Untracked: 535.758ms
+
+Application.AssetDatabase Initial Refresh End
+Launching external process: /Applications/Unity/Hub/Editor/6000.5.0f1/Unity.app/Contents/Helpers/UnityShaderCompiler
+Launched and connected shader compiler UnityShaderCompiler after 0.13 seconds
+Scanning for USB devices : 0.876ms
+Initializing Unity extensions:
+[MODES] ModeService[none].Initialize
+[MODES] ModeService[none].LoadModes
+[MODES] Loading mode Default (0) for mode-current-id-unity-game
+Unloading 3 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 21 unused Assets / (421.1 KB). Loaded Objects now: 673.
+Memory consumption went from 127.3 MB to 126.8 MB.
+Total: 38.061687 ms (FindLiveObjects: 0.074749 ms CreateObjectMapping: 0.013898 ms MarkObjects: 37.555513 ms  DeleteObjects: 0.415870 ms)
+
+[LAYOUT] About to load UserSettings/Layouts/default-6000.dwlt, keepMainWindow=False
+2026-06-22 23:41:12.852 Unity[19978:526401] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-06-22 23:41:12.859 Unity[19978:526401] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-06-22 23:41:12.864 Unity[19978:526401] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-06-22 23:41:12.865 Unity[19978:526401] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-06-22 23:41:12.865 Unity[19978:526401] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-06-22 23:41:12.867 Unity[19978:526401] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-06-22 23:41:14.939 Unity[19978:526401] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-06-22 23:41:14.940 Unity[19978:526401] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-06-22 23:41:14.975 Unity[19978:526401] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-06-22 23:41:14.976 Unity[19978:526401] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-06-22 23:41:14.976 Unity[19978:526401] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-06-22 23:41:14.977 Unity[19978:526401] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+[LAYOUT] About to save layout /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/UserSettings/Layouts/default-6000.dwlt
+[LAYOUT] About to save layout /Users/velja/Library/Preferences/Unity/Editor-5.x/Layouts/current/default-6000.dwlt
+[MODES] ModeService[default].InitializeCurrentMode
+[MODES] ModeService[default].RaiseModeChanged(default, default)
+This project uses Input Manager, which is marked for deprecation. To manage input in your project, use the <a href="https://docs.unity3d.com/Packages/com.unity.inputsystem@latest">Input System package</a> instead.
+[Project] Loading completed in 11.475 seconds
+	Project init time: 				8.473 seconds
+		Template init time: 		0.000 seconds
+		Package Manager init time: 		1.439 seconds
+		Asset Database init time: 		0.264 seconds
+		Global illumination init time: 	0.002 seconds
+		Assemblies load time: 			1.524 seconds
+		Unity extensions init time: 	0.000 seconds
+		Asset Database refresh time: 	4.477 seconds
+	Scene opening time: 			2.689 seconds
+##utp:{"type":"ProjectInfo","version":2,"phase":"Immediate","time":1782164475038,"processId":19978,"projectLoad":11.474526027,"projectInit":8.473035612,"templateInit":0.0,"packageManagerInit":1.439333053,"assetDatabaseInit":0.264235933,"globalIlluminationInit":0.001830752,"assembliesLoad":1.524012655,"unityExtensionsInit":0.000482783,"assetDatabaseRefresh":4.477009805,"sceneOpening":2.688519382}
+##utp:{"type":"EditorInfo","version":2,"phase":"Immediate","time":1782164475038,"processId":19978,"editorVersion":"6000.5.0f1 (88b47c5e7076)","branch":"6000.5/staging","buildType":"Release","platform":"OSX"}
+Subscribe to USB device events
+Scanning for USB devices : 0.896ms
+Dynamic Batching is deprecated and will be removed in a future release. Use GPU Instancing instead. Disable Dynamic Batching in Project Settings > Player > Other Settings to remove this warning.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:35)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:LogWarning (object)
+UnityEditor.PlayerSettingsBatchingWarning:WarnIfDynamicBatchingEnabled () (at /Users/bokken/build/output/unity/unity/Editor/Mono/Inspector/PlayerSettingsEditor/PlayerSettingsBatchingWarning.cs:45)
+UnityEditor.EditorApplication:Internal_CallUpdateFunctions () (at /Users/bokken/build/output/unity/unity/Editor/Mono/EditorApplication.cs:403)
+
+(Filename: /Users/bokken/build/output/unity/unity/Editor/Mono/Inspector/PlayerSettingsEditor/PlayerSettingsBatchingWarning.cs Line: 45)
+
+Worker ready: AssetImportWorkerHW0 0
+Created GICache directory at /Users/velja/Library/Caches/com.unity3d.UnityEditor/GiCache. Took: 0.004s, timestamps: [11.498 - 11.502]
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Client] Successfully updated the access token
+[Licensing::Module] Successfully updated access token: "GjP3Qp9Z"... (expires: 2026-06-22T23:33:51Z)
+TrimDiskCacheJob: Current cache size 0mb
+Asset Pipeline Refresh (id=02614dbe186c141c8845b3a152ac8533): Total: 0.045 seconds - Initiated by RefreshV2(AllowForceSynchronousImport)
+Importing 'GUID: 2f0c30baa2b3544cb8548d666f72aa8c - Path: Assets/Scenes' with importer (DefaultImporter)
+Imported 'GUID: 2f0c30baa2b3544cb8548d666f72aa8c' -> (Import Result ID: '96fcef6b2a39f190d5e040ee5918a867') in 0.006 seconds [static dependencies only]. Details - ImportResultOutputID=b4892d1898132ea1b8f229ef816bc032 DependenciesID=2ae565b5c9992924e000d49e6b26c07a StaticDependenciesID=5bbd399a45154cde5f1349d273dd3362 
+Asset Pipeline Refresh (id=796a34929cc8d49d48ccbd8a6e5c8919): Total: 0.024 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+Unloading 0 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 2 unused Assets / (0.8 KB). Loaded Objects now: 1716.
+Memory consumption went from 242.0 MB to 242.0 MB.
+Total: 14.151805 ms (FindLiveObjects: 0.111711 ms CreateObjectMapping: 0.018652 ms MarkObjects: 13.997198 ms  DeleteObjects: 0.022906 ms)
+
+Importing 'GUID: bd25eb8d490874617831a8f515d1d7ba - Path: Assets/Scenes/Main.unity' with importer (DefaultImporter)
+Imported 'GUID: bd25eb8d490874617831a8f515d1d7ba' -> (Import Result ID: '6c0e8ddbc3faf171df785223d3037e4f') in 0.001 seconds [static dependencies only]. Details - ImportResultOutputID=4bf4f07a4a70633776e17aee616614e7 DependenciesID=3c8bb73bc78c3c2873c4a7b88c197991 StaticDependenciesID=fa3fb6d68ea10152eb86c3a618af3fc8 
+Asset Pipeline Refresh (id=d92e4663b8eb5409e8f79984239794ac): Total: 0.010 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+AcceleratorClientConnectionCallback - disconnected - :0
+Importing 'GUID: 0000000000000000b000000000000000 - Path: ProjectSettings/EditorBuildSettings.asset' with importer (LibraryAssetImporter)
+Imported 'GUID: 0000000000000000b000000000000000' -> (Import Result ID: '0edba9b4e55d8fab8169c1e4488aeef2') in 0.001 seconds [static dependencies only]. Details - ImportResultOutputID=4647dd083cfc32cebcd7526e8846440c DependenciesID=80f77587b95217637426b838041e76b2 StaticDependenciesID=2703ed435779e522a272af428d5888e3 
+Asset Pipeline Refresh (id=012e410b059574fcea9dcd81a9ef7b45): Total: 0.008 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+Asset Pipeline Refresh (id=278d354e702814131be3abac427f21ba): Total: 0.012 seconds - Initiated by RefreshV2(NoUpdateAssetOptions)
+Opening scene 'Assets/Scenes/Main.unity'
+Unloading 0 Unused Serialized files (Serialized files now loaded: 0)
+Loaded scene 'Assets/Scenes/Main.unity'
+	Deserialize:            0.782 ms
+	Integration:            14.413 ms
+	Integration of assets:  0.004 ms
+	Thread Wait Time:       0.042 ms
+	Total Operation Time:   15.241 ms
+Unloading 2 unused Assets / (15.5 KB). Loaded Objects now: 1717.
+Memory consumption went from 241.5 MB to 241.5 MB.
+Total: 13.561958 ms (FindLiveObjects: 0.087597 ms CreateObjectMapping: 0.015973 ms MarkObjects: 13.417179 ms  DeleteObjects: 0.040217 ms)
+
+Start Indexing on Editor startup
+[Indexing] Starting Initial Indexing for Assets
+Starting new worker id: 1 with log in /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Logs/AssetImportWorkerHW1.log
+[Worker0] Imported GUID: 24f032dcbba344d0488a1e392798e3aa - Path: Assets/Scripts/Core/GameBootstrap.cs - Importer: ScriptedImporter/UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B -> (ImportResultId: '4ef064284e6f22c10fc8faa708569c40') in 0.133287432 seconds
+[Worker0] Imported GUID: 2f0c30baa2b3544cb8548d666f72aa8c - Path: Assets/Scenes - Importer: ScriptedImporter/UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B -> (ImportResultId: '607f4e5e4d35594bee6862380e128377') in 0.003001225 seconds
+[Worker0] Imported GUID: bd25eb8d490874617831a8f515d1d7ba - Path: Assets/Scenes/Main.unity - Importer: ScriptedImporter/UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B -> (ImportResultId: 'f2ed29db0139d279e43a80047524ac0e') in 0.002495178 seconds
+Reloading assemblies for play mode.
+Reloading assemblies after forced synchronous recompile.
+Begin MonoManager ReloadAssembly
+[Licensing::Client] Successfully resolved entitlement details
+<CFData 0x7fefd1ad8570 [0x7ff853b284a0]>{length = 6, capacity = 6, bytes = 0xf0189842ad88}
+Worker ready: AssetImportWorkerHW1 1
+Native extension for OSXStandalone target not found
+Native extension for WebGL target not found
+ScheduleIndexationOnStartup MainProcess:True IndexOnStartup:True
+[MODES] ModeService[none].Initialize
+[MODES] ModeService[none].LoadModes
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  1.562 seconds
+Domain Reload Profiling: 2193ms
+	BeginReloadAssembly (443ms)
+		DisableScriptedObjects (94ms)
+		CreateAndSetChildDomain (148ms)
+	RebuildCommonClasses (14ms)
+	RebuildNativeTypeToScriptingClass (26ms)
+	initialDomainReloadingComplete (35ms)
+	LoadAllAssembliesAndSetupDomain (111ms)
+		LoadAssemblies (107ms)
+		AnalyzeDomain (7ms)
+			TypeCache.Refresh (5ms)
+	FinalizeReload (1564ms)
+		SetupLoadedEditorAssemblies (0ms)
+			InitializePlatformSupportModulesInManaged (3ms)
+			BeforeProcessingInitializeOnLoad (121ms)
+			ProcessInitializeOnLoadAttributes (101ms)
+			ProcessInitializeOnLoadMethodAttributes (134ms)
+		AwakeInstancesAfterBackupRestoration (748ms)
+
+Asset Pipeline Refresh (id=6b21a0a413a0646d48bc9233672cdc65): Total: 2.343 seconds - Initiated by StopAssetImportingV2(ForceSynchronousImport | ForceDomainReload)
+	(Values over 0.05ms)
+	Summary:
+		Imports: total=0 (actual=0, local cache=0, cache server=0)
+		Asset DB Process Time: managed=0 ms, native=1633 ms
+		Asset DB Callback time: managed=55 ms, native=2 ms
+		Scripting: domain reloads=1, domain reload time=647 ms, compile time=4 ms, other=0 ms
+		Project Asset Count: scripts=106, non-scripts=63
+		Asset File Changes: new=0, changed=0, moved=0, deleted=0
+		Scan Filter Count: 0
+	InvokePackagesCallback: 1.553ms
+	ApplyChangesToAssetFolders: 0.207ms
+	Collect global state as custom dependencies: 0.337ms
+	ProcessAssetsWithTransientArtifactChanges: 0.926ms
+	CategorizeAssets: 1.165ms
+	CompileScripts: 3.966ms
+	ImportOutOfDateAssets: 1568.094ms (1565.335ms without children)
+		CollectScriptTypesHashes: 0.341ms
+		UnloadImportedAssets: 2.027ms
+		ImportSchedulerStart: 0.683ms
+	PostProcessAllAssets: 55.841ms
+		PostProcessCallbackCreateDeferredMaterials 0.066ms
+		MonoPostProcessAllAssets: 55.029ms
+			WindowAssetPostprocessingWatcher.OnPostprocessAllAssets 12.897ms
+			BuilderAssetPostprocessor.OnPostprocessAllAssets 9.930ms
+			AssetPostprocessor.OnPostprocessAllAssets 5.785ms
+			AssetChangedListener.OnPostprocessAllAssets 2.614ms
+			SyncVS.PostprocessSyncProject 1.773ms
+			RetainedModeAssetPostprocessor.OnPostprocessAllAssets 1.603ms
+			SpeedTree9Postprocessor.OnPostprocessAllAssets 1.076ms
+			ArtifactBrowserPostProcessor.OnPostprocessAllAssets 0.806ms
+			TextAssetPostProcessor.OnPostprocessAllAssets 0.780ms
+			ReferencedClipsPostProcessor.OnPostprocessAllAssets 0.521ms
+			AudioMixerPostprocessor.OnPostprocessAllAssets 0.460ms
+			StyleCatalogPostProcessor.OnPostprocessAllAssets 0.336ms
+			AssetEvents.OnPostprocessAllAssets 0.302ms
+			AssetDatabaseCallbacks.OnPostprocessAllAssets 0.235ms
+			ScenarioDriftAssetsTracker.OnPostprocessAllAssets 0.227ms
+			ConfigAssetsTracker.OnPostprocessAllAssets 0.212ms
+			TerrainToolbarOverlayPostProcessor.OnPostprocessAllAssets 0.210ms
+			SpeedTreePostProcessor.OnPostprocessAllAssets 0.203ms
+			AudioContainerPostProcessor.OnPostprocessAllAssets 0.115ms
+			RenderPipelineGlobalSettingsPostprocessor.OnPostprocessAllAssets 0.107ms
+	PostAssetChangesProfiler: 1.898ms
+	UnloadStreamsBegin: 1.894ms
+	Untracked: 703.998ms
+
+ArgumentException: You can only call GUI functions from inside OnGUI.
+  at UnityEngine.GUIUtility.CheckOnGUI () [0x0002b] in /Users/bokken/build/output/unity/unity/Modules/IMGUI/GUIUtility.cs:340 
+  at UnityEngine.GUI.get_skin () [0x00000] in /Users/bokken/build/output/unity/unity/Modules/IMGUI/GUI.cs:42 
+  at FromZeroToHero.Core.HUDController.CreateStyle (UnityEngine.Color background, System.Int32 size, UnityEngine.FontStyle fontStyle, UnityEngine.TextAnchor anchor) [0x00000] in /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Assets/Scripts/Core/HUDController.cs:85 
+  at FromZeroToHero.Core.HUDController.Build () [0x00000] in /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Assets/Scripts/Core/HUDController.cs:21 
+  at FromZeroToHero.Core.GameBootstrap.BuildHUD () [0x00015] in /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Assets/Scripts/Core/GameBootstrap.cs:151 
+  at FromZeroToHero.Core.GameBootstrap.Awake () [0x00025] in /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Assets/Scripts/Core/GameBootstrap.cs:39 
+
+(Filename: Assets/Scripts/Core/HUDController.cs Line: 21)
+
+Loaded scene 'Temp/__Backupscenes/0.backup'
+	Deserialize:            0.414 ms
+	Integration:            84.137 ms
+	Integration of assets:  0.001 ms
+	Thread Wait Time:       0.011 ms
+	Total Operation Time:   84.563 ms
+Launching external process: /Applications/Unity/Hub/Editor/6000.5.0f1/Unity.app/Contents/Helpers/UnityShaderCompiler
+Launched and connected shader compiler UnityShaderCompiler after 0.09 seconds
+Launching external process: /Applications/Unity/Hub/Editor/6000.5.0f1/Unity.app/Contents/Helpers/UnityShaderCompiler
+Launched and connected shader compiler UnityShaderCompiler after 0.09 seconds
+Launching external process: /Applications/Unity/Hub/Editor/6000.5.0f1/Unity.app/Contents/Helpers/UnityShaderCompiler
+Launched and connected shader compiler UnityShaderCompiler after 0.09 seconds
+Launching external process: /Applications/Unity/Hub/Editor/6000.5.0f1/Unity.app/Contents/Helpers/UnityShaderCompiler
+Launched and connected shader compiler UnityShaderCompiler after 0.09 seconds
+Launching external process: /Applications/Unity/Hub/Editor/6000.5.0f1/Unity.app/Contents/Helpers/UnityShaderCompiler
+Launched and connected shader compiler UnityShaderCompiler after 0.08 seconds
+Launching external process: /Applications/Unity/Hub/Editor/6000.5.0f1/Unity.app/Contents/Helpers/UnityShaderCompiler
+Launched and connected shader compiler UnityShaderCompiler after 0.08 seconds
+[Licensing::Client] Successfully resolved entitlement details
+2026-06-22 23:51:19.299 Unity[19978:526401] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-06-22 23:51:19.303 Unity[19978:526401] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-06-22 23:51:30.267 Unity[19978:526401] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-06-22 23:51:30.270 Unity[19978:526401] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+Unloading 12 Unused Serialized files (Serialized files now loaded: 0)
+Loaded scene 'Temp/__Backupscenes/0.backup'
+	Deserialize:            0.349 ms
+	Integration:            12.179 ms
+	Integration of assets:  0.001 ms
+	Thread Wait Time:       0.010 ms
+	Total Operation Time:   12.538 ms
+Unloading 210 unused Assets / (163.2 KB). Loaded Objects now: 1736.
+Memory consumption went from 228.4 MB to 228.3 MB.
+Total: 13.318892 ms (FindLiveObjects: 0.115067 ms CreateObjectMapping: 0.031604 ms MarkObjects: 12.962901 ms  DeleteObjects: 0.208318 ms)
+
+[Licensing::Client] Successfully resolved entitlement details
+2026-06-22 23:51:32.143 Unity[19978:526401] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-06-22 23:51:32.145 Unity[19978:526401] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+Reloading assemblies for play mode.
+Reloading assemblies after forced synchronous recompile.
+Begin MonoManager ReloadAssembly
+Native extension for OSXStandalone target not found
+Native extension for WebGL target not found
+ScheduleIndexationOnStartup MainProcess:True IndexOnStartup:True
+[MODES] ModeService[none].Initialize
+[MODES] ModeService[none].LoadModes
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  1.391 seconds
+Domain Reload Profiling: 2017ms
+	BeginReloadAssembly (433ms)
+		DisableScriptedObjects (69ms)
+		CreateAndSetChildDomain (154ms)
+	RebuildCommonClasses (14ms)
+	RebuildNativeTypeToScriptingClass (25ms)
+	initialDomainReloadingComplete (43ms)
+	LoadAllAssembliesAndSetupDomain (110ms)
+		LoadAssemblies (95ms)
+		AnalyzeDomain (7ms)
+			TypeCache.Refresh (5ms)
+	FinalizeReload (1392ms)
+		SetupLoadedEditorAssemblies (0ms)
+			InitializePlatformSupportModulesInManaged (3ms)
+			BeforeProcessingInitializeOnLoad (119ms)
+			ProcessInitializeOnLoadAttributes (97ms)
+			ProcessInitializeOnLoadMethodAttributes (129ms)
+		AwakeInstancesAfterBackupRestoration (597ms)
+
+Asset Pipeline Refresh (id=b99314ee4919346b7a3f20568f5eb4b6): Total: 2.110 seconds - Initiated by StopAssetImportingV2(ForceSynchronousImport | ForceDomainReload)
+	(Values over 0.05ms)
+	Summary:
+		Imports: total=0 (actual=0, local cache=0, cache server=0)
+		Asset DB Process Time: managed=0 ms, native=1441 ms
+		Asset DB Callback time: managed=27 ms, native=0 ms
+		Scripting: domain reloads=1, domain reload time=638 ms, compile time=2 ms, other=0 ms
+		Project Asset Count: scripts=106, non-scripts=63
+		Asset File Changes: new=0, changed=0, moved=0, deleted=0
+		Scan Filter Count: 0
+	InvokePackagesCallback: 0.884ms
+	ApplyChangesToAssetFolders: 0.181ms
+	Collect global state as custom dependencies: 0.357ms
+	CategorizeAssets: 1.033ms
+	CompileScripts: 2.242ms
+	ImportOutOfDateAssets: 1394.138ms (1393.291ms without children)
+		UnloadImportedAssets: 0.205ms
+		ImportSchedulerStart: 0.603ms
+	PostProcessAllAssets: 27.106ms
+		MonoPostProcessAllAssets: 27.103ms
+			WindowAssetPostprocessingWatcher.OnPostprocessAllAssets 11.677ms
+			BuilderAssetPostprocessor.OnPostprocessAllAssets 9.930ms
+			AssetPostprocessor.OnPostprocessAllAssets 5.785ms
+			AssetChangedListener.OnPostprocessAllAssets 2.614ms
+			SyncVS.PostprocessSyncProject 2.008ms
+			RetainedModeAssetPostprocessor.OnPostprocessAllAssets 1.603ms
+			SpeedTree9Postprocessor.OnPostprocessAllAssets 1.173ms
+			ArtifactBrowserPostProcessor.OnPostprocessAllAssets 0.806ms
+			TextAssetPostProcessor.OnPostprocessAllAssets 0.780ms
+			ReferencedClipsPostProcessor.OnPostprocessAllAssets 0.532ms
+			AudioMixerPostprocessor.OnPostprocessAllAssets 0.460ms
+			StyleCatalogPostProcessor.OnPostprocessAllAssets 0.336ms
+			AssetEvents.OnPostprocessAllAssets 0.302ms
+			TerrainToolbarOverlayPostProcessor.OnPostprocessAllAssets 0.239ms
+			ScenarioDriftAssetsTracker.OnPostprocessAllAssets 0.227ms
+			ConfigAssetsTracker.OnPostprocessAllAssets 0.212ms
+			AssetDatabaseCallbacks.OnPostprocessAllAssets 0.211ms
+			SpeedTreePostProcessor.OnPostprocessAllAssets 0.203ms
+			RenderPipelineGlobalSettingsPostprocessor.OnPostprocessAllAssets 0.132ms
+			AudioContainerPostProcessor.OnPostprocessAllAssets 0.115ms
+	Untracked: 681.303ms
+
+ArgumentException: You can only call GUI functions from inside OnGUI.
+  at UnityEngine.GUIUtility.CheckOnGUI () [0x0002b] in /Users/bokken/build/output/unity/unity/Modules/IMGUI/GUIUtility.cs:340 
+  at UnityEngine.GUI.get_skin () [0x00000] in /Users/bokken/build/output/unity/unity/Modules/IMGUI/GUI.cs:42 
+  at FromZeroToHero.Core.HUDController.CreateStyle (UnityEngine.Color background, System.Int32 size, UnityEngine.FontStyle fontStyle, UnityEngine.TextAnchor anchor) [0x00000] in /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Assets/Scripts/Core/HUDController.cs:85 
+  at FromZeroToHero.Core.HUDController.Build () [0x00000] in /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Assets/Scripts/Core/HUDController.cs:21 
+  at FromZeroToHero.Core.GameBootstrap.BuildHUD () [0x00015] in /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Assets/Scripts/Core/GameBootstrap.cs:151 
+  at FromZeroToHero.Core.GameBootstrap.Awake () [0x00025] in /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/Assets/Scripts/Core/GameBootstrap.cs:39 
+
+(Filename: Assets/Scripts/Core/HUDController.cs Line: 21)
+
+Loaded scene 'Temp/__Backupscenes/0.backup'
+	Deserialize:            0.388 ms
+	Integration:            51.422 ms
+	Integration of assets:  0.001 ms
+	Thread Wait Time:       0.017 ms
+	Total Operation Time:   51.828 ms
+[Licensing::Client] Successfully resolved entitlement details
+2026-06-22 23:51:56.716 Unity[19978:526401] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-06-22 23:51:56.721 Unity[19978:526401] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-06-22 23:52:08.726 Unity[19978:526401] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-06-22 23:52:08.728 Unity[19978:526401] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-06-22 23:52:09.043 Unity[19978:526401] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-06-22 23:52:09.044 Unity[19978:526401] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-06-22 23:52:10.287 Unity[19978:526401] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-06-22 23:52:10.289 Unity[19978:526401] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-06-22 23:52:16.678 Unity[19978:526401] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-06-22 23:52:16.679 Unity[19978:526401] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-06-22 23:52:17.490 Unity[19978:526401] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-06-22 23:52:17.492 Unity[19978:526401] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-06-22 23:52:21.486 Unity[19978:526401] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-06-22 23:52:21.488 Unity[19978:526401] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-06-22 23:52:23.128 Unity[19978:526401] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-06-22 23:52:23.129 Unity[19978:526401] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-06-22 23:52:23.561 Unity[19978:526401] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-06-22 23:52:23.562 Unity[19978:526401] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-06-22 23:52:24.944 Unity[19978:526401] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-06-22 23:52:24.946 Unity[19978:526401] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-06-22 23:52:53.358 Unity[19978:526401] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-06-22 23:52:53.361 Unity[19978:526401] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+MonoPathRemapper: Attempts to remap: 5828; Successful remaps: 216
+Serialized file version minimum: 23, current 23
+[LAYOUT] About to save layout /Users/velja/IdeaProjects/from-zero-to-hero/unity-game/UserSettings/Layouts/default-6000.dwlt
+[LAYOUT] About to save layout /Users/velja/Library/Preferences/Unity/Editor-5.x/Layouts/current/default-6000.dwlt
+Input System module state changed to: ShutdownInProgress.
+Input Polling Thread exited.
+Input System module state changed to: Shutdown.
+[Physics::Module] Cleanup current backend.
+[Physics::Module] Id: 0xf2b8ea05
+[Licensing::IpcConnector] LicenseClient-velja-6000.5.0-notifications channel disconnected successfully.
+[Licensing::IpcConnector] LicenseClient-velja-6000.5.0 channel disconnected successfully.
+Shutting down MSBuild server...
+Shutting down VB/C# compiler server...
+AcceleratorClientConnectionCallback - disconnected - :0
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+Cleanup mono
+CodeReloadManager destroyed
+VB/C# compiler server shut down successfully.
+MSBuild server shut down successfully.
+debugger-agent: Unable to listen on 86
+Checking for leaked weakptr:
+  Found no leaked weakptrs.
+[Package Manager] Server process was shutdown
+##utp:{"type":"MemoryLeaks","version":2,"phase":"Immediate","time":1782165213502,"processId":19978,"allocatedMemory":42970509,"memoryLabels":[{"Default":163807},{"Permanent":15416},{"Thread":1052280},{"Manager":25470},{"VertexData":8},{"Geometry":408},{"Texture":24},{"Shader":846272},{"Material":24},{"GfxDevice":50096},{"GfxThread":6400},{"Animation":968},{"Audio":896},{"FreeType":8},{"FontEngine":736},{"Physics":2050},{"Physics2D":16},{"Serialization":140440},{"Input":42448},{"JobScheduler":256},{"TextLib":18923},{"Mono":56},{"ScriptingNativeRuntime":155024},{"BaseObject":1764223},{"Resource":984},{"Renderer":3088},{"Transform":4693},{"File":3657},{"WebCam":32},{"Culling":32},{"Terrain":11346},{"Wind":24},{"String":11255},{"StaticString":4140},{"Utility":2672960},{"PoolAlloc":1960},{"AI":80},{"TypeTree":17037},{"CodeReload":448},{"RuntimeInitializeOnLoadManager":64},{"Sprites":102},{"SpriteAtlas":120},{"GI":7240},{"Director":8160},{"CloudService":7456},{"WebRequest":6786},{"VR":46890},{"SceneManager":616},{"Video":1088},{"LazyScriptCache":32},{"NativeArray":33047280},{"Camera":85785},{"Secure":10105},{"SerializationCache":1576},{"APIUpdating":10320},{"Subsystems":336},{"VirtualTexturing":57504},{"StaticSafetyDebugInfo":278528},{"Baselib":16},{"Analytics":528},{"Hierarchy":1480},{"UIElements":1463528},{"CoreStats":13704},{"Identifiers":13536},{"Gui":280657},{"EditorUtility":206522},{"VersionControl":8},{"Undo":939},{"AssetDatabase":343120},{"AssetImporter":40},{"EditorGi":328},{"UnityConnect":35433},{"Upm":1804},{"UpmDiagnostics":8},{"AssetCompliance":64},{"DrivenProperties":72},{"HubClient":848},{"LocalIPC":204},{"ProfilerEditor":9738},{"CoreBusinessMetrics":2469},{"Windowing":416},{"Licensing":768},{"AssetReference":32},{"IPCStream":6378}]}
