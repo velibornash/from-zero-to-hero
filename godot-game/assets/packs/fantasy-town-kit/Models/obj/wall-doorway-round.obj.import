@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://beh1sxvqiwc2h"
+path="res://.godot/imported/wall-doorway-round.obj-ba6eda711d18738d61b31f9b006c88db.mesh"
+
+[deps]
+
+files=["res://.godot/imported/wall-doorway-round.obj-ba6eda711d18738d61b31f9b006c88db.mesh"]
+
+source_file="res://assets/packs/fantasy-town-kit/Models/obj/wall-doorway-round.obj"
+dest_files=["res://.godot/imported/wall-doorway-round.obj-ba6eda711d18738d61b31f9b006c88db.mesh", "res://.godot/imported/wall-doorway-round.obj-ba6eda711d18738d61b31f9b006c88db.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

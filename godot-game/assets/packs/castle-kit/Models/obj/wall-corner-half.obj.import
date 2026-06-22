@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://cuw6s1ej5s0mb"
+path="res://.godot/imported/wall-corner-half.obj-a12f3324fb5e7baaaab693e3641cafae.mesh"
+
+[deps]
+
+files=["res://.godot/imported/wall-corner-half.obj-a12f3324fb5e7baaaab693e3641cafae.mesh"]
+
+source_file="res://assets/packs/castle-kit/Models/obj/wall-corner-half.obj"
+dest_files=["res://.godot/imported/wall-corner-half.obj-a12f3324fb5e7baaaab693e3641cafae.mesh", "res://.godot/imported/wall-corner-half.obj-a12f3324fb5e7baaaab693e3641cafae.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

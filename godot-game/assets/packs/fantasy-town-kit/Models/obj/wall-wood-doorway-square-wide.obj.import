@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://2gt80408868m"
+path="res://.godot/imported/wall-wood-doorway-square-wide.obj-f53a75d011b2713a2ecdff6dc9e4b67e.mesh"
+
+[deps]
+
+files=["res://.godot/imported/wall-wood-doorway-square-wide.obj-f53a75d011b2713a2ecdff6dc9e4b67e.mesh"]
+
+source_file="res://assets/packs/fantasy-town-kit/Models/obj/wall-wood-doorway-square-wide.obj"
+dest_files=["res://.godot/imported/wall-wood-doorway-square-wide.obj-f53a75d011b2713a2ecdff6dc9e4b67e.mesh", "res://.godot/imported/wall-wood-doorway-square-wide.obj-f53a75d011b2713a2ecdff6dc9e4b67e.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

@@ -1,0 +1,991 @@
+[gd_scene format=3 uid="uid://main"]
+
+[ext_resource type="Script" uid="uid://dju0epsraryh" path="res://scripts/main.gd" id="1"]
+[ext_resource type="Script" uid="uid://bqwexc0jqeu87" path="res://scripts/world.gd" id="2"]
+[ext_resource type="Shader" uid="uid://b20ie0823gel2" path="res://shaders/toon.gdshader" id="3_trceg"]
+[ext_resource type="Shader" uid="uid://cf7v20kuo7tkw" path="res://shaders/water.gdshader" id="4_a8y0u"]
+[ext_resource type="Script" uid="uid://dtxqctax5ti8f" path="res://scripts/tree_controller.gd" id="5_jkv2x"]
+[ext_resource type="PackedScene" uid="uid://dk6x8vr1mbwj" path="res://assets/packs/nature-kit/Models/gltf/flower_redA.glb" id="6_jbj1t"]
+[ext_resource type="PackedScene" uid="uid://2sybrv84bcep" path="res://assets/packs/nature-kit/Models/gltf/flower_yellowA.glb" id="7_muem4"]
+[ext_resource type="PackedScene" uid="uid://drky1x4vgix2y" path="res://assets/packs/nature-kit/Models/gltf/flower_purpleA.glb" id="8_dp3eg"]
+[ext_resource type="PackedScene" uid="uid://bu41ug67j5a42" path="res://assets/packs/nature-kit/Models/gltf/flower_purpleC.glb" id="9_0ld40"]
+[ext_resource type="PackedScene" uid="uid://ie715wavyetj" path="res://assets/packs/nature-kit/Models/gltf/flower_redB.glb" id="10_gqmmt"]
+[ext_resource type="PackedScene" uid="uid://d3od861hl1xfe" path="res://assets/packs/fantasy-town-kit/Models/glb/rock-small.glb" id="11_yc10j"]
+[ext_resource type="PackedScene" uid="uid://cni558h6kclm0" path="res://assets/packs/fantasy-town-kit/Models/glb/rock-large.glb" id="12_jscy8"]
+[ext_resource type="PackedScene" uid="uid://b565377g0t8j2" path="res://assets/packs/fantasy-town-kit/Models/glb/rock-wide.glb" id="13_pm3ni"]
+
+[sub_resource type="Environment" id="Environment_y6deb"]
+ambient_light_color = Color(0.7, 0.75, 0.85, 1)
+ambient_light_sky_contribution = 0.0
+ambient_light_energy = 0.9
+tonemap_mode = 3
+glow_enabled = true
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_og1vs"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.302, 0.655, 0.192, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_2wyq8"]
+size = Vector2(40, 40)
+subdivide_width = 2
+subdivide_depth = 2
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_vxglm"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.557, 0.424, 0.212, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_2f3dj"]
+size = Vector2(3, 6)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_yq6so"]
+render_priority = 0
+shader = ExtResource("4_a8y0u")
+shader_parameter/shallow_color = Color(0, 0.55, 0.75, 0.75)
+shader_parameter/deep_color = Color(0, 0.18, 0.35, 0.9)
+shader_parameter/wave_speed = 0.5
+shader_parameter/wave_height = 0.08
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_fv21b"]
+size = Vector2(12, 16)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_tel4y"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.85, 0.7, 0.4, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_qkpxi"]
+size = Vector3(2.4, 0.1, 2.4)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_5q0nq"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.6, 0.45, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_dgi5k"]
+size = Vector3(2.6, 0.05, 2.6)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_j8jky"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.85, 0.7, 0.4, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_kmb1v"]
+size = Vector3(2.4, 0.1, 2.4)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_fuf3a"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.6, 0.45, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pibwh"]
+size = Vector3(2.6, 0.05, 2.6)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_c6pm6"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.85, 0.7, 0.4, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_5he1u"]
+size = Vector3(2.4, 0.1, 2.4)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_5poiv"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.6, 0.45, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_2cjbq"]
+size = Vector3(2.6, 0.05, 2.6)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_chjal"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.85, 0.7, 0.4, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_cjqg0"]
+size = Vector3(2.4, 0.1, 2.4)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_vchkt"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.6, 0.45, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_txyw0"]
+size = Vector3(2.6, 0.05, 2.6)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_vc5cj"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.85, 0.7, 0.4, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_nvyfr"]
+size = Vector3(2.4, 0.1, 2.4)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ty1g6"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.6, 0.45, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_j2jfr"]
+size = Vector3(2.6, 0.05, 2.6)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_bjg73"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.85, 0.7, 0.4, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_bu4jf"]
+size = Vector3(2.4, 0.1, 2.4)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_o7ddy"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.6, 0.45, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_0loja"]
+size = Vector3(2.6, 0.05, 2.6)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ids8r"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.85, 0.7, 0.4, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_dnhof"]
+size = Vector3(2.4, 0.1, 2.4)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_1v6qk"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.6, 0.45, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_augu2"]
+size = Vector3(2.6, 0.05, 2.6)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_tm6hj"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.85, 0.7, 0.4, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_kf5aa"]
+size = Vector3(2.4, 0.1, 2.4)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_t5ykj"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.6, 0.45, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_e755i"]
+size = Vector3(2.6, 0.05, 2.6)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ro3en"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.85, 0.7, 0.4, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_od4ux"]
+size = Vector3(2.4, 0.1, 2.4)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_xhfw6"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.6, 0.45, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_1epgm"]
+size = Vector3(2.6, 0.05, 2.6)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_152kg"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.85, 0.7, 0.4, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_r4e17"]
+size = Vector3(2.4, 0.1, 2.4)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_y57op"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.6, 0.45, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_mlv25"]
+size = Vector3(2.6, 0.05, 2.6)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_a82wo"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.85, 0.7, 0.4, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_gdvew"]
+size = Vector3(2.4, 0.1, 2.4)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_kjtvk"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.6, 0.45, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_xrs0c"]
+size = Vector3(2.6, 0.05, 2.6)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_xljpf"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.85, 0.7, 0.4, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_j4bwh"]
+size = Vector3(2.4, 0.1, 2.4)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ksmap"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.6, 0.45, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ygd8o"]
+size = Vector3(2.6, 0.05, 2.6)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_2s0kr"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.85, 0.7, 0.4, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_xaipn"]
+size = Vector3(2.4, 0.1, 2.4)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ndrjj"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.6, 0.45, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ih3m7"]
+size = Vector3(2.6, 0.05, 2.6)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_11yus"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.85, 0.7, 0.4, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_b6ruc"]
+size = Vector3(2.4, 0.1, 2.4)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_155or"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.6, 0.45, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_vtx2l"]
+size = Vector3(2.6, 0.05, 2.6)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_63lxy"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.85, 0.7, 0.4, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_fjhjs"]
+size = Vector3(2.4, 0.1, 2.4)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_bfu41"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.6, 0.45, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_r4ag1"]
+size = Vector3(2.6, 0.05, 2.6)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_v0wtd"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.85, 0.7, 0.4, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_sgvw8"]
+size = Vector3(2.4, 0.1, 2.4)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_6nfnn"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.6, 0.45, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_4ue30"]
+size = Vector3(2.6, 0.05, 2.6)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_k42av"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.85, 0.7, 0.4, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_gr8w0"]
+size = Vector3(2.4, 0.1, 2.4)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_673bd"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.6, 0.45, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_akjxb"]
+size = Vector3(2.6, 0.05, 2.6)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_vrx01"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.85, 0.7, 0.4, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_1uevf"]
+size = Vector3(2.4, 0.1, 2.4)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_tc087"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.6, 0.45, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_73205"]
+size = Vector3(2.6, 0.05, 2.6)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_0tljd"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.85, 0.7, 0.4, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_mgpkq"]
+size = Vector3(2.4, 0.1, 2.4)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_xmrkg"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.6, 0.45, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wvlrk"]
+size = Vector3(2.6, 0.05, 2.6)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_engxj"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.85, 0.7, 0.4, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_raiwf"]
+size = Vector3(2.4, 0.1, 2.4)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_roort"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.6, 0.45, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_gm02q"]
+size = Vector3(2.6, 0.05, 2.6)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_07pt3"]
+render_priority = 0
+shader = ExtResource("3_trceg")
+shader_parameter/albedo = Color(0.55, 0.35, 0.15, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_37xlc"]
+top_radius = 0.04
+bottom_radius = 0.05
+height = 0.25
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_83607"]
+top_radius = 0.04
+bottom_radius = 0.05
+height = 0.25
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_vny5k"]
+top_radius = 0.04
+bottom_radius = 0.05
+height = 0.25
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_8lcmr"]
+top_radius = 0.04
+bottom_radius = 0.05
+height = 0.25
+
+[node name="Main" type="Node3D" unique_id=1920917427]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 4.228619)
+script = ExtResource("1")
+
+[node name="World" type="Node3D" parent="." unique_id=569014523]
+script = ExtResource("2")
+
+[node name="@WorldEnvironment@31003" type="WorldEnvironment" parent="World" unique_id=679124258]
+environment = SubResource("Environment_y6deb")
+
+[node name="_MeshInstance3D_31004" type="MeshInstance3D" parent="World" unique_id=848230022]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0.49126208, -0.22210054, -0.16124272)
+material_override = SubResource("ShaderMaterial_og1vs")
+mesh = SubResource("PlaneMesh_2wyq8")
+
+[node name="@StaticBody3D@31006" type="StaticBody3D" parent="World" unique_id=12751232]
+
+[node name="@MeshInstance3D@31007" type="MeshInstance3D" parent="World" unique_id=692585612]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, -0.02, 6)
+material_override = SubResource("ShaderMaterial_vxglm")
+mesh = SubResource("PlaneMesh_2f3dj")
+
+[node name="@MeshInstance3D@31008" type="MeshInstance3D" parent="World" unique_id=727212707]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, -12, -0.15, 10)
+material_override = SubResource("ShaderMaterial_yq6so")
+mesh = SubResource("PlaneMesh_fv21b")
+
+[node name="@MeshInstance3D@31009" type="MeshInstance3D" parent="World" unique_id=759514704]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.6, 0.05, -4.2)
+material_override = SubResource("ShaderMaterial_tel4y")
+mesh = SubResource("BoxMesh_qkpxi")
+
+[node name="@MeshInstance3D@31010" type="MeshInstance3D" parent="World" unique_id=1612626792]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.6, 0, -4.2)
+material_override = SubResource("ShaderMaterial_5q0nq")
+mesh = SubResource("BoxMesh_dgi5k")
+
+[node name="@MeshInstance3D@31011" type="MeshInstance3D" parent="World" unique_id=903479515]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.8, 0.05, -4.2)
+material_override = SubResource("ShaderMaterial_j8jky")
+mesh = SubResource("BoxMesh_kmb1v")
+
+[node name="@MeshInstance3D@31012" type="MeshInstance3D" parent="World" unique_id=1443121562]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.8, 0, -4.2)
+material_override = SubResource("ShaderMaterial_fuf3a")
+mesh = SubResource("BoxMesh_pibwh")
+
+[node name="@MeshInstance3D@31013" type="MeshInstance3D" parent="World" unique_id=1752477821]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, -4.2)
+material_override = SubResource("ShaderMaterial_c6pm6")
+mesh = SubResource("BoxMesh_5he1u")
+
+[node name="@MeshInstance3D@31014" type="MeshInstance3D" parent="World" unique_id=1145866954]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -4.2)
+material_override = SubResource("ShaderMaterial_5poiv")
+mesh = SubResource("BoxMesh_2cjbq")
+
+[node name="@MeshInstance3D@31015" type="MeshInstance3D" parent="World" unique_id=1208029209]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.8, 0.05, -4.2)
+material_override = SubResource("ShaderMaterial_chjal")
+mesh = SubResource("BoxMesh_cjqg0")
+
+[node name="@MeshInstance3D@31016" type="MeshInstance3D" parent="World" unique_id=1907772172]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.8, 0, -4.2)
+material_override = SubResource("ShaderMaterial_vchkt")
+mesh = SubResource("BoxMesh_txyw0")
+
+[node name="@MeshInstance3D@31017" type="MeshInstance3D" parent="World" unique_id=1803376710]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.6, 0.05, -4.2)
+material_override = SubResource("ShaderMaterial_vc5cj")
+mesh = SubResource("BoxMesh_nvyfr")
+
+[node name="@MeshInstance3D@31018" type="MeshInstance3D" parent="World" unique_id=166395319]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.6, 0, -4.2)
+material_override = SubResource("ShaderMaterial_ty1g6")
+mesh = SubResource("BoxMesh_j2jfr")
+
+[node name="@MeshInstance3D@31019" type="MeshInstance3D" parent="World" unique_id=1246255222]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.6, 0.05, -1.4)
+material_override = SubResource("ShaderMaterial_bjg73")
+mesh = SubResource("BoxMesh_bu4jf")
+
+[node name="@MeshInstance3D@31020" type="MeshInstance3D" parent="World" unique_id=1207507953]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.6, 0, -1.4)
+material_override = SubResource("ShaderMaterial_o7ddy")
+mesh = SubResource("BoxMesh_0loja")
+
+[node name="@MeshInstance3D@31021" type="MeshInstance3D" parent="World" unique_id=1433956563]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.8, 0.05, -1.4)
+material_override = SubResource("ShaderMaterial_ids8r")
+mesh = SubResource("BoxMesh_dnhof")
+
+[node name="@MeshInstance3D@31022" type="MeshInstance3D" parent="World" unique_id=1036262300]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.8, 0, -1.4)
+material_override = SubResource("ShaderMaterial_1v6qk")
+mesh = SubResource("BoxMesh_augu2")
+
+[node name="@MeshInstance3D@31023" type="MeshInstance3D" parent="World" unique_id=601430079]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, -1.4)
+material_override = SubResource("ShaderMaterial_tm6hj")
+mesh = SubResource("BoxMesh_kf5aa")
+
+[node name="@MeshInstance3D@31024" type="MeshInstance3D" parent="World" unique_id=1800617437]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.4)
+material_override = SubResource("ShaderMaterial_t5ykj")
+mesh = SubResource("BoxMesh_e755i")
+
+[node name="@MeshInstance3D@31025" type="MeshInstance3D" parent="World" unique_id=244956689]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.8, 0.05, -1.4)
+material_override = SubResource("ShaderMaterial_ro3en")
+mesh = SubResource("BoxMesh_od4ux")
+
+[node name="@MeshInstance3D@31026" type="MeshInstance3D" parent="World" unique_id=539670927]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.8, 0, -1.4)
+material_override = SubResource("ShaderMaterial_xhfw6")
+mesh = SubResource("BoxMesh_1epgm")
+
+[node name="@MeshInstance3D@31027" type="MeshInstance3D" parent="World" unique_id=202058981]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.6, 0.05, -1.4)
+material_override = SubResource("ShaderMaterial_152kg")
+mesh = SubResource("BoxMesh_r4e17")
+
+[node name="@MeshInstance3D@31028" type="MeshInstance3D" parent="World" unique_id=1730918956]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.6, 0, -1.4)
+material_override = SubResource("ShaderMaterial_y57op")
+mesh = SubResource("BoxMesh_mlv25")
+
+[node name="@MeshInstance3D@31029" type="MeshInstance3D" parent="World" unique_id=443871357]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.6, 0.05, 1.4)
+material_override = SubResource("ShaderMaterial_a82wo")
+mesh = SubResource("BoxMesh_gdvew")
+
+[node name="@MeshInstance3D@31030" type="MeshInstance3D" parent="World" unique_id=670366049]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.6, 0, 1.4)
+material_override = SubResource("ShaderMaterial_kjtvk")
+mesh = SubResource("BoxMesh_xrs0c")
+
+[node name="@MeshInstance3D@31031" type="MeshInstance3D" parent="World" unique_id=2104988337]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.8, 0.05, 1.4)
+material_override = SubResource("ShaderMaterial_xljpf")
+mesh = SubResource("BoxMesh_j4bwh")
+
+[node name="@MeshInstance3D@31032" type="MeshInstance3D" parent="World" unique_id=32232288]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.8, 0, 1.4)
+material_override = SubResource("ShaderMaterial_ksmap")
+mesh = SubResource("BoxMesh_ygd8o")
+
+[node name="@MeshInstance3D@31033" type="MeshInstance3D" parent="World" unique_id=1180344359]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 1.4)
+material_override = SubResource("ShaderMaterial_2s0kr")
+mesh = SubResource("BoxMesh_xaipn")
+
+[node name="@MeshInstance3D@31034" type="MeshInstance3D" parent="World" unique_id=1489260975]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.4)
+material_override = SubResource("ShaderMaterial_ndrjj")
+mesh = SubResource("BoxMesh_ih3m7")
+
+[node name="@MeshInstance3D@31035" type="MeshInstance3D" parent="World" unique_id=1449863083]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.8, 0.05, 1.4)
+material_override = SubResource("ShaderMaterial_11yus")
+mesh = SubResource("BoxMesh_b6ruc")
+
+[node name="@MeshInstance3D@31036" type="MeshInstance3D" parent="World" unique_id=556226803]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.8, 0, 1.4)
+material_override = SubResource("ShaderMaterial_155or")
+mesh = SubResource("BoxMesh_vtx2l")
+
+[node name="@MeshInstance3D@31037" type="MeshInstance3D" parent="World" unique_id=789959652]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.6, 0.05, 1.4)
+material_override = SubResource("ShaderMaterial_63lxy")
+mesh = SubResource("BoxMesh_fjhjs")
+
+[node name="@MeshInstance3D@31038" type="MeshInstance3D" parent="World" unique_id=2046080855]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.6, 0, 1.4)
+material_override = SubResource("ShaderMaterial_bfu41")
+mesh = SubResource("BoxMesh_r4ag1")
+
+[node name="@MeshInstance3D@31039" type="MeshInstance3D" parent="World" unique_id=12035506]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.6, 0.05, 4.2)
+material_override = SubResource("ShaderMaterial_v0wtd")
+mesh = SubResource("BoxMesh_sgvw8")
+
+[node name="@MeshInstance3D@31040" type="MeshInstance3D" parent="World" unique_id=610885174]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.6, 0, 4.2)
+material_override = SubResource("ShaderMaterial_6nfnn")
+mesh = SubResource("BoxMesh_4ue30")
+
+[node name="@MeshInstance3D@31041" type="MeshInstance3D" parent="World" unique_id=1648674572]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.8, 0.05, 4.2)
+material_override = SubResource("ShaderMaterial_k42av")
+mesh = SubResource("BoxMesh_gr8w0")
+
+[node name="@MeshInstance3D@31042" type="MeshInstance3D" parent="World" unique_id=1175794491]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.8, 0, 4.2)
+material_override = SubResource("ShaderMaterial_673bd")
+mesh = SubResource("BoxMesh_akjxb")
+
+[node name="@MeshInstance3D@31043" type="MeshInstance3D" parent="World" unique_id=2008246237]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 4.2)
+material_override = SubResource("ShaderMaterial_vrx01")
+mesh = SubResource("BoxMesh_1uevf")
+
+[node name="@MeshInstance3D@31044" type="MeshInstance3D" parent="World" unique_id=1245242775]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 4.2)
+material_override = SubResource("ShaderMaterial_tc087")
+mesh = SubResource("BoxMesh_73205")
+
+[node name="@MeshInstance3D@31045" type="MeshInstance3D" parent="World" unique_id=1169267808]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.8, 0.05, 4.2)
+material_override = SubResource("ShaderMaterial_0tljd")
+mesh = SubResource("BoxMesh_mgpkq")
+
+[node name="@MeshInstance3D@31046" type="MeshInstance3D" parent="World" unique_id=2041923597]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.8, 0, 4.2)
+material_override = SubResource("ShaderMaterial_xmrkg")
+mesh = SubResource("BoxMesh_wvlrk")
+
+[node name="@MeshInstance3D@31047" type="MeshInstance3D" parent="World" unique_id=1782641271]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.6, 0.05, 4.2)
+material_override = SubResource("ShaderMaterial_engxj")
+mesh = SubResource("BoxMesh_raiwf")
+
+[node name="@MeshInstance3D@31048" type="MeshInstance3D" parent="World" unique_id=724974004]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.6, 0, 4.2)
+material_override = SubResource("ShaderMaterial_roort")
+mesh = SubResource("BoxMesh_gm02q")
+
+[node name="@StaticBody3D@31049" type="StaticBody3D" parent="World" unique_id=1246253438]
+transform = Transform3D(-0.7669307, 0, 0.7837962, 0, 1.0965943, 0, -0.7837962, 0, -0.7669307, -6.458022, 0, -14.7969055)
+script = ExtResource("5_jkv2x")
+
+[node name="@StaticBody3D@31050" type="StaticBody3D" parent="World" unique_id=800908676]
+transform = Transform3D(0.755052, 0, 0.28469718, 0, 0.80694234, 0, -0.28469718, 0, 0.755052, -11.97517, 0, 1.7254639)
+script = ExtResource("5_jkv2x")
+
+[node name="@StaticBody3D@31051" type="StaticBody3D" parent="World" unique_id=1401588501]
+transform = Transform3D(-0.1282246, 0, -0.90822864, 0, 0.91723543, 0, 0.90822864, 0, -0.1282246, 7.7534523, 0, 11.052046)
+script = ExtResource("5_jkv2x")
+
+[node name="@StaticBody3D@31052" type="StaticBody3D" parent="World" unique_id=1844199885]
+transform = Transform3D(-1.267162, 0, -0.22557403, 0, 1.2870831, 0, 0.22557403, 0, -1.267162, -10.957909, 0, -10.996097)
+script = ExtResource("5_jkv2x")
+
+[node name="@StaticBody3D@31053" type="StaticBody3D" parent="World" unique_id=467141258]
+transform = Transform3D(0.73998296, 0, 0.4265002, 0, 0.8540944, 0, -0.4265002, 0, 0.73998296, -9.0175705, 0, 11.257151)
+script = ExtResource("5_jkv2x")
+
+[node name="@StaticBody3D@31054" type="StaticBody3D" parent="World" unique_id=1235272821]
+transform = Transform3D(-0.0976224, 0, -0.83171403, 0, 0.8374236, 0, 0.83171403, 0, -0.0976224, -4.4277124, 0, 8.673849)
+script = ExtResource("5_jkv2x")
+
+[node name="@StaticBody3D@31055" type="StaticBody3D" parent="World" unique_id=357399447]
+transform = Transform3D(-0.07281083, 0, -0.8783036, 0, 0.8813164, 0, 0.8783036, 0, -0.07281083, -1.8254204, 0, 11.65781)
+script = ExtResource("5_jkv2x")
+
+[node name="@StaticBody3D@31056" type="StaticBody3D" parent="World" unique_id=1360931745]
+transform = Transform3D(-0.8327686, 0, 0.14210618, 0, 0.8448063, 0, -0.14210618, 0, -0.8327686, 7.285082, 0, 11.06691)
+script = ExtResource("5_jkv2x")
+
+[node name="@StaticBody3D@31057" type="StaticBody3D" parent="World" unique_id=1287350702]
+transform = Transform3D(0.37237003, 0, -1.2001085, 0, 1.2565508, 0, 1.2001085, 0, 0.37237003, -10.108122, 0, -13.430808)
+script = ExtResource("5_jkv2x")
+
+[node name="@StaticBody3D@31058" type="StaticBody3D" parent="World" unique_id=908464362]
+transform = Transform3D(1.034438, 0, -0.20680764, 0, 1.0549083, 0, 0.20680764, 0, 1.034438, 15.860643, 0, -15.387323)
+script = ExtResource("5_jkv2x")
+
+[node name="@StaticBody3D@31059" type="StaticBody3D" parent="World" unique_id=1270235820]
+transform = Transform3D(0.78088963, 0, 0.88004905, 0, 1.1765522, 0, -0.88004905, 0, 0.78088963, -10.154795, 0, -0.6106386)
+script = ExtResource("5_jkv2x")
+
+[node name="@StaticBody3D@31060" type="StaticBody3D" parent="World" unique_id=1196711034]
+transform = Transform3D(-0.8618108, 0, -0.24201752, 0, 0.8951482, 0, 0.24201752, 0, -0.8618108, -9.66703, 0, 4.819868)
+script = ExtResource("5_jkv2x")
+
+[node name="@StaticBody3D@31061" type="StaticBody3D" parent="World" unique_id=1954029623]
+transform = Transform3D(1.1575425, 0, -0.057349406, 0, 1.1589622, 0, 0.057349406, 0, 1.1575425, -7.54298, 0, -9.66967)
+script = ExtResource("5_jkv2x")
+
+[node name="@StaticBody3D@31062" type="StaticBody3D" parent="World" unique_id=1517393524]
+transform = Transform3D(0.70671725, 0, 0.81879747, 0, 1.0816092, 0, -0.81879747, 0, 0.70671725, 12.633026, 0, 0.68732834)
+script = ExtResource("5_jkv2x")
+
+[node name="@StaticBody3D@31063" type="StaticBody3D" parent="World" unique_id=372827448]
+transform = Transform3D(-0.9524671, 0, -0.26371285, 0, 0.98830056, 0, 0.26371285, 0, -0.9524671, 0.5014248, 0, 10.517113)
+script = ExtResource("5_jkv2x")
+
+[node name="@StaticBody3D@31064" type="StaticBody3D" parent="World" unique_id=930627189]
+transform = Transform3D(-0.54274184, 0, -0.97146314, 0, 1.1127934, 0, 0.97146314, 0, -0.54274184, 5.422035, 0, -13.441247)
+script = ExtResource("5_jkv2x")
+
+[node name="@StaticBody3D@31065" type="StaticBody3D" parent="World" unique_id=275711144]
+transform = Transform3D(-1.1658896, 0, -0.034020465, 0, 1.1663859, 0, 0.034020465, 0, -1.1658896, -9.502504, 0, -5.230545)
+script = ExtResource("5_jkv2x")
+
+[node name="@StaticBody3D@31066" type="StaticBody3D" parent="World" unique_id=945384269]
+transform = Transform3D(-0.43622237, 0, -0.79262376, 0, 0.9047333, 0, 0.79262376, 0, -0.43622237, 10.842384, 0, -0.098303795)
+script = ExtResource("5_jkv2x")
+
+[node name="@StaticBody3D@31067" type="StaticBody3D" parent="World" unique_id=1334716837]
+transform = Transform3D(0.26981115, 0, 1.2715352, 0, 1.299846, 0, -1.2715352, 0, 0.26981115, 11.276949, 0, -14.8784685)
+script = ExtResource("5_jkv2x")
+
+[node name="@StaticBody3D@31068" type="StaticBody3D" parent="World" unique_id=1280906905]
+transform = Transform3D(0.8740236, 0, 0.14649908, 0, 0.8862163, 0, -0.14649908, 0, 0.8740236, -3.43684, 0, 8.152121)
+script = ExtResource("5_jkv2x")
+
+[node name="@StaticBody3D@31069" type="StaticBody3D" parent="World" unique_id=1617360595]
+transform = Transform3D(-0.79366934, 0, -0.6825081, 0, 1.0467705, 0, 0.6825081, 0, -0.79366934, -10.09566, 0, -9.541573)
+script = ExtResource("5_jkv2x")
+
+[node name="@StaticBody3D@31070" type="StaticBody3D" parent="World" unique_id=2064572461]
+transform = Transform3D(-1.1689531, 0, -0.54534054, 0, 1.2899022, 0, 0.54534054, 0, -1.1689531, -2.7825394, 0, 12.972252)
+script = ExtResource("5_jkv2x")
+
+[node name="@StaticBody3D@31071" type="StaticBody3D" parent="World" unique_id=1790313161]
+transform = Transform3D(-0.3188016, 0, 0.8319105, 0, 0.8909038, 0, -0.8319105, 0, -0.3188016, 13.374233, 0, 15.061926)
+script = ExtResource("5_jkv2x")
+
+[node name="@StaticBody3D@31072" type="StaticBody3D" parent="World" unique_id=1426289356]
+transform = Transform3D(-0.21264467, 0, 0.8479407, 0, 0.8741974, 0, -0.8479407, 0, -0.21264467, 12.145063, 0, -4.153141)
+script = ExtResource("5_jkv2x")
+
+[node name="@StaticBody3D@31073" type="StaticBody3D" parent="World" unique_id=268061314]
+transform = Transform3D(0.51301193, 0, 0.66683227, 0, 0.84133613, 0, -0.66683227, 0, 0.51301193, 2.8296452, 0, -10.740444)
+script = ExtResource("5_jkv2x")
+
+[node name="@StaticBody3D@31074" type="StaticBody3D" parent="World" unique_id=1069257997]
+transform = Transform3D(0.28940484, 0, 0.8750587, 0, 0.92167395, 0, -0.8750587, 0, 0.28940484, 4.3051395, 0, -10.813341)
+script = ExtResource("5_jkv2x")
+
+[node name="@StaticBody3D@31075" type="StaticBody3D" parent="World" unique_id=1106548835]
+transform = Transform3D(-0.40544885, 0, -0.99690676, 0, 1.0762025, 0, 0.99690676, 0, -0.40544885, 15.225491, 0, -6.6490593)
+script = ExtResource("5_jkv2x")
+
+[node name="@StaticBody3D@31076" type="StaticBody3D" parent="World" unique_id=1668117111]
+transform = Transform3D(1.1945305, 0, 0.1673084, 0, 1.2061903, 0, -0.1673084, 0, 1.1945305, -5.216675, 0, 9.473764)
+script = ExtResource("5_jkv2x")
+
+[node name="flower_redA2" parent="World" unique_id=786040003 instance=ExtResource("6_jbj1t")]
+transform = Transform3D(-0.7513127, 0, -0.80908513, 0, 1.1041238, 0, 0.80908513, 0, -0.7513127, 14.988821, 0, 16.156342)
+
+[node name="@Node3D@31077" parent="World" unique_id=886103676 instance=ExtResource("6_jbj1t")]
+transform = Transform3D(-0.6899089, 0, 0.61934584, 0, 0.9271265, 0, -0.61934584, 0, -0.6899089, 6.0993958, 0, 13.217108)
+
+[node name="flower_yellowA2" parent="World" unique_id=274869423 instance=ExtResource("7_muem4")]
+transform = Transform3D(0.96810156, 0, -0.45180103, 0, 1.0683374, 0, 0.45180103, 0, 0.96810156, 7.63274, 0, -14.015831)
+
+[node name="flower_purpleA2" parent="World" unique_id=16453234 instance=ExtResource("8_dp3eg")]
+transform = Transform3D(-0.59991586, 0, 0.9253816, 0, 1.1028283, 0, -0.9253816, 0, -0.59991586, -16.499397, 0, -4.5864706)
+
+[node name="@Node3D@31078" parent="World" unique_id=1961406622 instance=ExtResource("8_dp3eg")]
+transform = Transform3D(0.79081285, 0, -0.56354403, 0, 0.9710648, 0, 0.56354403, 0, 0.79081285, 4.07143, 0, -11.175039)
+
+[node name="flower_purpleC2" parent="World" unique_id=834522477 instance=ExtResource("9_0ld40")]
+transform = Transform3D(-0.60637456, 0, 0.75545824, 0, 0.96871424, 0, -0.75545824, 0, -0.60637456, 9.411736, 0, -14.274347)
+
+[node name="@Node3D@31079" parent="World" unique_id=1701359605 instance=ExtResource("8_dp3eg")]
+transform = Transform3D(1.0853504, 0, 0.21960355, 0, 1.1073442, 0, -0.21960355, 0, 1.0853504, -1.3565493, 0, 12.127811)
+
+[node name="@Node3D@31080" parent="World" unique_id=130634179 instance=ExtResource("9_0ld40")]
+transform = Transform3D(-0.77746594, 0, 0.4519699, 0, 0.8992942, 0, -0.4519699, 0, -0.77746594, 11.677771, 0, -9.302374)
+
+[node name="@Node3D@31081" parent="World" unique_id=614002679 instance=ExtResource("9_0ld40")]
+transform = Transform3D(-0.8970187, 0, 0.60360384, 0, 1.0811938, 0, -0.60360384, 0, -0.8970187, 5.648794, 0, -10.128818)
+
+[node name="@Node3D@31082" parent="World" unique_id=2134751419 instance=ExtResource("8_dp3eg")]
+transform = Transform3D(0.29262513, 0, 0.77791286, 0, 0.8311305, 0, -0.77791286, 0, 0.29262513, 5.7724113, 0, -14.01389)
+
+[node name="@Node3D@31083" parent="World" unique_id=1389674054 instance=ExtResource("9_0ld40")]
+transform = Transform3D(1.0681252, 0, -0.02746595, 0, 1.0684783, 0, 0.02746595, 0, 1.0681252, 13.975668, 0, -14.053192)
+
+[node name="@Node3D@31084" parent="World" unique_id=851819727 instance=ExtResource("7_muem4")]
+transform = Transform3D(-0.8640456, 0, -0.26015908, 0, 0.9023622, 0, 0.26015908, 0, -0.8640456, 13.723406, 0, 10.996386)
+
+[node name="@Node3D@31085" parent="World" unique_id=1071424645 instance=ExtResource("8_dp3eg")]
+transform = Transform3D(-0.35709813, 0, -0.7545489, 0, 0.8347833, 0, 0.7545489, 0, -0.35709813, -2.2500868, 0, -13.442257)
+
+[node name="@Node3D@31086" parent="World" unique_id=1042905043 instance=ExtResource("9_0ld40")]
+transform = Transform3D(-0.62907845, 0, 0.5711352, 0, 0.84966767, 0, -0.5711352, 0, -0.62907845, 4.867094, 0, 7.4196205)
+
+[node name="@Node3D@31087" parent="World" unique_id=2006271340 instance=ExtResource("7_muem4")]
+transform = Transform3D(0.04811538, 0, -1.106728, 0, 1.1077734, 0, 1.106728, 0, 0.04811538, 10.902468, 0, 4.8638954)
+
+[node name="@Node3D@31088" parent="World" unique_id=213869083 instance=ExtResource("7_muem4")]
+transform = Transform3D(-0.09844905, 0, 1.1565439, 0, 1.1607264, 0, -1.1565439, 0, -0.09844905, 10.01318, 0, 1.1734619)
+
+[node name="@Node3D@31089" parent="World" unique_id=1400980310 instance=ExtResource("8_dp3eg")]
+transform = Transform3D(-0.19298986, 0, 1.0090771, 0, 1.0273664, 0, -1.0090771, 0, -0.19298986, -14.074892, 0, -6.449011)
+
+[node name="@Node3D@31090" parent="World" unique_id=4718634 instance=ExtResource("8_dp3eg")]
+transform = Transform3D(-0.8493848, 0, -0.38511655, 0, 0.9326142, 0, 0.38511655, 0, -0.8493848, -0.33920097, 0, 13.249102)
+
+[node name="@Node3D@31091" parent="World" unique_id=1165813805 instance=ExtResource("7_muem4")]
+transform = Transform3D(-0.81605726, 0, 0.62898374, 0, 1.0303252, 0, -0.62898374, 0, -0.81605726, 7.610676, 0, -12.644152)
+
+[node name="@Node3D@31092" parent="World" unique_id=589264966 instance=ExtResource("9_0ld40")]
+transform = Transform3D(0.05430297, 0, -0.92811704, 0, 0.9297043, 0, 0.92811704, 0, 0.05430297, 14.073698, 0, -6.641927)
+
+[node name="@Node3D@31093" parent="World" unique_id=541070976 instance=ExtResource("6_jbj1t")]
+transform = Transform3D(-0.4932062, 0, -0.937749, 0, 1.0595403, 0, 0.937749, 0, -0.4932062, 1.0640774, 0, -16.38054)
+
+[node name="flower_redB2" parent="World" unique_id=2070756969 instance=ExtResource("10_gqmmt")]
+transform = Transform3D(-0.95583034, 0, -0.43180472, 0, 1.0488408, 0, 0.43180472, 0, -0.95583034, 8.534632, 0, 9.318104)
+
+[node name="@Node3D@31094" parent="World" unique_id=274874516 instance=ExtResource("7_muem4")]
+transform = Transform3D(0.87745047, 0, 0.7393319, 0, 1.1474018, 0, -0.7393319, 0, 0.87745047, 12.318209, 0, -7.7340746)
+
+[node name="@Node3D@31095" parent="World" unique_id=1018960237 instance=ExtResource("10_gqmmt")]
+transform = Transform3D(0.8607758, 0, 0.79590803, 0, 1.17235, 0, -0.79590803, 0, 0.8607758, 8.884153, 0, 5.316818)
+
+[node name="@Node3D@31096" parent="World" unique_id=1235087595 instance=ExtResource("7_muem4")]
+transform = Transform3D(-0.089721456, 0, -1.1403526, 0, 1.1438767, 0, 1.1403526, 0, -0.089721456, 14.224312, 0, -3.4296217)
+
+[node name="@Node3D@31097" parent="World" unique_id=770909309 instance=ExtResource("10_gqmmt")]
+transform = Transform3D(-0.558256, 0, 0.85674936, 0, 1.0225797, 0, -0.85674936, 0, -0.558256, 15.11097, 0, 1.0470695)
+
+[node name="@Node3D@31098" parent="World" unique_id=1522754811 instance=ExtResource("10_gqmmt")]
+transform = Transform3D(-0.21168143, 0, -0.8877637, 0, 0.91265184, 0, 0.8877637, 0, -0.21168143, 7.418146, 0, -10.427029)
+
+[node name="@Node3D@31099" parent="World" unique_id=273488114 instance=ExtResource("9_0ld40")]
+transform = Transform3D(-0.5659334, 0, 0.9174841, 0, 1.0779878, 0, -0.9174841, 0, -0.5659334, 1.5486946, 0, -12.975642)
+
+[node name="@Node3D@31100" parent="World" unique_id=1309644321 instance=ExtResource("7_muem4")]
+transform = Transform3D(0.8942665, 0, -0.5208215, 0, 1.0348756, 0, 0.5208215, 0, 0.8942665, -12.182282, 0, -13.049111)
+
+[node name="@Node3D@31101" parent="World" unique_id=32620170 instance=ExtResource("8_dp3eg")]
+transform = Transform3D(-0.67982143, 0, -0.83911526, 0, 1.0799406, 0, 0.83911526, 0, -0.67982143, 7.216753, 0, 15.192553)
+
+[node name="@Node3D@31102" parent="World" unique_id=360016064 instance=ExtResource("10_gqmmt")]
+transform = Transform3D(-0.2852895, 0, 0.75895715, 0, 0.8108058, 0, -0.75895715, 0, -0.2852895, 13.966457, 0, 3.0889206)
+
+[node name="@Node3D@31103" parent="World" unique_id=1985382087 instance=ExtResource("9_0ld40")]
+transform = Transform3D(-0.8467603, 0, -0.6087017, 0, 1.0428426, 0, 0.6087017, 0, -0.8467603, -14.819436, 0, -7.442868)
+
+[node name="@Node3D@31104" parent="World" unique_id=1331829866 instance=ExtResource("9_0ld40")]
+transform = Transform3D(-0.13235132, 0, -0.79109496, 0, 0.80208987, 0, 0.79109496, 0, -0.13235132, -15.495172, 0, -0.96567917)
+
+[node name="@Node3D@31105" parent="World" unique_id=1763629130 instance=ExtResource("6_jbj1t")]
+transform = Transform3D(-1.1078147, 0, 0.38453874, 0, 1.1726565, 0, -0.38453874, 0, -1.1078147, -10.219416, 0, -12.290436)
+
+[node name="@Node3D@31106" parent="World" unique_id=1787358440 instance=ExtResource("8_dp3eg")]
+transform = Transform3D(-0.47031745, 0, 0.649002, 0, 0.8014999, 0, -0.649002, 0, -0.47031745, 8.023773, 0, 5.1264515)
+
+[node name="@Node3D@31107" parent="World" unique_id=1132679503 instance=ExtResource("10_gqmmt")]
+transform = Transform3D(-0.2727539, 0, -0.8395615, 0, 0.88275605, 0, 0.8395615, 0, -0.2727539, -7.362653, 0, 7.702194)
+
+[node name="@Node3D@31108" parent="World" unique_id=2092031657 instance=ExtResource("6_jbj1t")]
+transform = Transform3D(-0.80768704, 0, 0.35215923, 0, 0.88112116, 0, -0.35215923, 0, -0.80768704, 13.63085, 0, -14.845098)
+
+[node name="@Node3D@31109" parent="World" unique_id=1692029573 instance=ExtResource("7_muem4")]
+transform = Transform3D(0.6880495, 0, -0.68042403, 0, 0.96767193, 0, 0.68042403, 0, 0.6880495, -13.011801, 0, -16.112692)
+
+[node name="@Node3D@31110" parent="World" unique_id=19762141 instance=ExtResource("8_dp3eg")]
+transform = Transform3D(-0.5301172, 0, -0.9293961, 0, 1.0699539, 0, 0.9293961, 0, -0.5301172, 9.366144, 0, 14.580616)
+
+[node name="@Node3D@31111" parent="World" unique_id=2029069999 instance=ExtResource("6_jbj1t")]
+transform = Transform3D(-0.9289232, 0, -0.6688038, 0, 1.1446383, 0, 0.6688038, 0, -0.9289232, 1.9724789, 0, -9.956261)
+
+[node name="@Node3D@31112" parent="World" unique_id=1090713817 instance=ExtResource("7_muem4")]
+transform = Transform3D(-0.44036043, 0, -1.0333089, 0, 1.1232295, 0, 1.0333089, 0, -0.44036043, -16.282316, 0, -8.114649)
+
+[node name="@Node3D@31113" parent="World" unique_id=1642266341 instance=ExtResource("7_muem4")]
+transform = Transform3D(-0.5893936, 0, 0.584757, 0, 0.8302563, 0, -0.584757, 0, -0.5893936, 15.954536, 0, -9.5912)
+
+[node name="@Node3D@31114" parent="World" unique_id=1469463710 instance=ExtResource("8_dp3eg")]
+transform = Transform3D(-0.7285868, 0, 0.60728467, 0, 0.9484901, 0, -0.60728467, 0, -0.7285868, 13.279257, 0, -13.370015)
+
+[node name="@Node3D@31115" parent="World" unique_id=491051407 instance=ExtResource("9_0ld40")]
+transform = Transform3D(-0.25408083, 0, -1.0035751, 0, 1.0352391, 0, 1.0035751, 0, -0.25408083, 15.802277, 0, 9.062433)
+
+[node name="@Node3D@31116" parent="World" unique_id=880939644 instance=ExtResource("9_0ld40")]
+transform = Transform3D(-0.685483, 0, 0.46055192, 0, 0.82582986, 0, -0.46055192, 0, -0.685483, -7.295315, 0, 9.680241)
+
+[node name="@Node3D@31117" parent="World" unique_id=1451119648 instance=ExtResource("6_jbj1t")]
+transform = Transform3D(0.9619948, 0, -0.33756778, 0, 1.0195029, 0, 0.33756778, 0, 0.9619948, 3.5775967, 0, 12.863363)
+
+[node name="@Node3D@31118" parent="World" unique_id=2063722947 instance=ExtResource("9_0ld40")]
+transform = Transform3D(1.0207499, 0, -0.59552175, 0, 1.1817684, 0, 0.59552175, 0, 1.0207499, -2.0596962, 0, 9.566429)
+
+[node name="@Node3D@31119" parent="World" unique_id=933948575 instance=ExtResource("10_gqmmt")]
+transform = Transform3D(0.8201211, 0, 0.21145861, 0, 0.84694356, 0, -0.21145861, 0, 0.8201211, 2.1595955, 0, -12.566147)
+
+[node name="@Node3D@31120" parent="World" unique_id=254571269 instance=ExtResource("7_muem4")]
+transform = Transform3D(0.9220806, 0, 0.100996085, 0, 0.92759514, 0, -0.100996085, 0, 0.9220806, -5.3253, 0, 7.853386)
+
+[node name="@Node3D@31121" parent="World" unique_id=864276123 instance=ExtResource("9_0ld40")]
+transform = Transform3D(-0.672082, 0, -0.7934279, 0, 1.0398183, 0, 0.7934279, 0, -0.672082, 1.1260529, 0, 13.122307)
+
+[node name="@Node3D@31122" parent="World" unique_id=1461935581 instance=ExtResource("9_0ld40")]
+transform = Transform3D(-0.74351406, 0, 0.7469646, 0, 1.0539304, 0, -0.7469646, 0, -0.74351406, -9.571909, 0, 5.648123)
+
+[node name="@Node3D@31123" parent="World" unique_id=916437186 instance=ExtResource("7_muem4")]
+transform = Transform3D(-1.0539283, 0, -0.54941505, 0, 1.1885376, 0, 0.54941505, 0, -1.0539283, -14.22405, 0, -4.602913)
+
+[node name="@Node3D@31124" parent="World" unique_id=1677128239 instance=ExtResource("10_gqmmt")]
+transform = Transform3D(-1.0274632, 0, -0.27939135, 0, 1.0647724, 0, 0.27939135, 0, -1.0274632, -8.899375, 0, -6.789625)
+
+[node name="@Node3D@31125" parent="World" unique_id=706997527 instance=ExtResource("9_0ld40")]
+transform = Transform3D(0.5923699, 0, 0.84347796, 0, 1.0307071, 0, -0.84347796, 0, 0.5923699, 9.436779, 0, 10.653597)
+
+[node name="@Node3D@31126" parent="World" unique_id=1578220648 instance=ExtResource("7_muem4")]
+transform = Transform3D(-0.41032565, 0, 0.91782403, 0, 1.0053697, 0, -0.91782403, 0, -0.41032565, 15.1397, 0, -6.111206)
+
+[node name="@Node3D@31127" parent="World" unique_id=716839797 instance=ExtResource("9_0ld40")]
+transform = Transform3D(0.46065545, 0, -0.7176652, 0, 0.8527877, 0, 0.7176652, 0, 0.46065545, -0.5987034, 0, -10.357616)
+
+[node name="@Node3D@31128" parent="World" unique_id=1533670765 instance=ExtResource("10_gqmmt")]
+transform = Transform3D(-0.8690178, 0, 0.52526873, 0, 1.0154306, 0, -0.52526873, 0, -0.8690178, 10.702297, 0, -16.694107)
+
+[node name="@Node3D@31129" parent="World" unique_id=1415414433 instance=ExtResource("9_0ld40")]
+transform = Transform3D(-0.20585538, 0, 1.1594734, 0, 1.1776056, 0, -1.1594734, 0, -0.20585538, 12.096432, 0, -7.852581)
+
+[node name="@Node3D@31130" parent="World" unique_id=679580327 instance=ExtResource("10_gqmmt")]
+transform = Transform3D(-0.49966884, 0, 0.8726189, 0, 1.005551, 0, -0.8726189, 0, -0.49966884, -14.505973, 0, -9.1593275)
+
+[node name="@Node3D@31131" parent="World" unique_id=416637811 instance=ExtResource("7_muem4")]
+transform = Transform3D(-1.0256304, 0, 0.45192304, 0, 1.1207819, 0, -0.45192304, 0, -1.0256304, -14.223106, 0, -7.7745705)
+
+[node name="@Node3D@31132" parent="World" unique_id=1433983289 instance=ExtResource("9_0ld40")]
+transform = Transform3D(-0.93576425, 0, -0.5237778, 0, 1.0723796, 0, 0.5237778, 0, -0.93576425, 4.4185333, 0, 12.515299)
+
+[node name="@Node3D@31133" parent="World" unique_id=448483484 instance=ExtResource("9_0ld40")]
+transform = Transform3D(-0.6404395, 0, 0.7083338, 0, 0.9549343, 0, -0.7083338, 0, -0.6404395, 2.092142, 0, -7.074108)
+
+[node name="@Node3D@31134" parent="World" unique_id=22713507 instance=ExtResource("7_muem4")]
+transform = Transform3D(-0.33332112, 0, -0.8761158, 0, 0.9373803, 0, 0.8761158, 0, -0.33332112, 1.3736324, 0, -10.181655)
+
+[node name="@Node3D@31135" parent="World" unique_id=2076007690 instance=ExtResource("10_gqmmt")]
+transform = Transform3D(0.9634203, 0, -0.7023171, 0, 1.1922365, 0, 0.7023171, 0, 0.9634203, 1.4934769, 0, 11.438438)
+
+[node name="@Node3D@31136" parent="World" unique_id=573039961 instance=ExtResource("8_dp3eg")]
+transform = Transform3D(-0.78572416, 0, 0.3049559, 0, 0.8428289, 0, -0.3049559, 0, -0.78572416, -11.487898, 0, 1.1369915)
+
+[node name="@Node3D@31137" parent="World" unique_id=1541966662 instance=ExtResource("10_gqmmt")]
+transform = Transform3D(-0.06989019, 0, 0.83107394, 0, 0.8340075, 0, -0.83107394, 0, -0.06989019, -3.0931349, 0, 9.649574)
+
+[node name="@Node3D@31138" parent="World" unique_id=1575005642 instance=ExtResource("10_gqmmt")]
+transform = Transform3D(-0.8047696, 0, -0.36304593, 0, 0.8828683, 0, 0.36304593, 0, -0.8047696, 0.09989929, 0, -6.527294)
+
+[node name="@Node3D@31139" parent="World" unique_id=238943012 instance=ExtResource("8_dp3eg")]
+transform = Transform3D(0.9447304, 0, 0.6168397, 0, 1.128276, 0, -0.6168397, 0, 0.9447304, 2.7288704, 0, -7.218624)
+
+[node name="@Node3D@31140" parent="World" unique_id=1579206011 instance=ExtResource("9_0ld40")]
+transform = Transform3D(0.5138326, 0, 0.6714381, 0, 0.84548986, 0, -0.6714381, 0, 0.5138326, 4.395897, 0, 6.5490303)
+
+[node name="@Node3D@31141" parent="World" unique_id=2134247741 instance=ExtResource("9_0ld40")]
+transform = Transform3D(-0.6712596, 0, 0.5503126, 0, 0.8680054, 0, -0.5503126, 0, -0.6712596, -13.763679, 0, -2.048563)
+
+[node name="@Node3D@31142" parent="World" unique_id=1337801302 instance=ExtResource("7_muem4")]
+transform = Transform3D(0.86604106, 0, -0.06078433, 0, 0.8681715, 0, 0.06078433, 0, 0.86604106, -8.124288, 0, -16.356289)
+
+[node name="@Node3D@31143" parent="World" unique_id=15705360 instance=ExtResource("6_jbj1t")]
+transform = Transform3D(0.9384208, 0, -0.27684608, 0, 0.9784055, 0, 0.27684608, 0, 0.9384208, -9.774049, 0, -11.377282)
+
+[node name="rock-small2" parent="World" unique_id=1497529008 instance=ExtResource("11_yc10j")]
+transform = Transform3D(-0.24891336, -0.013372616, 1.0500108, 0.07546667, 1.0760883, 0.0315947, -1.0473807, 0.08071318, -0.24726194, -2.800331, 0, 10.171333)
+
+[node name="@Node3D@31144" parent="World" unique_id=2108210714 instance=ExtResource("11_yc10j")]
+transform = Transform3D(-0.76810366, -0.10691777, -0.32739845, -0.07525389, 0.832963, -0.09546703, 0.33609226, -0.05784195, -0.76961076, 2.2374134, 0, -11.984589)
+
+[node name="rock-large2" parent="World" unique_id=499629583 instance=ExtResource("12_jscy8")]
+transform = Transform3D(-0.13250196, 0.19100215, -1.0989861, 0.14894024, 1.0998322, 0.17319182, 1.1054724, -0.1252868, -0.15505865, 11.856268, 0, -10.375081)
+
+[node name="rock-wide2" parent="World" unique_id=429968543 instance=ExtResource("13_pm3ni")]
+transform = Transform3D(-0.6232141, -0.1097046, 1.0922651, -0.13020442, 1.2545304, 0.051711366, -1.0900114, -0.087133005, -0.63067967, -10.533802, 0, -12.331976)
+
+[node name="@Node3D@31145" parent="World" unique_id=400495903 instance=ExtResource("13_pm3ni")]
+transform = Transform3D(0.9002122, -0.1309481, 0.15645492, 0.11811281, 0.91164565, 0.08342131, -0.16635779, -0.06133797, 0.90585333, -10.135132, 0, -9.962754)
+
+[node name="@Node3D@31146" parent="World" unique_id=2030066253 instance=ExtResource("12_jscy8")]
+transform = Transform3D(-0.117559314, -0.074712485, -0.91955864, -0.0395223, 0.92655075, -0.07022793, 0.92174184, 0.030199636, -0.12029209, -2.0243893, 0, -12.404083)
+
+[node name="@MeshInstance3D@31147" type="MeshInstance3D" parent="World" unique_id=849251132]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.35, 0.125, -5.95)
+material_override = SubResource("ShaderMaterial_07pt3")
+mesh = SubResource("CylinderMesh_37xlc")
+
+[node name="@MeshInstance3D@31148" type="MeshInstance3D" parent="World" unique_id=1154101163]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.35, 0.125, -5.95)
+material_override = SubResource("ShaderMaterial_07pt3")
+mesh = SubResource("CylinderMesh_83607")
+
+[node name="@MeshInstance3D@31149" type="MeshInstance3D" parent="World" unique_id=1212407858]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.35, 0.125, 5.95)
+material_override = SubResource("ShaderMaterial_07pt3")
+mesh = SubResource("CylinderMesh_vny5k")
+
+[node name="@MeshInstance3D@31150" type="MeshInstance3D" parent="World" unique_id=1398314841]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.35, 0.125, 5.95)
+material_override = SubResource("ShaderMaterial_07pt3")
+mesh = SubResource("CylinderMesh_8lcmr")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1675388682]

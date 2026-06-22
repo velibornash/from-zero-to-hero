@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://djtp4r8mhykh7"
+path="res://.godot/imported/wall-narrow-corner.obj-be4a4f113b663c2839cab2de9df120aa.mesh"
+
+[deps]
+
+files=["res://.godot/imported/wall-narrow-corner.obj-be4a4f113b663c2839cab2de9df120aa.mesh"]
+
+source_file="res://assets/packs/castle-kit/Models/obj/wall-narrow-corner.obj"
+dest_files=["res://.godot/imported/wall-narrow-corner.obj-be4a4f113b663c2839cab2de9df120aa.mesh", "res://.godot/imported/wall-narrow-corner.obj-be4a4f113b663c2839cab2de9df120aa.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://bejymkcm4nslc"
+path="res://.godot/imported/utensil-fork.obj-b761fe105a767741af0f6762966b6d41.mesh"
+
+[deps]
+
+files=["res://.godot/imported/utensil-fork.obj-b761fe105a767741af0f6762966b6d41.mesh"]
+
+source_file="res://assets/packs/food-kit/Models/obj/utensil-fork.obj"
+dest_files=["res://.godot/imported/utensil-fork.obj-b761fe105a767741af0f6762966b6d41.mesh", "res://.godot/imported/utensil-fork.obj-b761fe105a767741af0f6762966b6d41.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://brvt2dhsehkn"
+path="res://.godot/imported/fountain-edge.obj-fc7874dceaa916fc5b8590fc9a28873d.mesh"
+
+[deps]
+
+files=["res://.godot/imported/fountain-edge.obj-fc7874dceaa916fc5b8590fc9a28873d.mesh"]
+
+source_file="res://assets/packs/fantasy-town-kit/Models/obj/fountain-edge.obj"
+dest_files=["res://.godot/imported/fountain-edge.obj-fc7874dceaa916fc5b8590fc9a28873d.mesh", "res://.godot/imported/fountain-edge.obj-fc7874dceaa916fc5b8590fc9a28873d.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false
