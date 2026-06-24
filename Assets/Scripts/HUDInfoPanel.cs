@@ -25,6 +25,7 @@ public class HUDInfoPanel : MonoBehaviour
         oRt.sizeDelta = Vector2.zero;
         var oImg = overlay.AddComponent<Image>();
         oImg.color = new Color(0, 0, 0, 0.6f);
+        oImg.raycastTarget = false;
 
         goldIcon = LoadIcon("HUDIcons/gold_icon");
         woodIcon = LoadIcon("HUDIcons/wood_icon");
@@ -57,6 +58,7 @@ public class HUDInfoPanel : MonoBehaviour
         sRt.sizeDelta = new Vector2(590, 510);
         var sImg = shadowPanel.AddComponent<Image>();
         sImg.color = new Color(0, 0, 0, 0.45f);
+        sImg.raycastTarget = false;
 
         // Main panel
         panel = new GameObject("InfoPanel");
@@ -69,6 +71,7 @@ public class HUDInfoPanel : MonoBehaviour
         pRt.sizeDelta = new Vector2(590, 510);
         var pImg = panel.AddComponent<Image>();
         pImg.color = parchmentBg;
+        pImg.raycastTarget = false;
 
         // Wood frame - outer thick border
         var woodFrame = new GameObject("WoodFrame");
@@ -111,6 +114,7 @@ public class HUDInfoPanel : MonoBehaviour
         bRt.sizeDelta = new Vector2(-28, -68);
         var bImg = banner.AddComponent<Image>();
         bImg.color = bannerRed;
+        bImg.raycastTarget = false;
 
         // Gold trim on banner (top)
         var trimTop = new GameObject("TrimTop");
@@ -123,6 +127,7 @@ public class HUDInfoPanel : MonoBehaviour
         ttRt.sizeDelta = new Vector2(0, -3);
         var ttImg = trimTop.AddComponent<Image>();
         ttImg.color = goldAccent;
+        ttImg.raycastTarget = false;
 
         // Gold trim on banner (bottom)
         var trimBottom = new GameObject("TrimBottom");
@@ -135,6 +140,7 @@ public class HUDInfoPanel : MonoBehaviour
         tbRt.sizeDelta = new Vector2(0, -3);
         var tbImg = trimBottom.AddComponent<Image>();
         tbImg.color = goldAccent;
+        tbImg.raycastTarget = false;
 
         // Side pillars (left + right wood strips flanking banner)
         for (int side = -1; side <= 1; side += 2)

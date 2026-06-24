@@ -152,7 +152,6 @@ public class Setup3DScene
         church.transform.position = new Vector3(0f, 0, 0f);
         church.transform.localScale = Vector3.one * 8f;
         AddColliders(church);
-        AddBuildingLabel(church, "Church");
         Debug.Log("Church placed from FBX.");
     }
 
@@ -222,7 +221,6 @@ public class Setup3DScene
             house.transform.localScale = Vector3.one * 6f;
             house.transform.rotation = Quaternion.Euler(0, rotY, 0);
             AddColliders(house);
-            AddBuildingLabel(house, "House " + (char)('A' + placed));
             placed++;
         }
         Debug.Log($"Placed {placed} houses from assets.");
@@ -238,7 +236,6 @@ public class Setup3DScene
         wm.transform.localScale = Vector3.one * 6f;
         wm.transform.rotation = Quaternion.Euler(0, -90f, 0);
         AddColliders(wm);
-        AddBuildingLabel(wm, "Watermill");
         Debug.Log("Watermill placed from FBX.");
     }
 
@@ -252,30 +249,6 @@ public class Setup3DScene
             mc.sharedMesh = f.sharedMesh;
             mc.convex = false;
         }
-    }
-
-    static void AddBuildingLabel(GameObject building, string name)
-    {
-        float topY = 3f;
-        var rends = building.GetComponentsInChildren<Renderer>();
-        if (rends.Length > 0)
-        {
-            var b = rends[0].bounds;
-            foreach (var r in rends) b.Encapsulate(r.bounds);
-            topY = b.max.y + 1f;
-        }
-        var label = new GameObject("BuildingLabel");
-        label.transform.SetParent(building.transform);
-        label.transform.position = new Vector3(building.transform.position.x, topY, building.transform.position.z);
-        var tm = label.AddComponent<TextMesh>();
-        tm.text = name;
-        tm.fontSize = 36;
-        tm.fontStyle = FontStyle.Bold;
-        tm.alignment = TextAlignment.Center;
-        tm.anchor = TextAnchor.MiddleCenter;
-        tm.color = Color.black;
-        label.transform.localScale = new Vector3(0.08f, 0.08f, 0.08f);
-        label.AddComponent<Billboard>();
     }
 
     static void AddBuildZoneLabel(GameObject zone, int cost)
