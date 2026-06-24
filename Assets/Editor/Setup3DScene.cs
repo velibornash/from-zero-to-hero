@@ -71,7 +71,7 @@ public class Setup3DScene
         var mat = new Material(Shader.Find("Standard"));
         if (tex != null) { mat.mainTexture = tex; mat.mainTextureScale = new Vector2(200, 200); }
         else { mat.color = new Color(0.25f, 0.5f, 0.18f); }
-        go.GetComponent<Renderer>().material = mat;
+        go.GetComponent<Renderer>().sharedMaterial = mat;
     }
 
     static void PlaceVillage()
@@ -113,7 +113,7 @@ public class Setup3DScene
             post.name = "GatePost";
             post.transform.position = new Vector3(gx, 1.2f * fenceScaleY, bottom);
             post.transform.localScale = new Vector3(0.35f, 2.4f * fenceScaleY, 0.35f);
-            post.GetComponent<Renderer>().material = postMat;
+            post.GetComponent<Renderer>().sharedMaterial = postMat;
         }
 
         for (float z = bottom + 1f; z <= top - 1f; z += step)
@@ -311,7 +311,9 @@ public class Setup3DScene
         flagPole.name = "FlagPole";
         flagPole.transform.position = new Vector3(-2f, 3f, -48f);
         flagPole.transform.localScale = new Vector3(0.12f, 5f, 0.12f);
-        flagPole.GetComponent<Renderer>().material.color = new Color(0.6f, 0.6f, 0.6f);
+        var poleMat = new Material(Shader.Find("Standard"));
+        poleMat.color = new Color(0.6f, 0.6f, 0.6f);
+        flagPole.GetComponent<Renderer>().sharedMaterial = poleMat;
 
         string[] stripeColors = { "FF0000", "0033CC", "FFFFFF" };
         for (int i = 0; i < 3; i++)
@@ -322,7 +324,9 @@ public class Setup3DScene
             stripe.transform.localScale = new Vector3(2.5f, 0.5f, 0.05f);
             Color c;
             ColorUtility.TryParseHtmlString("#" + stripeColors[i], out c);
-            stripe.GetComponent<Renderer>().material.color = c;
+            var stripeMat = new Material(Shader.Find("Standard"));
+            stripeMat.color = c;
+            stripe.GetComponent<Renderer>().sharedMaterial = stripeMat;
         }
 
         var wheatMat = new Material(Shader.Find("Standard"));
@@ -335,7 +339,7 @@ public class Setup3DScene
             stalk.name = "WheatStalk";
             stalk.transform.position = new Vector3(wx, 0.3f, wz);
             stalk.transform.localScale = new Vector3(0.04f, 0.3f, 0.04f);
-            stalk.GetComponent<Renderer>().material = wheatMat;
+            stalk.GetComponent<Renderer>().sharedMaterial = wheatMat;
         }
 
         var flowerPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(
@@ -391,7 +395,7 @@ public class Setup3DScene
                 tile.name = "PathTile";
                 tile.transform.position = new Vector3(px, 0.01f, pz);
                 tile.transform.localScale = new Vector3(0.9f, 0.02f, 0.9f);
-                tile.GetComponent<Renderer>().material = pathMat;
+                tile.GetComponent<Renderer>().sharedMaterial = pathMat;
             }
         }
 
@@ -402,7 +406,7 @@ public class Setup3DScene
         pond.transform.position = new Vector3(-90f, 0.02f, -60f);
         pond.transform.localScale = new Vector3(8f, 0.05f, 8f);
         var pondMat = MakeWaterMaterial(0.15f, 0.45f, 0.7f, 0.85f);
-        pond.GetComponent<Renderer>().material = pondMat;
+        pond.GetComponent<Renderer>().sharedMaterial = pondMat;
     }
 
     static Material MakeWaterMaterial(float r, float g, float b, float a)
@@ -468,7 +472,7 @@ public class Setup3DScene
             var rend = seg.GetComponent<Renderer>();
             float t = (float)i / (path.Length - 2);
             float depthT = 1f - Mathf.Abs(t * 2f - 1f);
-            rend.material = depthT > 0.4f ? matDeep : matShallow;
+            rend.sharedMaterial = depthT > 0.4f ? matDeep : matShallow;
 
             var flow = seg.AddComponent<RiverFlow>();
             flow.flowDirection = new Vector2(Mathf.Sin(yaw * Mathf.Deg2Rad), Mathf.Cos(yaw * Mathf.Deg2Rad));
@@ -496,8 +500,7 @@ public class Setup3DScene
                 bank.transform.position = new Vector3(mid.x, 0.18f, mid.z);
                 bank.transform.localScale = new Vector3(1.6f, 0.6f, length);
                 bank.transform.rotation = Quaternion.Euler(0f, yaw, 0f);
-                bank.GetComponent<Renderer>().material = bankMat;
-                bank.GetComponent<MeshCollider>().enabled = true;
+                bank.GetComponent<Renderer>().sharedMaterial = bankMat;
             }
         }
 
@@ -514,7 +517,7 @@ public class Setup3DScene
             stone.transform.position = sp;
             stone.transform.localScale = Vector3.one * Random.Range(0.5f, 1.1f);
             stone.transform.rotation = Quaternion.Euler(0, Random.Range(0, 360), 0);
-            stone.GetComponent<Renderer>().material = stoneMat;
+            stone.GetComponent<Renderer>().sharedMaterial = stoneMat;
             Object.DestroyImmediate(stone.GetComponent<SphereCollider>());
         }
 
@@ -537,7 +540,7 @@ public class Setup3DScene
             reed.transform.position = center + perp * side * w;
             reed.transform.localScale = new Vector3(0.08f, 1.2f, 0.08f);
             reed.transform.rotation = Quaternion.Euler(Random.Range(-15f, 15f), Random.Range(0, 360), Random.Range(-15f, 15f));
-            reed.GetComponent<Renderer>().material = reedMat;
+            reed.GetComponent<Renderer>().sharedMaterial = reedMat;
             Object.DestroyImmediate(reed.GetComponent<BoxCollider>());
         }
 
@@ -636,7 +639,7 @@ public class Setup3DScene
             zone.transform.position = pos;
             zone.transform.localScale = new Vector3(6f, 2f, 6f);
             zone.GetComponent<BoxCollider>().isTrigger = true;
-            zone.GetComponent<Renderer>().material = mat;
+            zone.GetComponent<Renderer>().sharedMaterial = mat;
 
             var bz = zone.AddComponent<BuildZone>();
             bz.cost = 15;
