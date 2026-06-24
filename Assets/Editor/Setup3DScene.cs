@@ -414,7 +414,6 @@ public class Setup3DScene
         m.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
         m.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
         m.SetInt("_ZWrite", 0);
-        m.renderQueue = 3000;
         if (m.HasProperty("_Glossiness")) m.SetFloat("_Glossiness", 0.85f);
         if (m.HasProperty("_Metallic")) m.SetFloat("_Metallic", 0.0f);
         if (m.HasProperty("_SpecColor")) m.SetColor("_SpecColor", new Color(0.6f, 0.8f, 1f, 1f));
@@ -464,7 +463,7 @@ public class Setup3DScene
             float yaw = Mathf.Atan2(dir.x, dir.z) * Mathf.Rad2Deg;
             seg.transform.rotation = Quaternion.Euler(0f, yaw, 0f);
 
-            DestroyImmediate(seg.GetComponent<MeshCollider>());
+            Object.DestroyImmediate(seg.GetComponent<MeshCollider>());
 
             var rend = seg.GetComponent<Renderer>();
             float t = (float)i / (path.Length - 2);
@@ -516,7 +515,7 @@ public class Setup3DScene
             stone.transform.localScale = Vector3.one * Random.Range(0.5f, 1.1f);
             stone.transform.rotation = Quaternion.Euler(0, Random.Range(0, 360), 0);
             stone.GetComponent<Renderer>().material = stoneMat;
-            DestroyImmediate(stone.GetComponent<SphereCollider>());
+            Object.DestroyImmediate(stone.GetComponent<SphereCollider>());
         }
 
         var reedMat = new Material(Shader.Find("Standard"));
@@ -539,7 +538,7 @@ public class Setup3DScene
             reed.transform.localScale = new Vector3(0.08f, 1.2f, 0.08f);
             reed.transform.rotation = Quaternion.Euler(Random.Range(-15f, 15f), Random.Range(0, 360), Random.Range(-15f, 15f));
             reed.GetComponent<Renderer>().material = reedMat;
-            DestroyImmediate(reed.GetComponent<BoxCollider>());
+            Object.DestroyImmediate(reed.GetComponent<BoxCollider>());
         }
 
         Debug.Log("River: procedural, 6 segments, banks, stones, reeds (RiverFlow animates UV).");
