@@ -8,8 +8,6 @@ public class Setup3DScene
     const string Village = "Assets/3D/Village";
     const string NaturePrefabs = "Assets/Polytope Studio/Lowpoly_Environments/Prefabs";
     const string Kayak = "Assets/3D/KayKit/KayKit_Adventurers_2.0_FREE";
-    const string Slavic = "Assets/EmaceArt/Slavic World Free/Prefabs";
-    const string SlavicMat = "Assets/EmaceArt/Slavic World Free/Material";
 
     [MenuItem("Tools/Setup 3D Scene")]
     public static void Build()
@@ -397,65 +395,154 @@ public class Setup3DScene
             }
         }
 
-        var waterMat = AssetDatabase.LoadAssetAtPath<Material>(SlavicMat + "/Water.mat");
-        var fallbackWater = new Material(Shader.Find("Standard"));
-        fallbackWater.color = new Color(0.15f, 0.45f, 0.7f, 0.75f);
-        if (waterMat == null) waterMat = fallbackWater;
-
-        var riverStraight01g = AssetDatabase.LoadAssetAtPath<GameObject>(Slavic + "/RiverStraight/EA03_Environment_RiverStraight_01g_PRE.prefab");
-        var riverStraight02a = AssetDatabase.LoadAssetAtPath<GameObject>(Slavic + "/RiverStraight/EA03_Environment_RiverStraight_02a_PRE.prefab");
-        var riverStraight02b = AssetDatabase.LoadAssetAtPath<GameObject>(Slavic + "/RiverStraight/EA03_Environment_RiverStraight_02b_PRE.prefab");
-        var riverStraight01fR = AssetDatabase.LoadAssetAtPath<GameObject>(Slavic + "/RiverStraight/EA03_Environment_RiverStraight_01f_R_PRE.prefab");
-
-        var riverParent = new GameObject("River");
-        if (riverStraight01g != null)
-        {
-            var seg = (GameObject)Object.Instantiate(riverStraight01g);
-            seg.transform.SetParent(riverParent.transform, false);
-            seg.transform.position = new Vector3(80f, 0.02f, -60f);
-            seg.transform.localScale = Vector3.one * 1.6f;
-        }
-        if (riverStraight02b != null)
-        {
-            var seg = (GameObject)Object.Instantiate(riverStraight02b);
-            seg.transform.SetParent(riverParent.transform, false);
-            seg.transform.position = new Vector3(80f, 0.02f, -20f);
-            seg.transform.localScale = Vector3.one * 1.6f;
-        }
-        if (riverStraight01fR != null)
-        {
-            var seg = (GameObject)Object.Instantiate(riverStraight01fR);
-            seg.transform.SetParent(riverParent.transform, false);
-            seg.transform.position = new Vector3(80f, 0.02f, 20f);
-            seg.transform.localScale = Vector3.one * 1.6f;
-        }
-        if (riverStraight02a != null)
-        {
-            var seg = (GameObject)Object.Instantiate(riverStraight02a);
-            seg.transform.SetParent(riverParent.transform, false);
-            seg.transform.position = new Vector3(80f, 0.02f, 60f);
-            seg.transform.localScale = Vector3.one * 1.6f;
-        }
-
-        if (riverParent.transform.childCount == 0)
-        {
-            var placeholder = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            placeholder.name = "RiverFallback";
-            placeholder.transform.SetParent(riverParent.transform, false);
-            placeholder.transform.position = new Vector3(80f, 0.02f, 0f);
-            placeholder.transform.localScale = new Vector3(4f, 0.05f, 120f);
-            var m = new Material(waterMat);
-            m.color = new Color(0.15f, 0.45f, 0.7f, 0.75f);
-            placeholder.GetComponent<Renderer>().material = m;
-        }
-        Debug.Log("River: 4 segments from Slavic RiverStraight prefabs (or fallback).");
+        BuildProceduralRiver();
 
         var pond = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
         pond.name = "Pond";
         pond.transform.position = new Vector3(-90f, 0.02f, -60f);
         pond.transform.localScale = new Vector3(8f, 0.05f, 8f);
-        var pondMat = new Material(waterMat);
+        var pondMat = MakeWaterMaterial(0.15f, 0.45f, 0.7f, 0.85f);
         pond.GetComponent<Renderer>().material = pondMat;
+    }
+
+    static Material MakeWaterMaterial(float r, float g, float b, float a)
+    {
+        var shader = Shader.Find("Standard");
+        var m = new Material(shader);
+        m.color = new Color(r, g, b, a);
+        m.SetFloat("_Mode", 3);
+        m.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+        m.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+        m.SetInt("_ZWrite", 0);
+        m.renderQueue = 3000;
+        if (m.HasProperty("_Glossiness")) m.SetFloat("_Glossiness", 0.85f);
+        if (m.HasProperty("_Metallic")) m.SetFloat("_Metallic", 0.0f);
+        if (m.HasProperty("_SpecColor")) m.SetColor("_SpecColor", new Color(0.6f, 0.8f, 1f, 1f));
+        return m;
+    }
+
+    static void BuildProceduralRiver()
+    {
+        var river = new GameObject("River");
+        var matShallow = MakeWaterMaterial(0.28f, 0.62f, 0.78f, 0.78f);
+        var matDeep = MakeWaterMaterial(0.10f, 0.32f, 0.52f, 0.92f);
+
+        var bankMat = new Material(Shader.Find("Standard"));
+        bankMat.color = new Color(0.45f, 0.36f, 0.22f);
+
+        var stoneMat = new Material(Shader.Find("Standard"));
+        stoneMat.color = new Color(0.45f, 0.45f, 0.42f);
+
+        var path = new (Vector3 pos, float width)[] {
+            (new Vector3( 95f, 0.05f,  60f), 5.5f),
+            (new Vector3( 88f, 0.05f,  40f), 5.0f),
+            (new Vector3( 82f, 0.05f,  20f), 5.0f),
+            (new Vector3( 80f, 0.05f,   0f), 5.5f),
+            (new Vector3( 82f, 0.05f, -20f), 5.0f),
+            (new Vector3( 88f, 0.05f, -40f), 5.0f),
+            (new Vector3( 95f, 0.05f, -60f), 5.5f),
+        };
+
+        var segNames = new[] { "Seg_60", "Seg_40", "Seg_20", "Seg_00", "Seg_-20", "Seg_-40", "Seg_-60" };
+
+        for (int i = 0; i < path.Length - 1; i++)
+        {
+            var a = path[i];
+            var b = path[i + 1];
+
+            var seg = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            seg.name = "River." + segNames[i];
+            seg.transform.SetParent(river.transform, false);
+
+            var mid = (a.pos + b.pos) * 0.5f;
+            float length = Vector3.Distance(a.pos, b.pos);
+            float width = (a.width + b.width) * 0.5f;
+
+            seg.transform.position = new Vector3(mid.x, 0.05f, mid.z);
+            seg.transform.localScale = new Vector3(width / 10f, 1f, length / 10f);
+            Vector3 dir = (b.pos - a.pos).normalized;
+            float yaw = Mathf.Atan2(dir.x, dir.z) * Mathf.Rad2Deg;
+            seg.transform.rotation = Quaternion.Euler(0f, yaw, 0f);
+
+            DestroyImmediate(seg.GetComponent<MeshCollider>());
+
+            var rend = seg.GetComponent<Renderer>();
+            float t = (float)i / (path.Length - 2);
+            float depthT = 1f - Mathf.Abs(t * 2f - 1f);
+            rend.material = depthT > 0.4f ? matDeep : matShallow;
+
+            var flow = seg.AddComponent<RiverFlow>();
+            flow.flowDirection = new Vector2(Mathf.Sin(yaw * Mathf.Deg2Rad), Mathf.Cos(yaw * Mathf.Deg2Rad));
+            flow.speed = 0.12f;
+            flow.tiling = new Vector2(width / 4f, length / 4f);
+        }
+
+        for (int i = 0; i < path.Length - 1; i++)
+        {
+            var a = path[i];
+            var b = path[i + 1];
+            Vector3 dir = (b.pos - a.pos).normalized;
+            Vector3 perp = new Vector3(-dir.z, 0, dir.x);
+            float w = (a.width + b.width) * 0.5f * 0.5f;
+            float yaw = Mathf.Atan2(dir.x, dir.z) * Mathf.Rad2Deg;
+
+            for (int side = -1; side <= 1; side += 2)
+            {
+                var bank = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                bank.name = "Bank." + segNames[i] + (side > 0 ? ".N" : ".S");
+                bank.transform.SetParent(river.transform, false);
+
+                var mid = (a.pos + b.pos) * 0.5f + perp * side * (w + 0.6f);
+                float length = Vector3.Distance(a.pos, b.pos) + 1.2f;
+                bank.transform.position = new Vector3(mid.x, 0.18f, mid.z);
+                bank.transform.localScale = new Vector3(1.6f, 0.6f, length);
+                bank.transform.rotation = Quaternion.Euler(0f, yaw, 0f);
+                bank.GetComponent<Renderer>().material = bankMat;
+                bank.GetComponent<MeshCollider>().enabled = true;
+            }
+        }
+
+        var stonePositions = new Vector3[] {
+            new Vector3( 86f, 0.3f,  35f), new Vector3( 92f, 0.3f,  25f), new Vector3( 84f, 0.3f, -10f),
+            new Vector3( 86f, 0.3f, -32f), new Vector3( 93f, 0.3f, -45f), new Vector3( 81f, 0.3f,  45f),
+            new Vector3( 90f, 0.3f, -55f), new Vector3( 85f, 0.3f,  55f),
+        };
+        foreach (var sp in stonePositions)
+        {
+            var stone = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            stone.name = "RiverStone";
+            stone.transform.SetParent(river.transform, false);
+            stone.transform.position = sp;
+            stone.transform.localScale = Vector3.one * Random.Range(0.5f, 1.1f);
+            stone.transform.rotation = Quaternion.Euler(0, Random.Range(0, 360), 0);
+            stone.GetComponent<Renderer>().material = stoneMat;
+            DestroyImmediate(stone.GetComponent<SphereCollider>());
+        }
+
+        var reedMat = new Material(Shader.Find("Standard"));
+        reedMat.color = new Color(0.35f, 0.55f, 0.15f);
+        for (int i = 0; i < 30; i++)
+        {
+            int pi = Random.Range(0, path.Length - 1);
+            var a = path[pi];
+            var b = path[pi + 1];
+            Vector3 dir = (b.pos - a.pos).normalized;
+            Vector3 perp = new Vector3(-dir.z, 0, dir.x);
+            float t = Random.value;
+            Vector3 center = Vector3.Lerp(a.pos, b.pos, t);
+            float w = Mathf.Lerp(a.width, b.width, t) * 0.55f;
+            int side = Random.value > 0.5f ? 1 : -1;
+            var reed = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            reed.name = "Reed";
+            reed.transform.SetParent(river.transform, false);
+            reed.transform.position = center + perp * side * w;
+            reed.transform.localScale = new Vector3(0.08f, 1.2f, 0.08f);
+            reed.transform.rotation = Quaternion.Euler(Random.Range(-15f, 15f), Random.Range(0, 360), Random.Range(-15f, 15f));
+            reed.GetComponent<Renderer>().material = reedMat;
+            DestroyImmediate(reed.GetComponent<BoxCollider>());
+        }
+
+        Debug.Log("River: procedural, 6 segments, banks, stones, reeds (RiverFlow animates UV).");
     }
 
     static void PlaceForest()
