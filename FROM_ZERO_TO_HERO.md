@@ -1,77 +1,58 @@
 # From Zero to Hero
 
-Living build log for the fresh restart.
+Living build log for the project.
 
 ## Stack
 
-- Unity 6000.5
-- C#
-- Built-in 3D pipeline for now
-- Free asset packs already present in the repo
+- Unity 6000.5 (C#)
+- Built-in 3D pipeline
+- Free asset packs from the Unity Asset Store
 
-Why this stack:
+## Design Goal
 
-- free to use
-- built for 3D characters, buildings, camera framing, and mobile-style production UI
-- lets us keep the game as a real 3D diorama instead of a visible tile prototype
-- reusable asset pipeline for mobile-store style presentation
+A 3D city-builder driven by a physically-present hero. The hero walks across the village, activates buildings, and pushes development through Serbian historical eras. Visual target: a clean 3D diorama in the style of mobile city-builders (Outlet Rush, Whiteout Survival).
 
 ## Current Build Target
 
 The game should open into a 3D village scene with:
 
-- a visible hero
-- visible buildings and props
-- an invisible logical grid
+- a visible hero (third-person controller)
+- visible buildings and props placed on the terrain
+- an invisible logical grid for placement
 - only the current interaction square highlighted
-- walking, buying, building, and enemy pressure
+- walking, building, and economy
 - story events that change the rules
 
-## What Is Done
+## Current State
 
-- Unity project scaffold created in `unity-game/`
-- project bootstrapping is scripted
-- key source art has been moved into Unity-ready resource folders
-- living progress document exists
+- Unity 6000.5.0f1 project at repo root
+- `Assets/Scripts/` contains the gameplay scripts: `PlayerController3D`, `CameraFollow3D`, `BuildZone`, `Combat`, `NPCPatrol`, `HUDController`, `HUDInfoPanel`, `MinimapController`, `FloatingText`, `Billboard`
+- `Assets/Editor/Setup3DScene.cs` bootstraps a 3D scene (player, camera, ground, props)
+- `Assets/nova scena.unity` is the active hand-built scene
+- Asset packs already in the repo: EmaceArt, Environment Starter Pack, GuiPack2DFree, InfinityPBR - Magic Pig Games, MyDreamGameStudio, Polytope Studio, 3D
 
-## What Is Left
+## What's Next
 
-- Finish asset import into `unity-game/Assets/Resources`
-- Add the first playable scene with camera, light, hero, HUD, and interaction square
-- Add the first building/shop loop
-- Add worker spawning and simple production
-- Add the first story events and raid pressure
-- Add save/load and meta progression
+1. Wire `BuildZone` to the logical grid
+2. Building prefabs (kafana, pekara, toranj, crkva)
+3. Resource UI + economy loop
+4. Story events and era progression
+5. NPC behavior (idle, patrol, talk)
 
 ## How To Run
 
-1. Open `unity-game/` in Unity Hub.
-2. Open the project in Unity 6000.5.
-3. Let the bootstrap script create the first scene if prompted.
-
-If you need a direct path to the editor, use the installed Unity app inside:
-
-```text
-/Applications/Unity/Hub/Editor/6000.5.0f1/Unity.app
+```bash
+open -a "/Applications/Unity/Hub/Editor/6000.5.0f1/Unity.app" /Users/velja/IdeaProjects/from-zero-to-hero
+# Then press Play in the editor (or Cmd+B to build)
 ```
 
-## What To Expect In The First Slice
+## Project Layout
 
-- 3D village space
-- hero movement with arrow keys
-- a visible interaction square instead of visible tile grid lines
-- one or two recognizable buildings
-- a clean HUD
-- event messages when the opening conditions are met
-
-## Development Rule
-
-Do not fall back into prototype visuals.
-
-The order is:
-
-1. 3D world readability
-2. character and building identity
-3. interaction and progression
-4. animation polish
-5. content expansion
+```
+Assets/         source art, scenes, scripts
+Packages/       Unity package manifest
+ProjectSettings/ Unity project config
+UserSettings/   per-user editor settings (gitignored)
+Library/        Unity build cache (gitignored)
+Logs/           Unity editor logs (gitignored)
+```
