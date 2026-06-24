@@ -50,6 +50,7 @@ public class MinimapController : MonoBehaviour
         rtRt.sizeDelta = new Vector2(texSize + 8, texSize + 8);
         rawImage.texture = rt;
         rawImage.color = Color.white;
+        rawImage.raycastTarget = false;
 
         // Border
         var border = new GameObject("MinimapBorder");
@@ -61,6 +62,7 @@ public class MinimapController : MonoBehaviour
         var bImg = border.AddComponent<Image>();
         bImg.color = new Color(0.3f, 0.2f, 0.1f, 0.8f);
         bImg.type = Image.Type.Sliced;
+        bImg.raycastTarget = false;
     }
 
     void LateUpdate()

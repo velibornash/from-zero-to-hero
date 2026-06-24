@@ -49,6 +49,7 @@ public class HUDController : MonoBehaviour
         barRt.offsetMax = new Vector2(0, 0);
         var barImg = topBar.AddComponent<Image>();
         barImg.color = new Color(0.015f, 0.015f, 0.04f, 0.9f);
+        barImg.raycastTarget = false;
 
         // Separator line under bar
         var sep = new GameObject("BarSeparator");
@@ -61,6 +62,7 @@ public class HUDController : MonoBehaviour
         sepRt.offsetMax = new Vector2(0, 0);
         var sepImg = sep.AddComponent<Image>();
         sepImg.color = new Color(0.6f, 0.5f, 0.2f, 0.6f);
+        sepImg.raycastTarget = false;
 
         float x = 12f;
         float iconSize = 30f;
@@ -105,6 +107,7 @@ public class HUDController : MonoBehaviour
         evRt.sizeDelta = new Vector2(180, 240);
         var evImg = evPanel.AddComponent<Image>();
         evImg.color = new Color(0.015f, 0.015f, 0.04f, 0.72f);
+        evImg.raycastTarget = false;
 
         var evSep = new GameObject("EventSep");
         evSep.transform.SetParent(evPanel.transform, false);
@@ -116,6 +119,7 @@ public class HUDController : MonoBehaviour
         esRt.sizeDelta = new Vector2(-8, -2);
         var esImg = evSep.AddComponent<Image>();
         esImg.color = new Color(0.6f, 0.5f, 0.2f, 0.4f);
+        esImg.raycastTarget = false;
 
         MakeText(evPanel.transform, "Events", new Vector2(10, -8), new Vector2(160, 18),
             new Color(0.5f, 0.6f, 0.75f), 13, FontStyle.Bold, TextAnchor.UpperLeft);
@@ -137,6 +141,7 @@ public class HUDController : MonoBehaviour
         bgRt.sizeDelta = new Vector2(size, size);
         var bgImg = bg.AddComponent<Image>();
         bgImg.color = bgColor;
+        bgImg.raycastTarget = false;
 
         if (sprite != null)
         {
@@ -149,6 +154,7 @@ public class HUDController : MonoBehaviour
             var sImg = sym.AddComponent<Image>();
             sImg.sprite = sprite;
             sImg.color = tint;
+            sImg.raycastTarget = false;
         }
 
         x += size + 6;
