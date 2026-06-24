@@ -57,6 +57,7 @@ public class ObjectClickInfo : MonoBehaviour
         pRt.sizeDelta = new Vector2(460, 320);
         var pImg = panel.AddComponent<Image>();
         pImg.color = parchmentBg;
+        pImg.raycastTarget = false;
 
         var frame = new GameObject("Frame");
         frame.transform.SetParent(panel.transform, false);
@@ -66,6 +67,7 @@ public class ObjectClickInfo : MonoBehaviour
         fRt.sizeDelta = new Vector2(-8, -8);
         var fImg = frame.AddComponent<Image>();
         fImg.color = woodMid;
+        fImg.raycastTarget = false;
 
         var inner = new GameObject("Inner");
         inner.transform.SetParent(frame.transform, false);
@@ -75,6 +77,7 @@ public class ObjectClickInfo : MonoBehaviour
         iRt.sizeDelta = new Vector2(-5, -5);
         var iImg = inner.AddComponent<Image>();
         iImg.color = woodDark;
+        iImg.raycastTarget = false;
 
         var innerBorder = new GameObject("InnerBorder");
         innerBorder.transform.SetParent(inner.transform, false);
@@ -84,6 +87,7 @@ public class ObjectClickInfo : MonoBehaviour
         ibRt.sizeDelta = new Vector2(-6, -6);
         var ibImg = innerBorder.AddComponent<Image>();
         ibImg.color = new Color(0.92f, 0.84f, 0.68f);
+        ibImg.raycastTarget = false;
 
         var banner = new GameObject("Banner");
         banner.transform.SetParent(panel.transform, false);
@@ -95,6 +99,7 @@ public class ObjectClickInfo : MonoBehaviour
         bRt.sizeDelta = new Vector2(-20, -46);
         var bImg = banner.AddComponent<Image>();
         bImg.color = bannerRed;
+        bImg.raycastTarget = false;
 
         var trimTop = new GameObject("TrimTop");
         trimTop.transform.SetParent(banner.transform, false);
@@ -106,6 +111,7 @@ public class ObjectClickInfo : MonoBehaviour
         ttRt.sizeDelta = new Vector2(0, -2);
         var ttImg = trimTop.AddComponent<Image>();
         ttImg.color = goldAccent;
+        ttImg.raycastTarget = false;
 
         var trimBot = new GameObject("TrimBot");
         trimBot.transform.SetParent(banner.transform, false);
@@ -117,6 +123,7 @@ public class ObjectClickInfo : MonoBehaviour
         tbRt.sizeDelta = new Vector2(0, -2);
         var tbImg = trimBot.AddComponent<Image>();
         tbImg.color = goldAccent;
+        tbImg.raycastTarget = false;
 
         titleText = MakeLabel(panel.transform, "Object",
             new Vector2(0, -64), new Vector2(420, 36),
@@ -136,6 +143,7 @@ public class ObjectClickInfo : MonoBehaviour
         sepRt.sizeDelta = new Vector2(360, 2);
         var sepImg = sep.AddComponent<Image>();
         sepImg.color = parchmentDark;
+        sepImg.raycastTarget = false;
 
         bodyText = MakeLabel(panel.transform, "",
             new Vector2(0, -123), new Vector2(420, 170),
