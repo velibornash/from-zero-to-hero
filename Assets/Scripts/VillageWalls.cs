@@ -112,7 +112,7 @@ public class VillageWalls : MonoBehaviour
             post.transform.position = new Vector3(offset, 1.5f * fenceHeight, z);
             post.transform.localScale = new Vector3(0.6f, 3f * fenceHeight, 0.6f);
             post.GetComponent<Renderer>().sharedMaterial = postMat;
-            Object.DestroyImmediate(post.GetComponent<BoxCollider>());
+            Object.Destroy(post.GetComponent<BoxCollider>());
             fenceSegments.Add(post);
         }
 
@@ -122,7 +122,7 @@ public class VillageWalls : MonoBehaviour
         gate.transform.position = new Vector3(0f, 5f, z);
         gate.transform.localScale = new Vector3(8f, 0.3f, 0.3f);
         gate.GetComponent<Renderer>().sharedMaterial = postMat;
-        Object.DestroyImmediate(gate.GetComponent<BoxCollider>());
+        Object.Destroy(gate.GetComponent<BoxCollider>());
 
         // Gate block — non-trigger physics collider that blocks ALL entities
         gateBlock = new GameObject("GateBlock");
@@ -130,8 +130,7 @@ public class VillageWalls : MonoBehaviour
         gateBlock.transform.localScale = new Vector3(8f, 2f, 0.5f);
         var gateBlockCol = gateBlock.AddComponent<BoxCollider>();
         gateBlockCol.isTrigger = false;
-        // Try to tag, but don't fail if tag doesn't exist
-        try { gateBlock.tag = "Gate"; } catch { }
+        gateBlock.name = "GateBlock";
     }
 
     void Update()

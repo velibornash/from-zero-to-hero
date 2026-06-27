@@ -31,7 +31,7 @@ public class EnemySpawner : MonoBehaviour
         if (index == 0 && !started)
         {
             started = true;
-            HUDController.PushEvent("Enemies are coming from the forest! Defend the village!");
+            HUDController.PushEvent("The church bells ring — and the wild answers. Wolves and barbarians approach from the forest!");
             InvokeRepeating(nameof(SpawnWave), initialDelay, waveInterval);
         }
     }

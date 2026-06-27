@@ -10,7 +10,7 @@ public class PlayerController3D : MonoBehaviour
     // Health system
     public static int maxHealth = 100;
     public static int Health = 100;
-    public float regenRate = 15f;      // HP per second when in village + out of combat
+    public float regenRate = 5f;       // HP per second when in village + out of combat
     public float regenDelay = 1f;      // seconds after last hit before regen starts
     public float villageRadius = 80f;  // distance from center (0,0,0) considered "village"
     public static bool IsDead = false;
@@ -21,6 +21,7 @@ public class PlayerController3D : MonoBehaviour
     float lastHitTime;
     Transform modelRoot;
     float baseModelY;
+    float regenAccumulator;
 
     void Start()
     {
@@ -128,7 +129,13 @@ public class PlayerController3D : MonoBehaviour
         if (Time.time - lastHitTime < regenDelay) return;
         if (!IsInVillage()) return;
 
-        Health = Mathf.Min(maxHealth, Health + Mathf.RoundToInt(regenRate * Time.deltaTime));
+        regenAccumulator += regenRate * Time.deltaTime;
+        int regenAmount = Mathf.FloorToInt(regenAccumulator);
+        if (regenAmount > 0)
+        {
+            regenAccumulator -= regenAmount;
+            Health = Mathf.Min(maxHealth, Health + regenAmount);
+        }
     }
 
     bool IsInVillage()

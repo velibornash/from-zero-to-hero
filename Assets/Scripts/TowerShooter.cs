@@ -7,6 +7,7 @@ public class TowerShooter : MonoBehaviour
     public int damage = 1;
     public float projectileSpeed = 22f;
     public int upgradeCost = 10;
+    public float projectileSpawnHeight = 12f;
 
     public Color projectileColor = Color.white;
 
@@ -71,7 +72,7 @@ public class TowerShooter : MonoBehaviour
         if (s_projectileTemplate == null)
             s_projectileTemplate = CreateProjectileTemplate();
 
-        var spawnPos = transform.position + Vector3.up * 12f;
+        var spawnPos = transform.position + Vector3.up * projectileSpawnHeight;
         var proj = Instantiate(s_projectileTemplate, spawnPos, Quaternion.identity);
         proj.SetActive(true);
         proj.hideFlags = HideFlags.None;

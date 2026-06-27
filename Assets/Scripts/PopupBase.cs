@@ -17,7 +17,7 @@ public class PopupBase : MonoBehaviour
 
     // Standard dimensions
     public const float PANEL_WIDTH = 600f;
-    public const float PANEL_HEIGHT = 420f;
+    public const float PANEL_HEIGHT = 500f;
     public const float TITLE_BAR_HEIGHT = 70f;
     public const float BORDER_INSET = 10f;
 
@@ -93,22 +93,29 @@ public class PopupBase : MonoBehaviour
         CreateTrim(panel.transform, 0f, true);
         CreateTrim(panel.transform, -TITLE_BAR_HEIGHT, false);
 
-        // Title text (centered in red banner)
+        // Title text (centered in red banner, direct child of panel to avoid rect nesting issues)
         var titleGo = new GameObject("Title");
-        titleGo.transform.SetParent(titleBar.transform, false);
+        titleGo.transform.SetParent(panel.transform, false);
         var titleRt = titleGo.AddComponent<RectTransform>();
-        titleRt.anchorMin = Vector2.zero;
-        titleRt.anchorMax = Vector2.one;
-        titleRt.offsetMin = Vector2.zero;
-        titleRt.offsetMax = Vector2.zero;
+        titleRt.anchorMin = new Vector2(0, 1);
+        titleRt.anchorMax = new Vector2(1, 1);
+        titleRt.pivot = new Vector2(0.5f, 0.5f);
+        titleRt.anchoredPosition = new Vector2(0, -35);
+        titleRt.sizeDelta = new Vector2(-40, TITLE_BAR_HEIGHT);
         titleText = titleGo.AddComponent<Text>();
         titleText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        titleText.fontSize = 30;
+        titleText.fontSize = 26;
         titleText.fontStyle = FontStyle.Bold;
-        titleText.color = new Color(1f, 0.92f, 0.65f);
+        titleText.color = new Color(1f, 0.95f, 0.55f);
         titleText.alignment = TextAnchor.MiddleCenter;
         titleText.text = defaultTitle;
         titleText.raycastTarget = false;
+        titleText.resizeTextForBestFit = true;
+        titleText.resizeTextMinSize = 12;
+        titleText.resizeTextMaxSize = 26;
+        var outline = titleGo.AddComponent<Outline>();
+        outline.effectColor = new Color(0.3f, 0.05f, 0.02f);
+        outline.effectDistance = new Vector2(2, -2);
 
         // Body area (centered between title bar and close button)
         var bodyGo = new GameObject("Body");
@@ -139,6 +146,9 @@ public class PopupBase : MonoBehaviour
         bodyText.alignment = TextAnchor.UpperCenter;
         bodyText.text = defaultBody;
         bodyText.raycastTarget = false;
+        bodyText.resizeTextForBestFit = true;
+        bodyText.resizeTextMinSize = 12;
+        bodyText.resizeTextMaxSize = 20;
 
         // Close button (centered at bottom)
         var closeGo = new GameObject("CloseButton");
@@ -178,7 +188,7 @@ public class PopupBase : MonoBehaviour
         hintRt.anchorMin = new Vector2(0.5f, 0);
         hintRt.anchorMax = new Vector2(0.5f, 0);
         hintRt.pivot = new Vector2(0.5f, 0);
-        hintRt.anchoredPosition = new Vector2(0, 80);
+        hintRt.anchoredPosition = new Vector2(0, 74);
         hintRt.sizeDelta = new Vector2(440, 18);
         var hintText = hintGo.AddComponent<Text>();
         hintText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
@@ -188,6 +198,9 @@ public class PopupBase : MonoBehaviour
         hintText.alignment = TextAnchor.MiddleCenter;
         hintText.text = "[TAB]  [ESC]  [X]  —  Close";
         hintText.raycastTarget = false;
+        hintText.resizeTextForBestFit = true;
+        hintText.resizeTextMinSize = 8;
+        hintText.resizeTextMaxSize = 13;
     }
 
     void CreateTrim(Transform parent, float yOffset, bool top)

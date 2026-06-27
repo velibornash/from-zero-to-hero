@@ -9,6 +9,7 @@ public class SlotManager : MonoBehaviour
 
     List<BuildSlot> slots = new List<BuildSlot>();
     int unlockedIndex = 0;
+    int towersBuilt = 0;
 
     void Awake()
     {
@@ -44,10 +45,23 @@ public class SlotManager : MonoBehaviour
         // Notify subscribers FIRST (e.g. VillageWalls builds fences) regardless of unlock state
         SlotBuilt?.Invoke(index);
 
-        // Hard guard: towers (2-5) NEVER unlock anything
+        // Track tower builds — unlock mage tiles only after ALL 4 are built (any order)
         if (index >= 2 && index <= 5)
         {
-            Debug.Log($"SlotManager: Tower {index} built. NOT unlocking next slot (wait for all 4 towers).");
+            towersBuilt++;
+            Debug.Log($"SlotManager: Tower {index} built ({towersBuilt}/4 so far).");
+            if (towersBuilt >= 4)
+            {
+                Debug.Log($"SlotManager: All 4 towers built — unlocking mage tiles.");
+                int mageCount = Mathf.Min(4, slots.Count - 1 - unlockedIndex);
+                for (int i = 0; i < mageCount; i++)
+                {
+                    unlockedIndex++;
+                    slots[unlockedIndex].Unlock();
+                    slots[unlockedIndex].PulseUnlock();
+                }
+                HUDController.PushEvent("All towers stand! Ancient runes glow beneath 4 new tiles — mages are ready to be summoned.");
+            }
             return;
         }
 
@@ -64,22 +78,7 @@ public class SlotManager : MonoBehaviour
                 slots[unlockedIndex].Unlock();
                 slots[unlockedIndex].PulseUnlock();
             }
-            HUDController.PushEvent("All four tower corners are open!");
-            return;
-        }
-        // After the 4th tower (index 5) is built, unlock all 4 mage tiles at once
-        if (index == 5)
-        {
-            Debug.Log($"SlotManager: Tower 5 built, unlocking mage tiles. Current unlockedIndex={unlockedIndex}");
-            int mageCount = Mathf.Min(4, slots.Count - 1 - unlockedIndex);
-            Debug.Log($"SlotManager: Will unlock {mageCount} mage tiles");
-            for (int i = 0; i < mageCount; i++)
-            {
-                unlockedIndex++;
-                slots[unlockedIndex].Unlock();
-                slots[unlockedIndex].PulseUnlock();
-            }
-            HUDController.PushEvent("Mage tiles unlocked! Upgrade your defenses with magic.");
+            HUDController.PushEvent("All four foundation corners are open! Build towers to defend the valley.");
             return;
         }
 
@@ -87,6 +86,6 @@ public class SlotManager : MonoBehaviour
         unlockedIndex++;
         slots[unlockedIndex].Unlock();
         slots[unlockedIndex].PulseUnlock();
-        HUDController.PushEvent($"{slots[unlockedIndex].data.slotName} slot unlocked!");
+        HUDController.PushEvent($"New foundation revealed: {slots[unlockedIndex].data.slotName}");
     }
 }

@@ -7,7 +7,7 @@ public class Enemy : MonoBehaviour
     public int goldReward = 5;
     public float moveSpeed = 3.5f;
     public float rotateSpeed = 8f;
-    public float knockbackForce = 8f;
+    public float knockbackForce = 3f;
     public int heroDamage = 12;
     public float attackInterval = 0.7f;
     public string enemyName = "Enemy";
@@ -21,6 +21,7 @@ public class Enemy : MonoBehaviour
     float stunTimer;
     float baseY;
     float lastAttackTime;
+    bool hasAttackParam, hasDeathParam;
 
     public float walkBobAmp = 0.12f;
     public float walkBobSpeed = 14f;
@@ -47,6 +48,16 @@ public class Enemy : MonoBehaviour
         rb.freezeRotation = true;
         rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
+
+        // Cache animator parameter existence to avoid spammy warnings
+        if (anim != null)
+        {
+            foreach (var p in anim.parameters)
+            {
+                if (p.name == "Attack") hasAttackParam = true;
+                if (p.name == "Death") hasDeathParam = true;
+            }
+        }
     }
 
     void FixedUpdate()
@@ -84,7 +95,7 @@ public class Enemy : MonoBehaviour
             if (anim != null)
             {
                 anim.SetFloat("Speed", 0f);
-                anim.SetTrigger("Attack");
+                if (hasAttackParam) anim.SetTrigger("Attack");
             }
             // Damage the hero when in attack range (with cooldown)
             TryDamageHero();
@@ -151,7 +162,7 @@ public class Enemy : MonoBehaviour
 
         if (anim != null)
         {
-            anim.SetTrigger("Death");
+            if (hasDeathParam) anim.SetTrigger("Death");
             enabled = false;
             if (col != null) col.enabled = false;
             if (rb != null) rb.linearVelocity = Vector3.zero;

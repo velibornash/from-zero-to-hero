@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System.Linq;
 
 public class HUDController : MonoBehaviour
 {
@@ -9,6 +10,7 @@ public class HUDController : MonoBehaviour
     public static int Food = 0;
     public static int Day = 1;
     public const string ChapterName = "Chapter I: The Awakening";
+    static bool hasWon;
 
     Text goldText, woodText, foodText, dayText, eventText;
     List<string> events = new List<string>();
@@ -22,6 +24,7 @@ public class HUDController : MonoBehaviour
 
     void Start()
     {
+        ResetState();
         goldSprite = LoadIcon("HUDIcons/gold_icon");
         woodSprite = LoadIcon("HUDIcons/wood_icon");
         foodSprite = LoadIcon("HUDIcons/wheat_icon");
@@ -91,8 +94,8 @@ public class HUDController : MonoBehaviour
             ChapterName, 28, FontStyle.Bold,
             new Color(1f, 0.95f, 0.55f), TextAnchor.MiddleLeft);
 
-        // Health bar at the bottom-left of the screen
-        BuildHealthBar();
+        // Health bar in the top ribbon (right side)
+        BuildRibbonHealthBar(topBar.transform);
 
         // Reports panel (top right, ABOVE the minimap which is bottom-right)
         var evPanel = UIStyleHelper.MakeOrnatePanel(transform, 360, 320);
@@ -101,6 +104,7 @@ public class HUDController : MonoBehaviour
         evRt.anchorMax = new Vector2(1, 1);
         evRt.pivot = new Vector2(1, 1);
         evRt.anchoredPosition = new Vector2(-18, -130);
+        evRt.sizeDelta = new Vector2(360, 320);
         evRt.sizeDelta = new Vector2(360, 320);
 
         MakeText(evPanel.transform, "Header", new Vector2(40, -22), new Vector2(320, 50),
@@ -115,52 +119,37 @@ public class HUDController : MonoBehaviour
     Image healthBarFill;
     Text healthText;
 
-    void BuildHealthBar()
+    void BuildRibbonHealthBar(Transform ribbon)
     {
         var hb = new GameObject("HealthBar");
-        hb.transform.SetParent(transform, false);
+        hb.transform.SetParent(ribbon, false);
         var hRt = hb.AddComponent<RectTransform>();
-        hRt.anchorMin = new Vector2(0, 0);
-        hRt.anchorMax = new Vector2(0, 0);
-        hRt.pivot = new Vector2(0, 0);
-        hRt.anchoredPosition = new Vector2(20, 20);
+        hRt.anchorMin = new Vector2(1, 0.5f);
+        hRt.anchorMax = new Vector2(1, 0.5f);
+        hRt.pivot = new Vector2(1, 0.5f);
+        hRt.anchoredPosition = new Vector2(-80, 0);
         hRt.sizeDelta = new Vector2(280, 44);
 
-        // Background frame
-        var frame = new GameObject("Frame");
-        frame.transform.SetParent(hb.transform, false);
-        var fRt = frame.AddComponent<RectTransform>();
-        fRt.anchorMin = Vector2.zero;
-        fRt.anchorMax = Vector2.one;
-        fRt.offsetMin = Vector2.zero;
-        fRt.offsetMax = Vector2.zero;
-        var fImg = frame.AddComponent<Image>();
-        fImg.sprite = UIStyleHelper.Make9SliceBorder(64, 32, 6, 8);
-        fImg.type = Image.Type.Sliced;
-        fImg.color = Color.white;
-        fImg.raycastTarget = false;
+        // Simple background
+        var bg = new GameObject("BG");
+        bg.transform.SetParent(hb.transform, false);
+        var bgRt = bg.AddComponent<RectTransform>();
+        bgRt.anchorMin = Vector2.zero;
+        bgRt.anchorMax = Vector2.one;
+        bgRt.offsetMin = Vector2.zero;
+        bgRt.offsetMax = Vector2.zero;
+        var bgImg = bg.AddComponent<Image>();
+        bgImg.color = new Color(0.15f, 0.05f, 0.05f, 1f);
+        bgImg.raycastTarget = false;
 
-        // Inner background
-        var inner = new GameObject("Inner");
-        inner.transform.SetParent(hb.transform, false);
-        var iRt = inner.AddComponent<RectTransform>();
-        iRt.anchorMin = Vector2.zero;
-        iRt.anchorMax = Vector2.one;
-        iRt.offsetMin = new Vector2(8, 8);
-        iRt.offsetMax = new Vector2(-8, -8);
-        var iImg = inner.AddComponent<Image>();
-        iImg.color = new Color(0.15f, 0.05f, 0.05f, 1f);
-        iImg.raycastTarget = false;
-
-        // Fill (green->red gradient bar) - we use a fill-type image to support fillAmount
+        // Green fill bar (left-aligned)
         var fill = new GameObject("Fill");
         fill.transform.SetParent(hb.transform, false);
         var fillRt = fill.AddComponent<RectTransform>();
         fillRt.anchorMin = new Vector2(0, 0);
         fillRt.anchorMax = new Vector2(1, 1);
-        fillRt.pivot = new Vector2(0, 0.5f);
-        fillRt.offsetMin = new Vector2(8, 8);
-        fillRt.offsetMax = new Vector2(-8, -8);
+        fillRt.offsetMin = Vector2.zero;
+        fillRt.offsetMax = Vector2.zero;
         healthBarFill = fill.AddComponent<Image>();
         healthBarFill.color = new Color(0.3f, 0.85f, 0.3f, 1f);
         healthBarFill.raycastTarget = false;
@@ -169,7 +158,7 @@ public class HUDController : MonoBehaviour
         healthBarFill.fillOrigin = (int)Image.OriginHorizontal.Left;
         healthBarFill.fillAmount = 1f;
 
-        // HP text
+        // HP text centered
         healthText = MakeText(hb.transform, "HPText", new Vector2(0, 0), new Vector2(280, 44),
             "HP 100/100", 18, FontStyle.Bold,
             new Color(1f, 0.95f, 0.55f), TextAnchor.MiddleCenter);
@@ -228,6 +217,30 @@ public class HUDController : MonoBehaviour
             healthText.text = $"HP {hp}/{maxHp}";
         }
 
+        // Win condition check
+        if (!hasWon && Gold >= 300)
+        {
+            var slots = FindObjectsByType<BuildSlot>(FindObjectsInactive.Include);
+            int[] required = { 0, 1, 2, 3, 4, 5 };
+            if (required.All(i => slots.Any(s => s.slotIndex == i && s.IsBuilt)))
+            {
+                hasWon = true;
+                BuildingPopup.Show("VICTORY — Chapter I Complete",
+                    "The valley is yours.\n\n" +
+                    "The church stands tall against the sky. The Serbian\n" +
+                    "banner flies proud over every roof. Four watchtowers\n" +
+                    "guard the corners of your domain.\n\n" +
+                    "With 300 gold in the treasury, the people prosper.\n" +
+                    "Wolves retreat into the deep woods. Barbarians\n" +
+                    "flee beyond the hills.\n\n" +
+                    "\"From zero to hero\" — the old saying lives.\n\n" +
+                    "But beyond the mountains, a greater threat stirs.\n" +
+                    "The Gathering Storm approaches...\n\n" +
+                    "— Chapter II awaits —",
+                    "default", Vector3.zero, QuitGame);
+            }
+        }
+
         // Auto-fade events after EVENT_LIFETIME seconds
         if (events.Count > 0)
         {
@@ -255,5 +268,23 @@ public class HUDController : MonoBehaviour
         }
         if (instance.eventText != null)
             instance.eventText.text = string.Join("\n\n", instance.events);
+    }
+
+    public static void ResetState()
+    {
+        Gold = 10;
+        Wood = 0;
+        Food = 0;
+        Day = 1;
+        hasWon = false;
+    }
+
+    static void QuitGame()
+    {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
     }
 }

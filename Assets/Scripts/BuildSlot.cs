@@ -580,7 +580,9 @@ public class BuildSlot : MonoBehaviour
         {
             state = State.Built;
             UpdateVisuals();
-            SpawnBuilding();
+            // Mage tiles (6-9) have no building prefab — skip SpawnBuilding for them
+            if (slotIndex < 6 || slotIndex > 9)
+                SpawnBuilding();
             SpawnWorker();
             SmokePuff(transform.position);
             if (data != null)
@@ -686,35 +688,41 @@ public class BuildSlot : MonoBehaviour
         switch (slotIndex)
         {
             case 0: // Church
-                title = "Church Raised";
-                body = "The heart of the village beats strong.\n\n" +
-                       "The church brings faith and community. Villagers gather here for worship and counsel.\n\n" +
-                       "Unlocks:\n" +
-                       "  • Enemy waves begin\n" +
-                       "  • Foundation of the village";
+                title = "The Church Rises";
+                body = "The bell tower stands against the sky.\n\n" +
+                       "Villagers emerge from the forest, drawn by the sound\n" +
+                       "of hammers and hope. The church is more than stone\n" +
+                       "and mortar — it is the soul of the village.\n\n" +
+                       "But the wild hears it too. Wolves stir in the shadows.\n" +
+                       "Barbarian scouts turn their gaze toward the valley.\n\n" +
+                       "The fight for this land has begun.";
                 break;
             case 1: // Flag
-                title = "Serbian Banner Flies";
-                body = "The tricolor waves above the village.\n\n" +
-                       "The Serbian flag — red, blue, white with the coat of arms — unites all villagers under one banner.\n\n" +
-                       "Unlocks:\n" +
-                       "  • Four corner tower positions";
+                title = "The Serbian Banner Rises";
+                body = "Red, blue, and white — the tricolor snaps in the\n" +
+                       "wind above the village. The coat of arms gleams,\n" +
+                       "a promise to every Serb who sees it:\n\n" +
+                       "\"Here we stand. Here we build.\"\n\n" +
+                       "Villagers cheer. Warriors take up arms.\n" +
+                       "Four corner foundations are now ready.\n" +
+                       "Raise the towers, and let none pass.";
                 break;
             case 2: // Tower SW
             case 3: // Tower SE
             case 4: // Tower NE
             case 5: // Tower NW
-                // Map slotIndex 2-5 to corner index 0-3
                 int n = slotIndex - 2;
                 string[] cornerNames = { "Southwest", "Southeast", "Northeast", "Northwest" };
                 if (n >= 0 && n < cornerNames.Length)
                 {
-                    title = cornerNames[n] + " Tower Built";
-                    body = "A new watchtower rises at the " + cornerNames[n].ToLower() + " corner.\n\n" +
-                           "The tower automatically fires upon any enemy that comes within range.\n\n" +
-                           "Unlocks:\n" +
-                           "  • Auto-defense vs wolves and barbarians\n" +
-                           "  • After all 4 towers: Mage tiles";
+                    string corner = cornerNames[n];
+                    title = corner + " Watchtower";
+                    body = "The " + corner.ToLower() + " watchtower rises high.\n\n" +
+                           "Arrows and stones fly at any enemy who dares\n" +
+                           "approach this corner of the valley.\n\n" +
+                           "One by one, the walls grow teeth.\n" +
+                           "When all four towers stand, the village\n" +
+                           "will be ready for something greater.";
                 }
                 else
                 {
@@ -727,11 +735,14 @@ public class BuildSlot : MonoBehaviour
             case 8: // Mage tile 3
             case 9: // Mage tile 4
                 int m = slotIndex - 5;
-                title = "Mage Joins the Defense";
-                body = "A powerful mage takes position at the tile.\n\n" +
-                       "Mages cast magic projectiles that deal double damage and fire faster than the towers.\n\n" +
-                       "Unlocks:\n" +
-                       "  • Enhanced magical defense";
+                title = "A Mage Answers the Call";
+                body = "A figure in violet robes steps onto the tile.\n\n" +
+                       "The air crackles with arcane energy. Purple flames\n" +
+                       "dance at their fingertips.\n\n" +
+                       "Mages hurl bolts of pure magic that tear through\n" +
+                       "enemies faster than any arrow — double the damage\n" +
+                       "of a standard tower.\n\n" +
+                       "The village grows stronger still.";
                 break;
             default:
                 title = data.slotName + " Built";
@@ -848,11 +859,11 @@ public class BuildSlot : MonoBehaviour
         runeMat.EnableKeyword("_ALPHABLEND_ON");
         runeMat.renderQueue = 3000;
         rune.GetComponent<Renderer>().sharedMaterial = runeMat;
-        Object.DestroyImmediate(rune.GetComponent<CapsuleCollider>());
+        Object.Destroy(rune.GetComponent<CapsuleCollider>());
 
-        // Load the KayKit Mage FBX
+        // Create the mage GameObject (try FBX, fallback to empty with stand-in visual)
+        GameObject mage;
         string magePath = "Assets/3D/KayKit/KayKit_Adventurers_2.0_FREE/Characters/fbx/Mage.fbx";
-        GameObject mage = null;
 #if UNITY_EDITOR
         var magePrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(magePath);
         if (magePrefab != null)
@@ -863,20 +874,39 @@ public class BuildSlot : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("KayKit Mage.fbx not found at " + magePath);
+            Debug.LogWarning("KayKit Mage.fbx not found at " + magePath + " — using fallback sphere.");
+            mage = CreateMageFallback();
         }
+#else
+        mage = CreateMageFallback();
 #endif
-        if (mage == null) return;
 
-        // Add a shooter component to the mage
+        // Add a shooter component to the mage — shoots purple fireballs from hand height
         var shooter = mage.AddComponent<TowerShooter>();
         shooter.range = 35f;
         shooter.fireRate = 0.45f;
         shooter.damage = 2;
         shooter.projectileSpeed = 30f;
+        shooter.projectileSpawnHeight = 2.5f;
         shooter.projectileColor = new Color(0.6f, 0.3f, 1f);
         shooter.isUpgraded = false;
         shooter.enabled = true;
+    }
+
+    GameObject CreateMageFallback()
+    {
+        var go = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+        go.name = "TowerMage";
+        go.transform.position = transform.position;
+        go.transform.localScale = new Vector3(1.2f, 2.6f, 1.2f);
+        var rend = go.GetComponent<Renderer>();
+        var mat = new Material(Shader.Find("Standard"));
+        mat.color = new Color(0.5f, 0.2f, 0.9f);
+        mat.EnableKeyword("_EMISSION");
+        mat.SetColor("_EmissionColor", new Color(0.5f, 0.2f, 0.9f) * 0.6f);
+        rend.sharedMaterial = mat;
+        Object.Destroy(go.GetComponent<CapsuleCollider>());
+        return go;
     }
 
     Material MakeMat(Color color)
