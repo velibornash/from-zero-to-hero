@@ -72,7 +72,7 @@ public class BuildingPopup : MonoBehaviour
         pRt.anchorMax = new Vector2(0.5f, 0.5f);
         pRt.pivot = new Vector2(0.5f, 0.5f);
         pRt.anchoredPosition = Vector2.zero;
-        pRt.sizeDelta = new Vector2(540, 300);
+        pRt.sizeDelta = new Vector2(540, 400);
         var pImg = panel.AddComponent<Image>();
         pImg.sprite = UIStyleHelper.MakeParchmentSprite(256, 256);
         pImg.type = Image.Type.Sliced;
@@ -93,7 +93,7 @@ public class BuildingPopup : MonoBehaviour
         bImg.color = Color.white;
         bImg.raycastTarget = false;
 
-        // Title bar
+        // Title bar (red banner with gold trim)
         var titleBar = new GameObject("TitleBar");
         titleBar.transform.SetParent(panel.transform, false);
         var tbRt = titleBar.AddComponent<RectTransform>();
@@ -101,47 +101,48 @@ public class BuildingPopup : MonoBehaviour
         tbRt.anchorMax = new Vector2(1, 1);
         tbRt.pivot = new Vector2(0.5f, 1);
         tbRt.anchoredPosition = Vector2.zero;
-        tbRt.sizeDelta = new Vector2(0, -64);
+        tbRt.sizeDelta = new Vector2(0, -70);
         var tbImg = titleBar.AddComponent<Image>();
         tbImg.color = new Color(0.55f, 0.10f, 0.08f);
         tbImg.raycastTarget = false;
 
-        AddTrim(panel, -64, true);
-        AddTrim(panel, -64, false);
+        // Gold trims
+        AddTrim(panel, -70, true);
+        AddTrim(panel, -70, false);
 
         // Title
-        titleText = MakeText(panel, "Title", new Vector2(0, -8), new Vector2(460, 50),
-            "Building Complete", 36, FontStyle.Bold,
+        titleText = MakeText(panel, "Title", new Vector2(0, -8), new Vector2(500, 50),
+            "Building Complete", 32, FontStyle.Bold,
             new Color(1f, 0.95f, 0.70f), TextAnchor.MiddleCenter);
 
-        // Body — keep inside the panel
-        bodyText = MakeText(panel, "Body", new Vector2(0, -80), new Vector2(460, 200),
+        // Body — inside the panel
+        bodyText = MakeText(panel, "Body", new Vector2(0, -90), new Vector2(480, 220),
             "", 18, FontStyle.Bold,
-            new Color(0.35f, 0.20f, 0.05f), TextAnchor.UpperCenter);
+            new Color(0.30f, 0.15f, 0.05f), TextAnchor.UpperCenter);
 
         // Close button (mobile-friendly)
         var closeBtn = new GameObject("CloseButton");
         closeBtn.transform.SetParent(panel.transform, false);
         var cbRt = closeBtn.AddComponent<RectTransform>();
-        cbRt.anchorMin = new Vector2(1, 1);
-        cbRt.anchorMax = new Vector2(1, 1);
-        cbRt.pivot = new Vector2(1, 1);
-        cbRt.anchoredPosition = new Vector2(-8, -8);
-        cbRt.sizeDelta = new Vector2(72, 40);
+        cbRt.anchorMin = new Vector2(0.5f, 0);
+        cbRt.anchorMax = new Vector2(0.5f, 0);
+        cbRt.pivot = new Vector2(0.5f, 0);
+        cbRt.anchoredPosition = new Vector2(0, 24);
+        cbRt.sizeDelta = new Vector2(180, 44);
         var cbImg = closeBtn.AddComponent<Image>();
         cbImg.color = new Color(0.55f, 0.10f, 0.08f);
         cbImg.raycastTarget = true;
         var cbBtn = closeBtn.AddComponent<Button>();
         cbBtn.onClick.AddListener(DoHide);
 
-        var cbText = MakeText(closeBtn, "CloseLabel", Vector2.zero, new Vector2(72, 40),
-            "CLOSE", 18, FontStyle.Bold,
+        var cbText = MakeText(closeBtn, "CloseLabel", Vector2.zero, new Vector2(180, 44),
+            "CLOSE", 20, FontStyle.Bold,
             new Color(1f, 0.95f, 0.65f), TextAnchor.MiddleCenter);
 
-        // Hint
-        var hint = MakeText(panel, "Hint", new Vector2(0, -270), new Vector2(440, 24),
-            "[TAB] [ESC] [X] — Close", 15, FontStyle.Bold,
-            new Color(0.55f, 0.32f, 0.10f), TextAnchor.MiddleCenter);
+        // Hint — above the close button
+        var hint = MakeText(panel, "Hint", new Vector2(0, -336), new Vector2(440, 24),
+            "[TAB]  [ESC]  [X]  —  Close", 14, FontStyle.Bold,
+            new Color(0.50f, 0.28f, 0.08f), TextAnchor.MiddleCenter);
     }
 
     void AddTrim(GameObject parent, float yOffset, bool top)
@@ -255,6 +256,11 @@ public class BuildingPopup : MonoBehaviour
             {
                 panelRt.anchoredPosition = Vector2.zero;
             }
+        }
+        else
+        {
+            // No world position — center the popup
+            panel.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
         }
 
         overlay.SetActive(true);
