@@ -88,31 +88,31 @@ public class TowerShooter : MonoBehaviour
 
     void SpawnMuzzleFlash(Vector3 pos)
     {
-        // Bright yellow flash sphere that expands and fades
+        // Tiny subtle flash sphere that expands and fades quickly
         var flash = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         flash.name = "MuzzleFlash";
         Object.DestroyImmediate(flash.GetComponent<SphereCollider>());
         flash.transform.position = pos;
-        flash.transform.localScale = Vector3.one * 0.5f;
+        flash.transform.localScale = Vector3.one * 0.3f;
 
         var mat = new Material(Shader.Find("Standard"));
-        mat.color = new Color(1f, 0.95f, 0.4f, 1f);
+        mat.color = new Color(1f, 0.9f, 0.5f, 0.6f);
         mat.EnableKeyword("_EMISSION");
-        mat.SetColor("_EmissionColor", new Color(1f, 0.85f, 0.3f) * 3f);
+        mat.SetColor("_EmissionColor", new Color(1f, 0.8f, 0.4f) * 1.5f);
         flash.GetComponent<Renderer>().sharedMaterial = mat;
 
-        // Smoke puffs around the flash
-        for (int i = 0; i < 4; i++)
+        // Small smoke puffs
+        for (int i = 0; i < 2; i++)
         {
             var smoke = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             Object.DestroyImmediate(smoke.GetComponent<SphereCollider>());
             smoke.name = "MuzzleSmoke";
-            float angle = i * Mathf.PI * 0.5f;
+            float angle = i * Mathf.PI;
             smoke.transform.position = pos + new Vector3(
-                Mathf.Cos(angle) * 0.3f, Random.Range(-0.2f, 0.2f), Mathf.Sin(angle) * 0.3f);
-            smoke.transform.localScale = Vector3.one * 0.3f;
+                Mathf.Cos(angle) * 0.3f, Random.Range(-0.1f, 0.1f), Mathf.Sin(angle) * 0.3f);
+            smoke.transform.localScale = Vector3.one * 0.25f;
             var smokeMat = new Material(Shader.Find("Standard"));
-            smokeMat.color = new Color(0.7f, 0.65f, 0.55f, 0.7f);
+            smokeMat.color = new Color(0.6f, 0.55f, 0.45f, 0.5f);
             smokeMat.SetFloat("_Mode", 3);
             smokeMat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
             smokeMat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
@@ -123,7 +123,6 @@ public class TowerShooter : MonoBehaviour
             StartCoroutine(AnimateSmokePuff(smoke.transform, smokeMat));
         }
 
-        // Flash expands and fades
         StartCoroutine(AnimateFlash(flash.transform, mat));
     }
 

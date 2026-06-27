@@ -47,9 +47,10 @@ public class SlotManager : MonoBehaviour
                 slots[unlockedIndex].PulseUnlock();
             }
             HUDController.PushEvent("All four tower corners are open!");
+            return;
         }
         // After the 4th tower (index 5) is built, unlock all 4 mage tiles at once
-        else if (index == 5)
+        if (index == 5)
         {
             int mageCount = Mathf.Min(4, slots.Count - 1 - unlockedIndex);
             for (int i = 0; i < mageCount; i++)
@@ -59,13 +60,15 @@ public class SlotManager : MonoBehaviour
                 slots[unlockedIndex].PulseUnlock();
             }
             HUDController.PushEvent("Mage tiles unlocked! Upgrade your defenses with magic.");
+            return;
         }
-        else
-        {
-            unlockedIndex++;
-            slots[unlockedIndex].Unlock();
-            slots[unlockedIndex].PulseUnlock();
-            HUDController.PushEvent($"{slots[unlockedIndex].data.slotName} slot unlocked!");
-        }
+        // Towers (2-5) do NOT auto-unlock the next slot
+        if (index >= 2 && index <= 5) return;
+
+        // Default: unlock next slot
+        unlockedIndex++;
+        slots[unlockedIndex].Unlock();
+        slots[unlockedIndex].PulseUnlock();
+        HUDController.PushEvent($"{slots[unlockedIndex].data.slotName} slot unlocked!");
     }
 }

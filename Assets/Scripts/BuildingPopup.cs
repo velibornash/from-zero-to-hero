@@ -46,7 +46,7 @@ public class BuildingPopup : MonoBehaviour
         oRt.anchorMax = Vector2.one;
         oRt.sizeDelta = Vector2.zero;
         var oImg = overlay.AddComponent<Image>();
-        oImg.color = new Color(0, 0, 0, 0.7f);
+        oImg.color = new Color(0, 0, 0, 0.5f);
         oImg.raycastTarget = true;  // intercept clicks
         overlay.SetActive(false);
 
@@ -56,21 +56,7 @@ public class BuildingPopup : MonoBehaviour
         entry.callback.AddListener(_ => DoHide());
         trigger.triggers.Add(entry);
 
-        // Procedural ornate panel — non-blocking (raycastTarget false)
-        var border = new GameObject("Border");
-        border.transform.SetParent(overlay.transform, false);
-        var bRt = border.AddComponent<RectTransform>();
-        bRt.anchorMin = new Vector2(0.5f, 0.5f);
-        bRt.anchorMax = new Vector2(0.5f, 0.5f);
-        bRt.pivot = new Vector2(0.5f, 0.5f);
-        bRt.anchoredPosition = Vector2.zero;
-        bRt.sizeDelta = new Vector2(560, 320);
-        var bImg = border.AddComponent<Image>();
-        bImg.sprite = UIStyleHelper.Make9SliceBorder(96, 96, 14, 18);
-        bImg.type = Image.Type.Sliced;
-        bImg.color = Color.white;
-        bImg.raycastTarget = false;
-
+        // Create panel first (it will be the parent for border + content)
         panel = new GameObject("Panel");
         panel.transform.SetParent(overlay.transform, false);
         var pRt = panel.AddComponent<RectTransform>();
@@ -84,6 +70,20 @@ public class BuildingPopup : MonoBehaviour
         pImg.type = Image.Type.Sliced;
         pImg.color = Color.white;
         pImg.raycastTarget = false;
+
+        // Border is a child of panel so they move together
+        var border = new GameObject("Border");
+        border.transform.SetParent(panel.transform, false);
+        var bRt = border.AddComponent<RectTransform>();
+        bRt.anchorMin = Vector2.zero;
+        bRt.anchorMax = Vector2.one;
+        bRt.offsetMin = new Vector2(-10, -10);
+        bRt.offsetMax = new Vector2(10, 10);
+        var bImg = border.AddComponent<Image>();
+        bImg.sprite = UIStyleHelper.Make9SliceBorder(96, 96, 14, 18);
+        bImg.type = Image.Type.Sliced;
+        bImg.color = Color.white;
+        bImg.raycastTarget = false;
 
         // Title bar
         var titleBar = new GameObject("TitleBar");

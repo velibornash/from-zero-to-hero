@@ -848,7 +848,7 @@ public class BuildSlot : MonoBehaviour
         rune.GetComponent<Renderer>().sharedMaterial = runeMat;
         Object.DestroyImmediate(rune.GetComponent<CapsuleCollider>());
 
-        // Load the KayKit Mage FBX (or use a fallback placeholder)
+        // Load the KayKit Mage FBX
         string magePath = "Assets/3D/KayKit/KayKit_Adventurers_2.0_FREE/Characters/fbx/Mage.fbx";
         GameObject mage = null;
 #if UNITY_EDITOR
@@ -857,32 +857,14 @@ public class BuildSlot : MonoBehaviour
         {
             mage = (GameObject)Object.Instantiate(magePrefab, transform.position, Quaternion.identity);
             mage.name = "TowerMage";
-            // Scale to match the hero (which is 2.2x)
             mage.transform.localScale = Vector3.one * 2.0f;
         }
-#endif
-        if (mage == null)
+        else
         {
-            // Fallback: build a simple mage from primitives
-            mage = new GameObject("TowerMage");
-            mage.transform.position = transform.position;
-
-            var body = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-            body.name = "Robe";
-            body.transform.SetParent(mage.transform);
-            body.transform.localPosition = new Vector3(0f, 1.0f, 0f);
-            body.transform.localScale = new Vector3(0.6f, 1.0f, 0.6f);
-            body.GetComponent<Renderer>().sharedMaterial = MakeMat(new Color(0.35f, 0.2f, 0.75f));
-            Destroy(body.GetComponent<CapsuleCollider>());
-
-            var head = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            head.name = "Head";
-            head.transform.SetParent(mage.transform);
-            head.transform.localPosition = new Vector3(0f, 2.4f, 0f);
-            head.transform.localScale = Vector3.one * 0.45f;
-            head.GetComponent<Renderer>().sharedMaterial = MakeMat(new Color(0.95f, 0.8f, 0.65f));
-            Destroy(head.GetComponent<SphereCollider>());
+            Debug.LogWarning("KayKit Mage.fbx not found at " + magePath);
         }
+#endif
+        if (mage == null) return;
 
         // Add a shooter component to the mage
         var shooter = mage.AddComponent<TowerShooter>();

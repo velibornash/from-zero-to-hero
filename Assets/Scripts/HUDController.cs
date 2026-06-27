@@ -91,6 +91,9 @@ public class HUDController : MonoBehaviour
             ChapterName, 28, FontStyle.Bold,
             new Color(1f, 0.95f, 0.55f), TextAnchor.MiddleLeft);
 
+        // Health bar at the bottom-left of the screen
+        BuildHealthBar();
+
         // Reports panel (top right, ABOVE the minimap which is bottom-right)
         var evPanel = UIStyleHelper.MakeOrnatePanel(transform, 360, 320);
         var evRt = evPanel.GetComponent<RectTransform>();
@@ -107,6 +110,69 @@ public class HUDController : MonoBehaviour
         eventText = MakeText(evPanel.transform, "Events", new Vector2(40, -80), new Vector2(280, 220),
             "", 18, FontStyle.Bold,
             new Color(1f, 0.90f, 0.60f), TextAnchor.UpperLeft);
+    }
+
+    Image healthBarFill;
+    Text healthText;
+
+    void BuildHealthBar()
+    {
+        var hb = new GameObject("HealthBar");
+        hb.transform.SetParent(transform, false);
+        var hRt = hb.AddComponent<RectTransform>();
+        hRt.anchorMin = new Vector2(0, 0);
+        hRt.anchorMax = new Vector2(0, 0);
+        hRt.pivot = new Vector2(0, 0);
+        hRt.anchoredPosition = new Vector2(20, 20);
+        hRt.sizeDelta = new Vector2(280, 44);
+
+        // Background frame
+        var frame = new GameObject("Frame");
+        frame.transform.SetParent(hb.transform, false);
+        var fRt = frame.AddComponent<RectTransform>();
+        fRt.anchorMin = Vector2.zero;
+        fRt.anchorMax = Vector2.one;
+        fRt.offsetMin = Vector2.zero;
+        fRt.offsetMax = Vector2.zero;
+        var fImg = frame.AddComponent<Image>();
+        fImg.sprite = UIStyleHelper.Make9SliceBorder(64, 32, 6, 8);
+        fImg.type = Image.Type.Sliced;
+        fImg.color = Color.white;
+        fImg.raycastTarget = false;
+
+        // Inner background
+        var inner = new GameObject("Inner");
+        inner.transform.SetParent(hb.transform, false);
+        var iRt = inner.AddComponent<RectTransform>();
+        iRt.anchorMin = Vector2.zero;
+        iRt.anchorMax = Vector2.one;
+        iRt.offsetMin = new Vector2(8, 8);
+        iRt.offsetMax = new Vector2(-8, -8);
+        var iImg = inner.AddComponent<Image>();
+        iImg.color = new Color(0.15f, 0.05f, 0.05f, 1f);
+        iImg.raycastTarget = false;
+
+        // Fill (green->red gradient bar) - we use a fill-type image to support fillAmount
+        var fill = new GameObject("Fill");
+        fill.transform.SetParent(hb.transform, false);
+        var fillRt = fill.AddComponent<RectTransform>();
+        fillRt.anchorMin = new Vector2(0, 0);
+        fillRt.anchorMax = new Vector2(1, 1);
+        fillRt.pivot = new Vector2(0, 0.5f);
+        fillRt.offsetMin = new Vector2(8, 8);
+        fillRt.offsetMax = new Vector2(-8, -8);
+        healthBarFill = fill.AddComponent<Image>();
+        healthBarFill.color = new Color(0.3f, 0.85f, 0.3f, 1f);
+        healthBarFill.raycastTarget = false;
+        healthBarFill.type = Image.Type.Filled;
+        healthBarFill.fillMethod = Image.FillMethod.Horizontal;
+        healthBarFill.fillOrigin = (int)Image.OriginHorizontal.Left;
+        healthBarFill.fillAmount = 1f;
+
+        // HP text
+        healthText = MakeText(hb.transform, "HPText", new Vector2(0, 0), new Vector2(280, 44),
+            "HP 100/100", 18, FontStyle.Bold,
+            new Color(1f, 0.95f, 0.55f), TextAnchor.MiddleCenter);
     }
 
     Text BuildResourceSlot(Transform parent, ref float x, Sprite sprite, string initialValue,
@@ -147,6 +213,20 @@ public class HUDController : MonoBehaviour
         if (woodText != null) woodText.text = $"{Wood}";
         if (foodText != null) foodText.text = $"{Food}";
         if (dayText != null) dayText.text = ChapterName;
+
+        // Health bar
+        if (healthBarFill != null && healthText != null)
+        {
+            int hp = PlayerController3D.Health;
+            int maxHp = PlayerController3D.maxHealth;
+            float pct = (float)hp / Mathf.Max(1, maxHp);
+            healthBarFill.fillAmount = pct;
+            // Color shifts from green to red as health drops
+            if (pct > 0.6f) healthBarFill.color = new Color(0.3f, 0.85f, 0.3f, 1f);
+            else if (pct > 0.3f) healthBarFill.color = new Color(0.95f, 0.7f, 0.2f, 1f);
+            else healthBarFill.color = new Color(0.9f, 0.25f, 0.2f, 1f);
+            healthText.text = $"HP {hp}/{maxHp}";
+        }
 
         // Auto-fade events after EVENT_LIFETIME seconds
         if (events.Count > 0)

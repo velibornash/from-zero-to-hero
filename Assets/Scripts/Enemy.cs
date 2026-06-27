@@ -8,6 +8,8 @@ public class Enemy : MonoBehaviour
     public float moveSpeed = 3.5f;
     public float rotateSpeed = 8f;
     public float knockbackForce = 8f;
+    public int heroDamage = 15;
+    public float attackInterval = 0.8f;
     public string enemyName = "Enemy";
 
     int currentHealth;
@@ -18,6 +20,7 @@ public class Enemy : MonoBehaviour
     Vector3 knockbackVelocity;
     float stunTimer;
     float baseY;
+    float lastAttackTime;
 
     public float walkBobAmp = 0.12f;
     public float walkBobSpeed = 14f;
@@ -84,6 +87,8 @@ public class Enemy : MonoBehaviour
                 anim.SetFloat("Speed", 0f);
                 anim.SetTrigger("Attack");
             }
+            // Damage the hero when in attack range (with cooldown)
+            TryDamageHero();
         }
     }
 
@@ -122,6 +127,20 @@ public class Enemy : MonoBehaviour
         transform.localScale = baseScale * 1.2f;
         yield return new WaitForSeconds(0.08f);
         transform.localScale = baseScale;
+    }
+
+    void TryDamageHero()
+    {
+        if (target == null) return;
+        if (Time.time - lastAttackTime < attackInterval) return;
+
+        // Find the hero and damage them
+        var hero = target.GetComponent<PlayerController3D>();
+        if (hero != null)
+        {
+            hero.TakeDamage(heroDamage);
+            lastAttackTime = Time.time;
+        }
     }
 
     void Die()

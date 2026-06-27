@@ -7,9 +7,18 @@ public class PlayerController3D : MonoBehaviour
     public int attackDamage = 1;
     public float attackRate = 0.35f;
 
+    // Health system
+    public static int maxHealth = 100;
+    public static int Health = 100;
+    public float regenRate = 10f;      // HP per second when in village + out of combat
+    public float regenDelay = 2f;      // seconds after last hit before regen starts
+    public float villageRadius = 70f;  // distance from center (0,0,0) considered "village"
+    public static bool IsDead = false;
+
     CharacterController controller;
     Animator anim;
     float attackTimer;
+    float lastHitTime;
     Transform modelRoot;
     float baseModelY;
 
@@ -25,6 +34,10 @@ public class PlayerController3D : MonoBehaviour
             controller.skinWidth = 0.02f;
         }
 
+        Health = maxHealth;
+        IsDead = false;
+        lastHitTime = -999f;
+
         anim = GetComponentInChildren<Animator>();
         // Find the visual model root (first child with a renderer)
         foreach (Transform child in transform)
@@ -39,8 +52,10 @@ public class PlayerController3D : MonoBehaviour
 
     void Update()
     {
+        if (IsDead) return;
         HandleMovement();
         HandleAttack();
+        HandleHealthRegen();
     }
 
     void HandleMovement()
@@ -105,6 +120,47 @@ public class PlayerController3D : MonoBehaviour
             attackTimer = 0f;
             GetComponent<SimpleWeapon>()?.Swing();
         }
+    }
+
+    void HandleHealthRegen()
+    {
+        if (Health >= maxHealth) return;
+        if (Time.time - lastHitTime < regenDelay) return;
+        if (!IsInVillage()) return;
+
+        Health = Mathf.Min(maxHealth, Health + Mathf.RoundToInt(regenRate * Time.deltaTime));
+    }
+
+    bool IsInVillage()
+    {
+        // Hero is in village if within villageRadius from center
+        Vector2 xz = new Vector2(transform.position.x, transform.position.z);
+        return xz.magnitude <= villageRadius;
+    }
+
+    public void TakeDamage(int damage)
+    {
+        if (IsDead) return;
+        Health -= damage;
+        lastHitTime = Time.time;
+        if (Health <= 0)
+        {
+            Health = 0;
+            Die();
+        }
+    }
+
+    void Die()
+    {
+        IsDead = true;
+        HUDController.PushEvent("Hero has fallen! The village is in ruins...");
+        // Trigger game over after a short delay
+        Invoke(nameof(ShowGameOver), 1.5f);
+    }
+
+    void ShowGameOver()
+    {
+        GameOverScreen.Show();
     }
 
     void OnDrawGizmosSelected()

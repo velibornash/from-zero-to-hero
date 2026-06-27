@@ -53,11 +53,9 @@ public class MinimapController : MonoBehaviour
         rawImage.raycastTarget = false;
 
         mapRect = rawImage.GetComponent<RectTransform>();
-        mapRect.anchorMin = new Vector2(1, 0);
-        mapRect.anchorMax = new Vector2(1, 0);
-        mapRect.pivot = new Vector2(1, 0);
-        mapRect.anchoredPosition = new Vector2(-16, 16);
-        mapRect.sizeDelta = new Vector2(texSize + 12, texSize + 12);
+        // Force anchor and position to bottom-right corner
+        ForceMinimapPosition();
+
         rawImage.texture = rt;
         rawImage.color = new Color(1, 1, 1, 0.65f);
 
@@ -75,6 +73,16 @@ public class MinimapController : MonoBehaviour
 
         playerMarker = MakeMarker("PlayerMarker", new Vector2(0.5f, 0.5f), 14f,
             new Color(0.2f, 0.9f, 0.2f, 0.95f));
+    }
+
+    void ForceMinimapPosition()
+    {
+        if (mapRect == null) return;
+        mapRect.anchorMin = new Vector2(1, 0);
+        mapRect.anchorMax = new Vector2(1, 0);
+        mapRect.pivot = new Vector2(1, 0);
+        mapRect.anchoredPosition = new Vector2(-16, 16);
+        mapRect.sizeDelta = new Vector2(texSize + 12, texSize + 12);
     }
 
     Image MakeMarker(string name, Vector2 anchor, float size, Color color)
@@ -130,7 +138,8 @@ public class MinimapController : MonoBehaviour
 
     void LateUpdate()
     {
-        // Minimap camera is static — no follow logic needed
+        // Force minimap to stay at bottom-right corner every frame
+        ForceMinimapPosition();
         if (mapRect == null || minimapCam == null) return;
 
         // Update player marker
