@@ -63,6 +63,7 @@ public class BuildSlot : MonoBehaviour
 
     public void Unlock()
     {
+        Debug.Log($"BuildSlot '{name}' (idx={slotIndex}) Unlock called, was state={state}");
         if (state == State.Locked)
         {
             state = State.Available;
