@@ -91,13 +91,24 @@ public class PlayerController3D : MonoBehaviour
         if (anim != null)
             anim.SetFloat("Speed", moving ? 1f : 0f);
 
-        // Procedural walk bob fallback (when animation clips are null/sliding)
-        if (modelRoot != null)
+        // Procedural walk bob — makes movement look like walking even when
+        // animation clips are missing or the avatar rig doesn't match.
+        if (modelRoot != null && moving)
         {
-            float bob = moving ? Mathf.Sin(Time.time * 14f) * 0.12f : 0f;
+            float t = Time.time * 12f;
+            float bob = Mathf.Sin(t) * 0.25f;
+            float sway = Mathf.Sin(t * 0.5f) * 4f;
             var lp = modelRoot.localPosition;
             lp.y = baseModelY + bob;
             modelRoot.localPosition = lp;
+            modelRoot.localRotation = Quaternion.Euler(0f, 0f, sway);
+        }
+        else if (modelRoot != null)
+        {
+            var lp = modelRoot.localPosition;
+            lp.y = baseModelY;
+            modelRoot.localPosition = lp;
+            modelRoot.localRotation = Quaternion.identity;
         }
     }
 

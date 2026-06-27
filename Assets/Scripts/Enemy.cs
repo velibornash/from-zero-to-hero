@@ -22,9 +22,10 @@ public class Enemy : MonoBehaviour
     float baseY;
     float lastAttackTime;
     bool hasAttackParam, hasDeathParam;
+    Transform modelRoot;
 
-    public float walkBobAmp = 0.12f;
-    public float walkBobSpeed = 14f;
+    public float walkBobAmp = 0.25f;
+    public float walkBobSpeed = 12f;
 
     // Stuck detection for going around obstacles (fences, etc)
     Vector3 lastStuckPos;
@@ -33,13 +34,18 @@ public class Enemy : MonoBehaviour
     void Start()
     {
         currentHealth = maxHealth;
-        baseY = transform.position.y;
 
         var player = FindAnyObjectByType<PlayerController3D>();
         if (player != null) target = player.transform;
 
         anim = GetComponentInChildren<Animator>();
         col = GetComponentInChildren<Collider>();
+
+        foreach (Transform child in transform)
+            if (child.GetComponentInChildren<SkinnedMeshRenderer>() != null)
+                { modelRoot = child; break; }
+        if (modelRoot != null) baseY = modelRoot.localPosition.y;
+        else baseY = 0f;
 
         // Add Rigidbody so fences and other physics colliders block the enemy
         rb = GetComponent<Rigidbody>();
@@ -104,12 +110,24 @@ public class Enemy : MonoBehaviour
 
     void Update()
     {
-        // Apply walking bob to the visual model so it doesn't look like it's sliding
         float moveSpeedNow = rb != null ? new Vector2(rb.linearVelocity.x, rb.linearVelocity.z).magnitude : 0f;
-        if (moveSpeedNow > 0.1f)
+        bool moving = moveSpeedNow > 0.1f;
+        if (modelRoot != null && moving)
         {
-            float bob = Mathf.Sin(Time.time * walkBobSpeed) * walkBobAmp;
-            transform.position = new Vector3(transform.position.x, baseY + bob, transform.position.z);
+            float t = Time.time * walkBobSpeed;
+            float bob = Mathf.Sin(t) * walkBobAmp;
+            float sway = Mathf.Sin(t * 0.5f) * 4f;
+            var lp = modelRoot.localPosition;
+            lp.y = baseY + bob;
+            modelRoot.localPosition = lp;
+            modelRoot.localRotation = Quaternion.Euler(0f, 0f, sway);
+        }
+        else if (modelRoot != null)
+        {
+            var lp = modelRoot.localPosition;
+            lp.y = baseY;
+            modelRoot.localPosition = lp;
+            modelRoot.localRotation = Quaternion.identity;
         }
     }
 
