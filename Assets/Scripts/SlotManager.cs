@@ -17,9 +17,20 @@ public class SlotManager : MonoBehaviour
 
     void Start()
     {
+        // Reset state in case this is a duplicate or stale instance
+        slots.Clear();
+        unlockedIndex = 0;
+        Instance = this;
+
         slots = Object.FindObjectsByType<BuildSlot>(FindObjectsInactive.Include)
             .OrderBy(s => s.slotIndex)
             .ToList();
+
+        Debug.Log($"SlotManager.Start: found {slots.Count} slots. Initial unlockedIndex = {unlockedIndex}");
+        for (int i = 0; i < slots.Count; i++)
+        {
+            Debug.Log($"  Slot {i}: {(slots[i] != null ? slots[i].name : "null")} state={slots[i].state}");
+        }
 
         for (int i = 0; i < slots.Count; i++)
         {
@@ -32,6 +43,13 @@ public class SlotManager : MonoBehaviour
     {
         // Notify subscribers FIRST (e.g. VillageWalls builds fences) regardless of unlock state
         SlotBuilt?.Invoke(index);
+
+        // Hard guard: towers (2-5) NEVER unlock anything
+        if (index >= 2 && index <= 5)
+        {
+            Debug.Log($"SlotManager: Tower {index} built. NOT unlocking next slot (wait for all 4 towers).");
+            return;
+        }
 
         if (index != unlockedIndex) return;
         if (unlockedIndex >= slots.Count - 1) return;
@@ -62,8 +80,6 @@ public class SlotManager : MonoBehaviour
             HUDController.PushEvent("Mage tiles unlocked! Upgrade your defenses with magic.");
             return;
         }
-        // Towers (2-5) do NOT auto-unlock the next slot
-        if (index >= 2 && index <= 5) return;
 
         // Default: unlock next slot
         unlockedIndex++;

@@ -31,6 +31,7 @@ public class VillageWalls : MonoBehaviour
 
     void OnSlotBuilt(int index)
     {
+        Debug.Log($"VillageWalls.OnSlotBuilt({index}). fencePrefab={(fencePrefab != null ? fencePrefab.name : "NULL")}");
         int towerIdx = index - 2;
         if (towerIdx < 0 || towerIdx >= 4) return;
         towersBuilt[towerIdx] = true;

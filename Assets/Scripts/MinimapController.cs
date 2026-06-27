@@ -154,7 +154,8 @@ public class MinimapController : MonoBehaviour
             mapRect = transform.Find("Minimap") as RectTransform;
             if (mapRect != null)
             {
-                playerMarker = transform.Find("Minimap/PlayerMarker") as Image;
+                var playerMarkerT = transform.Find("Minimap/PlayerMarker");
+                if (playerMarkerT != null) playerMarker = playerMarkerT.GetComponent<Image>();
                 if (minimapCam == null)
                 {
                     var camGo = GameObject.Find("MinimapCamera");
