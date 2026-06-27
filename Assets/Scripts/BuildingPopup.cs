@@ -115,20 +115,18 @@ public class BuildingPopup : MonoBehaviour
             "Building Complete", 32, FontStyle.Bold,
             new Color(1f, 0.95f, 0.70f), TextAnchor.MiddleCenter);
 
-        // Body parchment background — a separate Image that fills the body area
-        // (without this, the body's text shows the dark overlay behind it)
+        // Body parchment background — a child of the body so it auto-sizes
         var bodyBg = new GameObject("BodyBg");
-        bodyBg.transform.SetParent(panel.transform, false);
-        var bodyBgRt = bodyBg.AddComponent<RectTransform>();
-        bodyBgRt.anchorMin = new Vector2(0, 0);
-        bodyBgRt.anchorMax = new Vector2(1, 1);
-        // Body is anchored top-anchor 0,0 to 1,1. Body occupies y=-80 (top) to y=80 (bottom of body, above close button).
-        // So bodyBg must cover exactly y=-80 to y=80.
-        // offsetMin.y = 80 (bottom inset), offsetMax.y = -80 (top inset, negative).
-        bodyBgRt.offsetMin = new Vector2(10, 80);
-        bodyBgRt.offsetMax = new Vector2(-10, -80);
-        bodyBgRt.SetAsFirstSibling();  // render BEFORE title/body
-        var bodyBgImg = bodyBg.AddComponent<Image>();
+        bodyBg.transform.SetParent(bodyText.transform, false);
+        bodyBg.transform.SetAsFirstSibling();  // render BEHIND the text
+        var bodyBgRt = bodyBg.GetComponent<RectTransform>();
+        if (bodyBgRt == null) bodyBgRt = bodyBg.AddComponent<RectTransform>();
+        bodyBgRt.anchorMin = Vector2.zero;
+        bodyBgRt.anchorMax = Vector2.one;
+        bodyBgRt.offsetMin = new Vector2(0, 0);
+        bodyBgRt.offsetMax = Vector2.zero;
+        var bodyBgImg = bodyBg.GetComponent<Image>();
+        if (bodyBgImg == null) bodyBgImg = bodyBg.AddComponent<Image>();
         bodyBgImg.sprite = UIStyleHelper.MakeParchmentSprite(128, 128);
         bodyBgImg.type = Image.Type.Sliced;
         bodyBgImg.color = Color.white;
