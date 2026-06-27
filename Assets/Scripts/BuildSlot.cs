@@ -8,8 +8,8 @@ public class BuildSlot : MonoBehaviour
     public BuildSlotData data;
     public int slotIndex;
 
-    enum State { Locked, Available, Building, Ready, Built }
-    State state = State.Locked;
+    public enum State { Locked, Available, Building, Ready, Built }
+    public State state = State.Locked;
     public bool IsBuilt => state == State.Built;
 
     int spentGold;
