@@ -681,6 +681,8 @@ public class BuildSlot : MonoBehaviour
 
     void ShowCompletionPopup()
     {
+        Debug.Log($"BuildSlot '{name}': ShowCompletionPopup for slot {slotIndex}");
+        string title, body;
         string title, body;
         switch (slotIndex)
         {
@@ -737,6 +739,7 @@ public class BuildSlot : MonoBehaviour
                 body = data.completedMessage;
                 break;
         }
+        Debug.Log($"BuildSlot '{name}': Calling BuildingPopup.Show with title='{title}'");
         BuildingPopup.Show(title, body, "default", transform.position);
     }
 

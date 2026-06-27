@@ -16,10 +16,16 @@ public class BuildingPopup : MonoBehaviour
 
     public static void Show(string title, string body, string iconType = "default", Vector3 worldPos = default)
     {
+        Debug.Log($"BuildingPopup.Show: title='{title}' worldPos={worldPos}");
         if (instance == null)
         {
             var go = new GameObject("BuildingPopup");
             instance = go.AddComponent<BuildingPopup>();
+        }
+        if (instance == null)
+        {
+            Debug.LogError("BuildingPopup: failed to create instance!");
+            return;
         }
         instance.ShowPopup(title, body, iconType, worldPos);
     }
@@ -31,7 +37,9 @@ public class BuildingPopup : MonoBehaviour
 
     void Awake()
     {
+        Debug.Log($"BuildingPopup.Awake: looking for canvas...");
         canvas = FindAnyObjectByType<Canvas>();
+        Debug.Log($"BuildingPopup.Awake: canvas found = {canvas != null}");
         if (canvas == null) return;
         BuildUI();
     }
@@ -189,8 +197,19 @@ public class BuildingPopup : MonoBehaviour
 
     public void ShowPopup(string title, string body, string iconType, Vector3 worldPos = default)
     {
+        Debug.Log($"BuildingPopup.ShowPopup: title='{title}' canvas={(canvas != null ? "OK" : "NULL")} panel={(panel != null ? "OK" : "NULL")}");
+
         if (canvas == null) canvas = FindAnyObjectByType<Canvas>();
-        if (canvas == null) return;
+        if (canvas == null)
+        {
+            Debug.LogError("BuildingPopup: NO CANVAS FOUND! Cannot show popup.");
+            return;
+        }
+        if (panel == null)
+        {
+            Debug.LogError("BuildingPopup: PANEL IS NULL! UI was not built.");
+            return;
+        }
 
         titleText.text = title;
         bodyText.text = body;
