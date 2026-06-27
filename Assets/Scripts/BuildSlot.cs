@@ -683,7 +683,6 @@ public class BuildSlot : MonoBehaviour
     {
         Debug.Log($"BuildSlot '{name}': ShowCompletionPopup for slot {slotIndex}");
         string title, body;
-        string title, body;
         switch (slotIndex)
         {
             case 0: // Church
