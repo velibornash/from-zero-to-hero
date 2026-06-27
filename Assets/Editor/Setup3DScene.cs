@@ -32,6 +32,7 @@ public class Setup3DScene
             return;
         }
         ForceCleanCachedScene();
+        ConfigureKayKitAnimations();
         EnsureGoldIcon();
         CreateGround();
         PlaceVillage();
@@ -1216,25 +1217,44 @@ public class Setup3DScene
             heroAnimator.applyRootMotion = false;
         }
 
-        // Simple sword for visual combat feedback.
-        Directory.CreateDirectory("Assets/Materials");
-        string swordMatPath = "Assets/Materials/HeroSword.mat";
-        var swordMat = AssetDatabase.LoadAssetAtPath<Material>(swordMatPath);
-        if (swordMat == null)
+        // One-handed sword from KayKit weapon pack — replaces the old cube "toothpick".
+        string swordPath = Kayak + "/Weapons/sword_1handed.fbx";
+        var swordPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(swordPath);
+        GameObject sword;
+        if (swordPrefab != null)
         {
-            swordMat = new Material(Shader.Find("Standard"));
-            swordMat.color = new Color(0.75f, 0.75f, 0.8f);
-            AssetDatabase.CreateAsset(swordMat, swordMatPath);
+            sword = (GameObject)Object.Instantiate(swordPrefab);
+            sword.name = "HeroSword";
+            sword.transform.SetParent(go.transform);
+            sword.transform.localPosition = new Vector3(1.2f, 0.8f, 0.4f);
+            sword.transform.localRotation = Quaternion.Euler(-60f, 90f, 0f);
+            sword.transform.localScale = Vector3.one * 0.8f;
+            // Disable sword shadows so the hero casting toggle is consistent
+            foreach (var r in sword.GetComponentsInChildren<Renderer>())
+                r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
         }
+        else
+        {
+            // Fallback cube if the KayKit weapon FBX hasn't been imported yet
+            Directory.CreateDirectory("Assets/Materials");
+            string swordMatPath = "Assets/Materials/HeroSword.mat";
+            var swordMat = AssetDatabase.LoadAssetAtPath<Material>(swordMatPath);
+            if (swordMat == null)
+            {
+                swordMat = new Material(Shader.Find("Standard"));
+                swordMat.color = new Color(0.75f, 0.75f, 0.8f);
+                AssetDatabase.CreateAsset(swordMat, swordMatPath);
+            }
 
-        var sword = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        sword.name = "HeroSword";
-        sword.transform.SetParent(go.transform);
-        sword.transform.localPosition = new Vector3(0.65f, 1.2f, 0.4f);
-        sword.transform.localRotation = Quaternion.Euler(0f, 0f, -30f);
-        sword.transform.localScale = new Vector3(0.12f, 1.4f, 0.05f);
-        sword.GetComponent<Renderer>().sharedMaterial = swordMat;
-        Object.DestroyImmediate(sword.GetComponent<BoxCollider>());
+            sword = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            sword.name = "HeroSword";
+            sword.transform.SetParent(go.transform);
+            sword.transform.localPosition = new Vector3(0.65f, 1.2f, 0.4f);
+            sword.transform.localRotation = Quaternion.Euler(0f, 0f, -30f);
+            sword.transform.localScale = new Vector3(0.12f, 1.4f, 0.05f);
+            sword.GetComponent<Renderer>().sharedMaterial = swordMat;
+            Object.DestroyImmediate(sword.GetComponent<BoxCollider>());
+        }
 
         var weapon = go.AddComponent<SimpleWeapon>();
         weapon.weapon = sword.transform;
@@ -1398,6 +1418,53 @@ public class Setup3DScene
         PrefabUtility.SaveAsPrefabAsset(flag, path);
         Object.DestroyImmediate(flag);
         return AssetDatabase.LoadAssetAtPath<GameObject>(path);
+    }
+
+    static void ConfigureKayKitAnimations()
+    {
+        string movementFbx = "Assets/3D/KayKit/KayKit_Adventurers_2.0_FREE/Animations/fbx/Rig_Medium/Rig_Medium_MovementBasic.fbx";
+        string generalFbx = "Assets/3D/KayKit/KayKit_Adventurers_2.0_FREE/Animations/fbx/Rig_Medium/Rig_Medium_General.fbx";
+
+        ConfigureAnimationClips(movementFbx, new[] {
+            "Walking_A", "Walking_B", "Walking_C",
+            "Running_A", "Running_B",
+            "Jump_Full_Long", "Jump_Full_Short", "Jump_Idle", "Jump_Land", "Jump_Start"
+        });
+        ConfigureAnimationClips(generalFbx, new[] {
+            "Idle_A", "Idle_B",
+            "Death_A", "Death_B",
+            "Hit_A", "Hit_B",
+            "Interact", "PickUp",
+            "Spawn_Air", "Spawn_Ground",
+            "Throw", "Use_Item"
+        });
+    }
+
+    static void ConfigureAnimationClips(string fbxPath, string[] takeNames)
+    {
+        var importer = AssetImporter.GetAtPath(fbxPath) as ModelImporter;
+        if (importer == null) { Debug.LogError($"Can't get ModelImporter for {fbxPath}"); return; }
+
+        // Check if already configured
+        var existing = importer.clipAnimations;
+        if (existing != null && existing.Length > 0)
+        {
+            Debug.Log($"Animation clips already configured on {fbxPath} ({existing.Length} clips)");
+            return;
+        }
+
+        var clips = new ModelImporterClipAnimation[takeNames.Length];
+        for (int i = 0; i < takeNames.Length; i++)
+        {
+            clips[i] = new ModelImporterClipAnimation();
+            clips[i].takeName = takeNames[i];
+            clips[i].name = takeNames[i];
+            clips[i].loop = true;
+            clips[i].loopPose = true;
+        }
+        importer.clipAnimations = clips;
+        importer.SaveAndReimport();
+        Debug.Log($"Configured {clips.Length} animation clips on {fbxPath}");
     }
 
     static void EnsureGoldIcon()
