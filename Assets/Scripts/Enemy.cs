@@ -8,8 +8,8 @@ public class Enemy : MonoBehaviour
     public float moveSpeed = 3.5f;
     public float rotateSpeed = 8f;
     public float knockbackForce = 8f;
-    public int heroDamage = 15;
-    public float attackInterval = 0.8f;
+    public int heroDamage = 25;
+    public float attackInterval = 0.5f;
     public string enemyName = "Enemy";
 
     int currentHealth;
@@ -72,7 +72,7 @@ public class Enemy : MonoBehaviour
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, rotateSpeed * Time.fixedDeltaTime);
         }
 
-        if (dist > 1.5f)
+        if (dist > 2.5f)
         {
             Vector3 moveDir = dir.normalized;
             rb.linearVelocity = new Vector3(moveDir.x * moveSpeed, 0, moveDir.z * moveSpeed);

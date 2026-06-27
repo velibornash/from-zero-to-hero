@@ -70,7 +70,9 @@ public class SlotManager : MonoBehaviour
         // After the 4th tower (index 5) is built, unlock all 4 mage tiles at once
         if (index == 5)
         {
+            Debug.Log($"SlotManager: Tower 5 built, unlocking mage tiles. Current unlockedIndex={unlockedIndex}");
             int mageCount = Mathf.Min(4, slots.Count - 1 - unlockedIndex);
+            Debug.Log($"SlotManager: Will unlock {mageCount} mage tiles");
             for (int i = 0; i < mageCount; i++)
             {
                 unlockedIndex++;

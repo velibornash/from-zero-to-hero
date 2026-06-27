@@ -115,6 +115,21 @@ public class BuildingPopup : MonoBehaviour
             "Building Complete", 32, FontStyle.Bold,
             new Color(1f, 0.95f, 0.70f), TextAnchor.MiddleCenter);
 
+        // Body parchment background — a separate Image that fills the body area
+        // (without this, the body's text shows the dark overlay behind it)
+        var bodyBg = new GameObject("BodyBg");
+        bodyBg.transform.SetParent(panel.transform, false);
+        var bodyBgRt = bodyBg.AddComponent<RectTransform>();
+        bodyBgRt.anchorMin = new Vector2(0, 0);
+        bodyBgRt.anchorMax = new Vector2(1, 1);
+        bodyBgRt.offsetMin = new Vector2(10, 80);   // leave room for close button at bottom
+        bodyBgRt.offsetMax = new Vector2(-10, -80);  // leave room for title bar at top
+        var bodyBgImg = bodyBg.AddComponent<Image>();
+        bodyBgImg.sprite = UIStyleHelper.MakeParchmentSprite(128, 128);
+        bodyBgImg.type = Image.Type.Sliced;
+        bodyBgImg.color = Color.white;
+        bodyBgImg.raycastTarget = false;
+
         // Body — inside the panel
         bodyText = MakeText(panel, "Body", new Vector2(0, -90), new Vector2(480, 220),
             "", 18, FontStyle.Bold,
@@ -139,8 +154,8 @@ public class BuildingPopup : MonoBehaviour
             "CLOSE", 20, FontStyle.Bold,
             new Color(1f, 0.95f, 0.65f), TextAnchor.MiddleCenter);
 
-        // Hint — above the close button
-        var hint = MakeText(panel, "Hint", new Vector2(0, -336), new Vector2(440, 24),
+        // Hint — positioned above the close button, inside the panel
+        var hint = MakeText(panel, "Hint", new Vector2(0, 80), new Vector2(440, 24),
             "[TAB]  [ESC]  [X]  —  Close", 14, FontStyle.Bold,
             new Color(0.50f, 0.28f, 0.08f), TextAnchor.MiddleCenter);
     }
