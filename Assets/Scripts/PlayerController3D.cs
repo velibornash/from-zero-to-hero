@@ -141,13 +141,19 @@ public class PlayerController3D : MonoBehaviour
     public void TakeDamage(int damage)
     {
         if (IsDead) return;
+        if (damage > 0) lastHitTime = Time.time;
         Health -= damage;
-        lastHitTime = Time.time;
         if (Health <= 0)
         {
             Health = 0;
             Die();
         }
+    }
+
+    // Reset regen timer (for restart)
+    public void ResetRegen()
+    {
+        lastHitTime = -999f;
     }
 
     void Die()

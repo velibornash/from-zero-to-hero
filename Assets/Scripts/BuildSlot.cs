@@ -280,7 +280,6 @@ public class BuildSlot : MonoBehaviour
 
     Texture2D CreateFlagIcon()
     {
-        int s = 64;
         var tex = CreateGenericIcon();
         Color pole = new Color(0.55f, 0.55f, 0.55f);
         Color red = new Color(0.9f, 0.08f, 0.08f);

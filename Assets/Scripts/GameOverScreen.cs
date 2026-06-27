@@ -142,6 +142,12 @@ public class GameOverScreen : MonoBehaviour
     public void DoShow()
     {
         if (overlay != null) overlay.SetActive(true);
+    }
+
+    public void DoHide()
+    {
+        if (overlay != null) overlay.SetActive(false);
+    }
         // Note: we do NOT use Time.timeScale = 0 because that breaks
         // Button.onClick in Unity 6. Player input is already blocked
         // by PlayerController3D.Update checking PlayerController3D.IsDead.
@@ -152,14 +158,12 @@ public class GameOverScreen : MonoBehaviour
         Time.timeScale = 1f;
         PlayerController3D.Health = PlayerController3D.maxHealth;
         PlayerController3D.IsDead = false;
-        // Reset health regen timer
+        // Reset hero position and regen timer
         var hero = FindAnyObjectByType<PlayerController3D>();
         if (hero != null)
         {
             hero.transform.position = new Vector3(0, 0, -55);
-            // Use reflection or a public method to reset lastHitTime
-            // Easier: just trigger a hit so regen timer resets
-            hero.TakeDamage(0);
+            hero.ResetRegen();  // reset lastHitTime so regen can start immediately
         }
         // Delete all enemies
         foreach (var e in FindObjectsByType<Enemy>())

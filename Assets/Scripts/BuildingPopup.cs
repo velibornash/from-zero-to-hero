@@ -122,8 +122,11 @@ public class BuildingPopup : MonoBehaviour
         var bodyBgRt = bodyBg.AddComponent<RectTransform>();
         bodyBgRt.anchorMin = new Vector2(0, 0);
         bodyBgRt.anchorMax = new Vector2(1, 1);
-        bodyBgRt.offsetMin = new Vector2(10, 80);   // leave room for close button at bottom
-        bodyBgRt.offsetMax = new Vector2(-10, -80);  // leave room for title bar at top
+        // Body is anchored top-anchor 0,0 to 1,1. Body occupies y=-80 (top) to y=80 (bottom of body, above close button).
+        // So bodyBg must cover exactly y=-80 to y=80.
+        // offsetMin.y = 80 (bottom inset), offsetMax.y = -80 (top inset, negative).
+        bodyBgRt.offsetMin = new Vector2(10, 80);
+        bodyBgRt.offsetMax = new Vector2(-10, -80);
         bodyBgRt.SetAsFirstSibling();  // render BEFORE title/body
         var bodyBgImg = bodyBg.AddComponent<Image>();
         bodyBgImg.sprite = UIStyleHelper.MakeParchmentSprite(128, 128);
@@ -156,8 +159,8 @@ public class BuildingPopup : MonoBehaviour
             new Color(1f, 0.95f, 0.65f), TextAnchor.MiddleCenter);
 
         // Hint — positioned above the close button, inside the panel
-        var hint = MakeText(panel, "Hint", new Vector2(0, 80), new Vector2(440, 24),
-            "[TAB]  [ESC]  [X]  —  Close", 14, FontStyle.Bold,
+        var hint = MakeText(panel, "Hint", new Vector2(0, 88), new Vector2(440, 18),
+            "[TAB]  [ESC]  [X]  —  Close", 13, FontStyle.Bold,
             new Color(0.50f, 0.28f, 0.08f), TextAnchor.MiddleCenter);
     }
 
