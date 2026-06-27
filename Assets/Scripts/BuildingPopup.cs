@@ -22,9 +22,9 @@ public class BuildingPopup : PopupBase
         }
     }
 
-    public static void Hide()
+    public new static void Hide()
     {
-        if (instance != null) instance.DoHide();
+        if (instance != null) instance.Hide();
     }
 
     void Update()

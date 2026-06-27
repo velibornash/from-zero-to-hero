@@ -10,8 +10,8 @@ using UnityEngine.EventSystems;
 public class PopupBase : MonoBehaviour
 {
     protected Canvas canvas;
-    protected GameObject overlay;
-    protected GameObject panel;
+    public GameObject overlay;
+    public GameObject panel;
     protected Text titleText;
     protected Text bodyText;
 

@@ -3,8 +3,6 @@ using UnityEngine.UI;
 
 public class HUDInfoPanel : PopupBase
 {
-    GameObject panel;
-
     void Start()
     {
         BuildUI("Chapter I: The Awakening",

@@ -35,11 +35,6 @@ public class GameOverScreen : PopupBase
         Show("DEFEAT", "The village has fallen.");
     }
 
-    public new void DoHide()
-    {
-        Hide();
-    }
-
     void RestartGame()
     {
         Time.timeScale = 1f;
