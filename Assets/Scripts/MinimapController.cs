@@ -160,6 +160,7 @@ public class MinimapController : MonoBehaviour
                     var camGo = GameObject.Find("MinimapCamera");
                     if (camGo != null) minimapCam = camGo.GetComponent<Camera>();
                 }
+                Debug.Log($"MinimapController: recovered mapRect={mapRect != null} minimapCam={minimapCam != null}");
             }
         }
         if (mapRect == null || minimapCam == null) return;
