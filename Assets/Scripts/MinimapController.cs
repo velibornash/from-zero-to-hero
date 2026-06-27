@@ -11,8 +11,7 @@ public class MinimapController : MonoBehaviour
 
     Camera minimapCam;
     RenderTexture rt;
-    RawImage rawImage;
-
+    GameObject minimapHud;  // Persistent parent for all minimap UI — immune to popup moves
     RectTransform mapRect;
     List<Image> enemyMarkers = new List<Image>();
     List<Image> slotMarkers = new List<Image>();
@@ -22,13 +21,18 @@ public class MinimapController : MonoBehaviour
     float worldMinX = -100f, worldMaxX = 100f;
     float worldMinZ = -100f, worldMaxZ = 100f;
 
+    void Awake()
+    {
+        // Destroy ALL stale minimap GameObjects that may have leaked from a previous session
+        foreach (var name in new[] { "MinimapCamera", "MinimapHUD", "Minimap" })
+        {
+            var existing = GameObject.Find(name);
+            if (existing != null) Object.DestroyImmediate(existing);
+        }
+    }
+
     void Start()
     {
-        // Cleanup any stale MinimapCamera / Minimap raw image from a previous session
-        var staleCam = GameObject.Find("MinimapCamera");
-        if (staleCam != null) Object.DestroyImmediate(staleCam);
-        var staleRaw = GameObject.Find("Minimap");
-        if (staleRaw != null) Object.DestroyImmediate(staleRaw);
         enemyMarkers.Clear();
         slotMarkers.Clear();
 
@@ -38,68 +42,94 @@ public class MinimapController : MonoBehaviour
             if (player != null) target = player.transform;
         }
 
-        rt = new RenderTexture(texSize, texSize, 24);
-        rt.Create();
-
-        var go = new GameObject("MinimapCamera");
-        minimapCam = go.AddComponent<Camera>();
+        // Create minimap camera (separate from UI)
+        var camGo = new GameObject("MinimapCamera");
+        minimapCam = camGo.AddComponent<Camera>();
         minimapCam.orthographic = true;
         minimapCam.orthographicSize = mapSize * 0.5f;
-        // Static camera — shows the entire world
         minimapCam.transform.position = new Vector3(0, height, 0);
         minimapCam.transform.rotation = Quaternion.Euler(90, 0, 0);
         minimapCam.clearFlags = CameraClearFlags.SolidColor;
         minimapCam.backgroundColor = new Color(0.15f, 0.2f, 0.1f);
-        minimapCam.targetTexture = rt;
         minimapCam.depth = -1;
+        minimapCam.useOcclusionCulling = false;
 
+        rt = new RenderTexture(texSize, texSize, 24);
+        rt.Create();
+        minimapCam.targetTexture = rt;
+
+        // Find the canvas
         var canvas = Object.FindAnyObjectByType<Canvas>();
-        if (canvas == null) return;
+        if (canvas == null)
+        {
+            Debug.LogError("MinimapController: no Canvas found!");
+            return;
+        }
 
-        rawImage = new GameObject("Minimap").AddComponent<RawImage>();
-        rawImage.transform.SetParent(canvas.transform, false);
-        rawImage.raycastTarget = false;
+        // Create a dedicated parent for all minimap UI
+        // This is CRITICAL — the parent must NOT be the popup's overlay
+        // so that building popup movements don't drag the minimap with them
+        minimapHud = new GameObject("MinimapHUD");
+        var hudRt = minimapHud.AddComponent<RectTransform>();
+        hudRt.SetParent(canvas.transform, false);
+        hudRt.anchorMin = new Vector2(1, 0);
+        hudRt.anchorMax = new Vector2(1, 0);
+        hudRt.pivot = new Vector2(1, 0);
+        hudRt.anchoredPosition = new Vector2(-16, 16);
+        hudRt.sizeDelta = new Vector2(texSize + 12, texSize + 12);
+        hudRt.localScale = Vector3.one;
 
-        mapRect = rawImage.GetComponent<RectTransform>();
-        // Force anchor and position to bottom-right corner
-        ForceMinimapPosition();
+        // Raw image inside the HUD parent
+        var rawGo = new GameObject("MinimapImage");
+        rawGo.transform.SetParent(minimapHud.transform, false);
+        mapRect = rawGo.AddComponent<RectTransform>();
+        mapRect.anchorMin = Vector2.zero;
+        mapRect.anchorMax = Vector2.one;
+        mapRect.offsetMin = Vector2.zero;
+        mapRect.offsetMax = Vector2.zero;
+        var rawImg = rawGo.AddComponent<RawImage>();
+        rawImg.texture = rt;
+        rawImg.color = new Color(1, 1, 1, 0.65f);
+        rawImg.raycastTarget = false;
 
-        rawImage.texture = rt;
-        rawImage.color = new Color(1, 1, 1, 0.65f);
-
+        // Gold border inside the HUD parent
         var border = new GameObject("MinimapBorder");
-        border.transform.SetParent(rawImage.transform, false);
+        border.transform.SetParent(minimapHud.transform, false);
         var bRt = border.AddComponent<RectTransform>();
         bRt.anchorMin = Vector2.zero;
         bRt.anchorMax = Vector2.one;
-        bRt.sizeDelta = new Vector2(0, 0);
+        bRt.offsetMin = new Vector2(-6, -6);
+        bRt.offsetMax = new Vector2(6, 6);
         var bImg = border.AddComponent<Image>();
-        bImg.sprite = MakeWhiteSprite();
-        bImg.color = new Color(0.25f, 0.15f, 0.07f, 0.7f);
-        bImg.type = Image.Type.Simple;
+        bImg.sprite = UIStyleHelper.Make9SliceBorder(96, 96, 14, 18);
+        bImg.type = Image.Type.Sliced;
+        bImg.color = Color.white;
         bImg.raycastTarget = false;
 
-        playerMarker = MakeMarker("PlayerMarker", new Vector2(0.5f, 0.5f), 14f,
-            new Color(0.2f, 0.9f, 0.2f, 0.95f));
+        // Player marker (anchored to UV in LateUpdate)
+        playerMarker = MakeMarkerOnHud("PlayerMarker", 14f, new Color(0.2f, 0.9f, 0.2f, 0.95f));
     }
 
     void ForceMinimapPosition()
     {
-        if (mapRect == null) return;
-        mapRect.anchorMin = new Vector2(1, 0);
-        mapRect.anchorMax = new Vector2(1, 0);
-        mapRect.pivot = new Vector2(1, 0);
-        mapRect.anchoredPosition = new Vector2(-16, 16);
-        mapRect.sizeDelta = new Vector2(texSize + 12, texSize + 12);
+        if (minimapHud == null) return;
+        var hudRt = minimapHud.GetComponent<RectTransform>();
+        if (hudRt == null) return;
+        // Force the HUD parent to stay in the bottom-right corner
+        hudRt.anchorMin = new Vector2(1, 0);
+        hudRt.anchorMax = new Vector2(1, 0);
+        hudRt.pivot = new Vector2(1, 0);
+        hudRt.anchoredPosition = new Vector2(-16, 16);
+        hudRt.sizeDelta = new Vector2(texSize + 12, texSize + 12);
     }
 
-    Image MakeMarker(string name, Vector2 anchor, float size, Color color)
+    Image MakeMarkerOnHud(string name, float size, Color color)
     {
         var marker = new GameObject(name);
-        marker.transform.SetParent(rawImage.transform, false);
+        marker.transform.SetParent(minimapHud.transform, false);
         var rt = marker.AddComponent<RectTransform>();
-        rt.anchorMin = anchor;
-        rt.anchorMax = anchor;
+        rt.anchorMin = new Vector2(0.5f, 0.5f);
+        rt.anchorMax = new Vector2(0.5f, 0.5f);
         rt.pivot = new Vector2(0.5f, 0.5f);
         rt.anchoredPosition = Vector2.zero;
         rt.sizeDelta = new Vector2(size, size);
@@ -146,28 +176,14 @@ public class MinimapController : MonoBehaviour
 
     void LateUpdate()
     {
-        // Force minimap to stay at bottom-right corner every frame
+        // Force the minimap HUD to stay in the bottom-right corner EVERY frame
+        // so that popup panel movements don't drag it with them
         ForceMinimapPosition();
-        if (mapRect == null)
-        {
-            // Find the minimap raw image if it was lost (e.g., from scene reload)
-            mapRect = transform.Find("Minimap") as RectTransform;
-            if (mapRect != null)
-            {
-                var playerMarkerT = transform.Find("Minimap/PlayerMarker");
-                if (playerMarkerT != null) playerMarker = playerMarkerT.GetComponent<Image>();
-                if (minimapCam == null)
-                {
-                    var camGo = GameObject.Find("MinimapCamera");
-                    if (camGo != null) minimapCam = camGo.GetComponent<Camera>();
-                }
-                Debug.Log($"MinimapController: recovered mapRect={mapRect != null} minimapCam={minimapCam != null}");
-            }
-        }
-        if (mapRect == null || minimapCam == null) return;
+
+        if (minimapHud == null || minimapCam == null) return;
 
         // Update player marker
-        if (target != null)
+        if (target != null && playerMarker != null)
         {
             Vector2 uv = WorldToMinimapUV(target.position);
             uv.x = Mathf.Clamp01(uv.x);
@@ -181,8 +197,7 @@ public class MinimapController : MonoBehaviour
         var enemies = FindObjectsByType<Enemy>(FindObjectsSortMode.None);
         while (enemyMarkers.Count < enemies.Length)
         {
-            var m = MakeMarker("EnemyMarker", new Vector2(0.5f, 0.5f), 8f,
-                new Color(0.95f, 0.15f, 0.15f, 0.9f));
+            var m = MakeMarkerOnHud("EnemyMarker", 8f, new Color(0.95f, 0.15f, 0.15f, 0.9f));
             enemyMarkers.Add(m);
         }
         while (enemyMarkers.Count > enemies.Length)
@@ -193,7 +208,6 @@ public class MinimapController : MonoBehaviour
         for (int i = 0; i < enemies.Length; i++)
         {
             Vector2 uv = WorldToMinimapUV(enemies[i].transform.position);
-            // Clamp to map bounds and dim if outside
             bool outside = uv.x < 0 || uv.x > 1 || uv.y < 0 || uv.y > 1;
             uv.x = Mathf.Clamp01(uv.x);
             uv.y = Mathf.Clamp01(uv.y);
@@ -213,8 +227,7 @@ public class MinimapController : MonoBehaviour
         foreach (var s in allSlots) if (!s.IsBuilt) activeSlots.Add(s);
         while (slotMarkers.Count < activeSlots.Count)
         {
-            var m = MakeMarker("SlotMarker", new Vector2(0.5f, 0.5f), 10f,
-                new Color(0.8f, 0.7f, 0.1f, 0.6f));
+            var m = MakeMarkerOnHud("SlotMarker", 10f, new Color(0.8f, 0.7f, 0.1f, 0.6f));
             slotMarkers.Add(m);
         }
         while (slotMarkers.Count > activeSlots.Count)
