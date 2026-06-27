@@ -8,8 +8,8 @@ public class Enemy : MonoBehaviour
     public float moveSpeed = 3.5f;
     public float rotateSpeed = 8f;
     public float knockbackForce = 8f;
-    public int heroDamage = 25;
-    public float attackInterval = 0.5f;
+    public int heroDamage = 12;
+    public float attackInterval = 0.7f;
     public string enemyName = "Enemy";
 
     int currentHealth;

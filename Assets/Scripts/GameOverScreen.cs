@@ -152,14 +152,22 @@ public class GameOverScreen : MonoBehaviour
         Time.timeScale = 1f;
         PlayerController3D.Health = PlayerController3D.maxHealth;
         PlayerController3D.IsDead = false;
+        // Reset health regen timer
+        var hero = FindAnyObjectByType<PlayerController3D>();
+        if (hero != null)
+        {
+            hero.transform.position = new Vector3(0, 0, -55);
+            // Use reflection or a public method to reset lastHitTime
+            // Easier: just trigger a hit so regen timer resets
+            hero.TakeDamage(0);
+        }
         // Delete all enemies
         foreach (var e in FindObjectsByType<Enemy>())
             Destroy(e.gameObject);
-        // Delete the game over screen
+        // Hide the game over screen immediately
+        DoHide();
+        // Then destroy the game over screen
         if (instance != null) Destroy(instance.gameObject);
-        // Reset hero position
-        var hero = FindAnyObjectByType<PlayerController3D>();
-        if (hero != null) hero.transform.position = new Vector3(0, 0, -55);
         HUDController.PushEvent("A new day begins. Defend the village!");
     }
 }

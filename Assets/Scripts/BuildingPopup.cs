@@ -124,6 +124,7 @@ public class BuildingPopup : MonoBehaviour
         bodyBgRt.anchorMax = new Vector2(1, 1);
         bodyBgRt.offsetMin = new Vector2(10, 80);   // leave room for close button at bottom
         bodyBgRt.offsetMax = new Vector2(-10, -80);  // leave room for title bar at top
+        bodyBgRt.SetAsFirstSibling();  // render BEFORE title/body
         var bodyBgImg = bodyBg.AddComponent<Image>();
         bodyBgImg.sprite = UIStyleHelper.MakeParchmentSprite(128, 128);
         bodyBgImg.type = Image.Type.Sliced;
@@ -131,8 +132,8 @@ public class BuildingPopup : MonoBehaviour
         bodyBgImg.raycastTarget = false;
 
         // Body — inside the panel
-        bodyText = MakeText(panel, "Body", new Vector2(0, -90), new Vector2(480, 220),
-            "", 18, FontStyle.Bold,
+        bodyText = MakeText(panel, "Body", new Vector2(0, -90), new Vector2(460, 190),
+            "", 17, FontStyle.Bold,
             new Color(0.30f, 0.15f, 0.05f), TextAnchor.UpperCenter);
 
         // Close button (mobile-friendly)
