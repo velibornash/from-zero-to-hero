@@ -24,6 +24,14 @@ public class MinimapController : MonoBehaviour
 
     void Start()
     {
+        // Cleanup any stale MinimapCamera / Minimap raw image from a previous session
+        var staleCam = GameObject.Find("MinimapCamera");
+        if (staleCam != null) Object.DestroyImmediate(staleCam);
+        var staleRaw = GameObject.Find("Minimap");
+        if (staleRaw != null) Object.DestroyImmediate(staleRaw);
+        enemyMarkers.Clear();
+        slotMarkers.Clear();
+
         if (target == null)
         {
             var player = Object.FindAnyObjectByType<PlayerController3D>();
@@ -140,6 +148,20 @@ public class MinimapController : MonoBehaviour
     {
         // Force minimap to stay at bottom-right corner every frame
         ForceMinimapPosition();
+        if (mapRect == null)
+        {
+            // Find the minimap raw image if it was lost (e.g., from scene reload)
+            mapRect = transform.Find("Minimap") as RectTransform;
+            if (mapRect != null)
+            {
+                playerMarker = transform.Find("Minimap/PlayerMarker") as Image;
+                if (minimapCam == null)
+                {
+                    var camGo = GameObject.Find("MinimapCamera");
+                    if (camGo != null) minimapCam = camGo.GetComponent<Camera>();
+                }
+            }
+        }
         if (mapRect == null || minimapCam == null) return;
 
         // Update player marker

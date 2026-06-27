@@ -18,7 +18,6 @@ public class Setup3DScene
     public static void Build()
     {
         ForceCleanCachedScene();
-        Cleanup();
         EnsureGoldIcon();
         CreateGround();
         PlaceVillage();
@@ -42,9 +41,8 @@ public class Setup3DScene
             new EditorBuildSettingsScene(OutputScenePath, true)
         };
 
-        // Open the freshly generated scene so the editor view refreshes immediately.
-        if (File.Exists(OutputScenePath))
-            EditorSceneManager.OpenScene(OutputScenePath);
+        // Do NOT call OpenScene at the end - it can cause Unity to load stale cached content.
+        // The scene is already active and saved.
 
         Debug.Log($"Scene saved to {OutputScenePath}! Press Play to test the slots.");
     }
@@ -58,11 +56,19 @@ public class Setup3DScene
 
     static void ForceCleanCachedScene()
     {
-        // Create a brand new empty active scene first so we don't operate on a deleted file.
+        // AGGRESSIVE CLEAN: destroy EVERYTHING in the current scene first
+        // This handles cases where stale objects from a previous session linger in memory.
+        var allRoots = UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene().GetRootGameObjects();
+        foreach (var go in allRoots)
+        {
+            if (go != null) Object.DestroyImmediate(go);
+        }
+
+        // Create a brand new empty active scene
         var newScene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene);
         EditorSceneManager.SetActiveScene(newScene);
 
-        // Always start from a fresh scene file so we never load stale cached content.
+        // Delete the saved scene file so Unity cannot reload the old one
         foreach (var path in new[] { OutputScenePath, OldScenePath })
         {
             if (File.Exists(path))
@@ -80,7 +86,6 @@ public class Setup3DScene
         }
 
         // Delete cached prefabs and materials so they are rebuilt with proper shaders.
-        // Also delete the cached flag texture so color order fix takes effect.
         string[] deleteDirs = { "Assets/Prefabs", "Assets/Materials", "Assets/Data/Slots", "Assets/Textures" };
         foreach (var dir in deleteDirs)
         {
