@@ -55,7 +55,7 @@ public class TowerShooter : MonoBehaviour
 
     Enemy FindClosestEnemy()
     {
-        var enemies = FindObjectsByType<Enemy>(FindObjectsSortMode.None);
+        var enemies = FindObjectsByType<Enemy>();
         Enemy closest = null;
         float closestDist = range;
         foreach (var e in enemies)

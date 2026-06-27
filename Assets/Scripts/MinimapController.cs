@@ -194,7 +194,7 @@ public class MinimapController : MonoBehaviour
         }
 
         // Update enemy markers
-        var enemies = FindObjectsByType<Enemy>(FindObjectsSortMode.None);
+        var enemies = FindObjectsByType<Enemy>();
         while (enemyMarkers.Count < enemies.Length)
         {
             var m = MakeMarkerOnHud("EnemyMarker", 8f, new Color(0.95f, 0.15f, 0.15f, 0.9f));
@@ -222,7 +222,7 @@ public class MinimapController : MonoBehaviour
         }
 
         // Update slot markers (only show unbuilt slots)
-        var allSlots = FindObjectsByType<BuildSlot>(FindObjectsSortMode.None);
+        var allSlots = FindObjectsByType<BuildSlot>();
         var activeSlots = new List<BuildSlot>();
         foreach (var s in allSlots) if (!s.IsBuilt) activeSlots.Add(s);
         while (slotMarkers.Count < activeSlots.Count)

@@ -151,7 +151,7 @@ public class GameOverScreen : MonoBehaviour
         PlayerController3D.Health = PlayerController3D.maxHealth;
         PlayerController3D.IsDead = false;
         // Delete all enemies
-        foreach (var e in FindObjectsByType<Enemy>(FindObjectsSortMode.None))
+        foreach (var e in FindObjectsByType<Enemy>())
             Destroy(e.gameObject);
         // Delete the game over screen
         if (instance != null) Destroy(instance.gameObject);

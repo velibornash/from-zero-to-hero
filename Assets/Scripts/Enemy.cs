@@ -28,7 +28,6 @@ public class Enemy : MonoBehaviour
     // Stuck detection for going around obstacles (fences, etc)
     Vector3 lastStuckPos;
     float stuckTimer;
-    float sideStepAngle = 0f;
 
     void Start()
     {

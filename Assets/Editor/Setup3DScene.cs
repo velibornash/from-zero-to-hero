@@ -14,6 +14,13 @@ public class Setup3DScene
     const string OutputScenePath = "Assets/Village.unity";
     const string OldScenePath = "Assets/Main.unity";
 
+    [MenuItem("Tools/Clean Cache")]
+    public static void CleanCache()
+    {
+        ForceCleanCachedScene();
+        Debug.Log("Cache cleaned. Run 'Build 3D Scene' to regenerate.");
+    }
+
     [MenuItem("Tools/Build 3D Scene")]
     public static void Build()
     {
@@ -41,17 +48,7 @@ public class Setup3DScene
             new EditorBuildSettingsScene(OutputScenePath, true)
         };
 
-        // Do NOT call OpenScene at the end - it can cause Unity to load stale cached content.
-        // The scene is already active and saved.
-
         Debug.Log($"Scene saved to {OutputScenePath}! Press Play to test the slots.");
-    }
-
-    [MenuItem("Tools/Clean Cache")]
-    public static void CleanCache()
-    {
-        ForceCleanCachedScene();
-        Debug.Log("Cache cleaned. Run 'Build 3D Scene' to regenerate.");
     }
 
     static void ForceCleanCachedScene()
