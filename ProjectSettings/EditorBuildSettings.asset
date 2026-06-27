@@ -4,6 +4,12 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Village.unity
+    guid: 685566998cb6e40d9907e0531dae95a1
   m_configObjects:
+    com.unity.adaptivePerformance.basic.provider_settings: {fileID: 11400000, guid: e6fff509095ac480eb412e3a7b539e7a, type: 2}
+    com.unity.adaptiveperformance.loader_settings: {fileID: 11400000, guid: b4413db0eb28c4f0a8e4a1092f9a63c0, type: 2}
+    com.unity.adaptiveperformance.simulator.provider_settings: {fileID: 11400000, guid: 0ebc8d0b679a04ec1a741f3511f55723, type: 2}
     com.unity.dt.app-ui: {fileID: 11400000, guid: 1b1c20d82303e4b5781c3ef50ac1449f, type: 2}

@@ -225,10 +225,6 @@ public class BuildingPopup : MonoBehaviour
 
         overlay.SetActive(true);
     }
-        }
-
-        overlay.SetActive(true);
-    }
 
     public void DoHide()
     {

@@ -16,7 +16,7 @@ namespace GUIPack2DFree
         string newPrefabPath = "";
         string newScriptPath = "";
 
-        [MenuItem("Tools/Popup Generator")]
+        // [MenuItem("Tools/Popup Generator")] // hidden — not needed for this project
         public static void ShowWindow()
         {
             GetWindow<PopupGeneratorWindow>("Popup Generator");
