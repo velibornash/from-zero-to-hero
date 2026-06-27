@@ -6,7 +6,7 @@ public class BuildingPopup : PopupBase
 {
     static BuildingPopup instance;
 
-    public static bool IsVisible => instance != null && overlay != null && overlay.activeSelf;
+    public static bool IsVisible => instance != null && instance.overlay != null && instance.overlay.activeSelf;
 
     public static void Show(string title, string body, string iconType = "default", Vector3 worldPos = default)
     {
@@ -31,11 +31,6 @@ public class BuildingPopup : PopupBase
     {
         if (overlay == null || !overlay.activeSelf) return;
         if (Input.GetKeyDown(KeyCode.Tab) || Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.X))
-            DoHide();
-    }
-
-    public new void DoHide()
-    {
-        Hide();
+            Hide();
     }
 }

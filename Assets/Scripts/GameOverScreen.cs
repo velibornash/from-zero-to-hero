@@ -48,7 +48,7 @@ public class GameOverScreen : PopupBase
         }
         foreach (var e in FindObjectsByType<Enemy>())
             Destroy(e.gameObject);
-        DoHide();
+        Hide();
         if (instance != null) Destroy(instance.gameObject);
         HUDController.PushEvent("A new day begins. Defend the village!");
     }
