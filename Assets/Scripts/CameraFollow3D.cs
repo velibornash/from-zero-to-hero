@@ -9,7 +9,7 @@ public class CameraFollow3D : MonoBehaviour
     public float maxDist = 60f;
 
     public float pitch = 55f;
-    float yaw;
+    public float yaw = 0f;
     public float currentDist = 45f;
 
     void Start()

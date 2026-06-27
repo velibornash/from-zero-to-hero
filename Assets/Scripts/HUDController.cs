@@ -2,18 +2,18 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 
-// HUD icons from game-icons.net under CC BY 3.0:
-// gold-nuggets by Delapouite (gold), log by Delapouite (wood), wheat by Lorc (food)
-
 public class HUDController : MonoBehaviour
 {
-    public static int Gold = 50;
+    public static int Gold = 10;
     public static int Wood = 0;
     public static int Food = 0;
     public static int Day = 1;
+    public const string ChapterName = "Chapter I: The Awakening";
 
     Text goldText, woodText, foodText, dayText, eventText;
     List<string> events = new List<string>();
+    List<float> eventTimestamps = new List<float>();
+    const float EVENT_LIFETIME = 8f;
     static HUDController instance;
 
     Sprite goldSprite, woodSprite, foodSprite;
@@ -37,147 +37,16 @@ public class HUDController : MonoBehaviour
         return null;
     }
 
-    void BuildHUD()
+    Text MakeText(Transform parent, string name, Vector2 anchoredPos, Vector2 size,
+        string content, int fontSize, FontStyle fontStyle, Color color, TextAnchor anchor)
     {
-        var topBar = new GameObject("TopBar");
-        topBar.transform.SetParent(transform, false);
-        var barRt = topBar.AddComponent<RectTransform>();
-        barRt.anchorMin = new Vector2(0, 1);
-        barRt.anchorMax = new Vector2(1, 1);
-        barRt.pivot = new Vector2(0.5f, 1);
-        barRt.offsetMin = new Vector2(0, -68);
-        barRt.offsetMax = new Vector2(0, 0);
-        var barImg = topBar.AddComponent<Image>();
-        barImg.color = new Color(0.015f, 0.015f, 0.04f, 0.9f);
-        barImg.raycastTarget = false;
-
-        // Separator line under bar
-        var sep = new GameObject("BarSeparator");
-        sep.transform.SetParent(topBar.transform, false);
-        var sepRt = sep.AddComponent<RectTransform>();
-        sepRt.anchorMin = new Vector2(0, 0);
-        sepRt.anchorMax = new Vector2(1, 0);
-        sepRt.pivot = new Vector2(0.5f, 0);
-        sepRt.offsetMin = new Vector2(0, -2);
-        sepRt.offsetMax = new Vector2(0, 0);
-        var sepImg = sep.AddComponent<Image>();
-        sepImg.color = new Color(0.6f, 0.5f, 0.2f, 0.6f);
-        sepImg.raycastTarget = false;
-
-        float x = 12f;
-        float iconSize = 30f;
-        float labelY = -14f;
-
-        // Gold
-        BuildIcon(topBar.transform, ref x, goldSprite, iconSize, labelY,
-            new Color(0.35f, 0.22f, 0.05f), new Color(1f, 0.84f, 0f));
-        goldText = BuildValue(topBar.transform, ref x, "50",
-            new Color(1f, 0.9f, 0.2f), 26);
-        x += 18f;
-
-        // Wood
-        BuildIcon(topBar.transform, ref x, woodSprite, iconSize, labelY,
-            new Color(0.2f, 0.12f, 0.03f), new Color(0.65f, 0.45f, 0.15f));
-        woodText = BuildValue(topBar.transform, ref x, "0",
-            new Color(0.85f, 0.75f, 0.55f), 22);
-        x += 18f;
-
-        // Food
-        BuildIcon(topBar.transform, ref x, foodSprite, iconSize, labelY,
-            new Color(0.15f, 0.15f, 0.05f), new Color(1f, 0.85f, 0.2f));
-        foodText = BuildValue(topBar.transform, ref x, "0",
-            new Color(1f, 0.85f, 0.3f), 22);
-        x += 18f;
-
-        // Day (right)
-        dayText = MakeText(topBar.transform, "", new Vector2(-16, -8), new Vector2(130, 40),
-            new Color(0.7f, 0.8f, 0.95f), 20, FontStyle.Bold, TextAnchor.MiddleRight);
-        dayText.GetComponent<RectTransform>().anchorMin = new Vector2(1, 0);
-        dayText.GetComponent<RectTransform>().anchorMax = new Vector2(1, 1);
-        dayText.GetComponent<RectTransform>().pivot = new Vector2(1, 0.5f);
-
-        // Event panel
-        var evPanel = new GameObject("EventPanel");
-        evPanel.transform.SetParent(transform, false);
-        var evRt = evPanel.AddComponent<RectTransform>();
-        evRt.anchorMin = new Vector2(1, 0.5f);
-        evRt.anchorMax = new Vector2(1, 0.5f);
-        evRt.pivot = new Vector2(1, 0.5f);
-        evRt.anchoredPosition = new Vector2(-8, 0);
-        evRt.sizeDelta = new Vector2(180, 240);
-        var evImg = evPanel.AddComponent<Image>();
-        evImg.color = new Color(0.015f, 0.015f, 0.04f, 0.72f);
-        evImg.raycastTarget = false;
-
-        var evSep = new GameObject("EventSep");
-        evSep.transform.SetParent(evPanel.transform, false);
-        var esRt = evSep.AddComponent<RectTransform>();
-        esRt.anchorMin = new Vector2(0, 1);
-        esRt.anchorMax = new Vector2(1, 1);
-        esRt.pivot = new Vector2(0.5f, 1);
-        esRt.anchoredPosition = new Vector2(0, -26);
-        esRt.sizeDelta = new Vector2(-8, -2);
-        var esImg = evSep.AddComponent<Image>();
-        esImg.color = new Color(0.6f, 0.5f, 0.2f, 0.4f);
-        esImg.raycastTarget = false;
-
-        MakeText(evPanel.transform, "Events", new Vector2(10, -8), new Vector2(160, 18),
-            new Color(0.5f, 0.6f, 0.75f), 13, FontStyle.Bold, TextAnchor.UpperLeft);
-
-        eventText = MakeText(evPanel.transform, "", new Vector2(10, -34), new Vector2(160, 200),
-            new Color(0.7f, 0.8f, 0.9f), 12, FontStyle.Normal, TextAnchor.UpperLeft);
-    }
-
-    void BuildIcon(Transform parent, ref float x, Sprite sprite, float size, float y,
-        Color bgColor, Color tint)
-    {
-        var bg = new GameObject("IconBg");
-        bg.transform.SetParent(parent, false);
-        var bgRt = bg.AddComponent<RectTransform>();
-        bgRt.anchorMin = new Vector2(0, 1);
-        bgRt.anchorMax = new Vector2(0, 1);
-        bgRt.pivot = new Vector2(0, 1);
-        bgRt.anchoredPosition = new Vector2(x, y);
-        bgRt.sizeDelta = new Vector2(size, size);
-        var bgImg = bg.AddComponent<Image>();
-        bgImg.color = bgColor;
-        bgImg.raycastTarget = false;
-
-        if (sprite != null)
-        {
-            var sym = new GameObject("IconSprite");
-            sym.transform.SetParent(bg.transform, false);
-            var sRt = sym.AddComponent<RectTransform>();
-            sRt.anchorMin = Vector2.zero;
-            sRt.anchorMax = Vector2.one;
-            sRt.sizeDelta = Vector2.zero;
-            var sImg = sym.AddComponent<Image>();
-            sImg.sprite = sprite;
-            sImg.color = tint;
-            sImg.raycastTarget = false;
-        }
-
-        x += size + 6;
-    }
-
-    Text BuildValue(Transform parent, ref float x, string initialValue, Color color, int fontSize)
-    {
-        var val = MakeText(parent, initialValue, new Vector2(x, -10), new Vector2(80, 36),
-            color, fontSize, FontStyle.Bold, TextAnchor.MiddleLeft);
-        x += 80;
-        return val;
-    }
-
-    Text MakeText(Transform parent, string content, Vector2 pos, Vector2 size, Color color,
-        int fontSize, FontStyle fontStyle, TextAnchor anchor)
-    {
-        var go = new GameObject("Text");
+        var go = new GameObject(name);
         go.transform.SetParent(parent, false);
         var rt = go.AddComponent<RectTransform>();
         rt.anchorMin = new Vector2(0, 1);
         rt.anchorMax = new Vector2(0, 1);
         rt.pivot = new Vector2(0, 1);
-        rt.anchoredPosition = pos;
+        rt.anchoredPosition = anchoredPos;
         rt.sizeDelta = size;
         var text = go.AddComponent<Text>();
         text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
@@ -186,7 +55,90 @@ public class HUDController : MonoBehaviour
         text.color = color;
         text.alignment = anchor;
         text.text = content;
+        text.raycastTarget = false;
         return text;
+    }
+
+    void BuildHUD()
+    {
+        // Top ribbon
+        var topBar = UIStyleHelper.MakeOrnatePanel(transform, 1600, 110);
+        var barRt = topBar.GetComponent<RectTransform>();
+        barRt.anchorMin = new Vector2(0, 1);
+        barRt.anchorMax = new Vector2(1, 1);
+        barRt.pivot = new Vector2(0.5f, 1);
+        barRt.offsetMin = new Vector2(0, -110);
+        barRt.offsetMax = new Vector2(0, 0);
+
+        float x = 32f;
+        const float iconSize = 64f;
+        const float labelY = -22f;
+
+        goldText = BuildResourceSlot(topBar.transform, ref x, goldSprite, "10", iconSize, labelY,
+            new Color(1f, 0.95f, 0.40f));
+        x += 18f;
+        woodText = BuildResourceSlot(topBar.transform, ref x, woodSprite, "0", iconSize, labelY,
+            new Color(0.95f, 0.82f, 0.50f));
+        x += 18f;
+        foodText = BuildResourceSlot(topBar.transform, ref x, foodSprite, "0", iconSize, labelY,
+            new Color(1f, 0.90f, 0.35f));
+        x += 32f;
+
+        MakeVerticalSeparator(topBar.transform, x);
+        x += 18f;
+
+        dayText = MakeText(topBar.transform, "Chapter", new Vector2(x, labelY), new Vector2(360, 50),
+            ChapterName, 28, FontStyle.Bold,
+            new Color(1f, 0.95f, 0.55f), TextAnchor.MiddleLeft);
+
+        // Reports panel (top right, ABOVE the minimap which is bottom-right)
+        var evPanel = UIStyleHelper.MakeOrnatePanel(transform, 360, 320);
+        var evRt = evPanel.GetComponent<RectTransform>();
+        evRt.anchorMin = new Vector2(1, 1);
+        evRt.anchorMax = new Vector2(1, 1);
+        evRt.pivot = new Vector2(1, 1);
+        evRt.anchoredPosition = new Vector2(-18, -130);
+        evRt.sizeDelta = new Vector2(360, 320);
+
+        MakeText(evPanel.transform, "Header", new Vector2(40, -22), new Vector2(320, 50),
+            "REPORTS", 32, FontStyle.Bold,
+            new Color(0.95f, 0.75f, 0.20f), TextAnchor.MiddleLeft);
+
+        eventText = MakeText(evPanel.transform, "Events", new Vector2(40, -80), new Vector2(280, 220),
+            "", 18, FontStyle.Bold,
+            new Color(1f, 0.90f, 0.60f), TextAnchor.UpperLeft);
+    }
+
+    Text BuildResourceSlot(Transform parent, ref float x, Sprite sprite, string initialValue,
+        float iconSize, float labelY, Color valueColor)
+    {
+        UIStyleHelper.MakeOrnateIcon(parent, sprite, (int)iconSize);
+        var iconRt = parent.GetChild(parent.childCount - 1).GetComponent<RectTransform>();
+        iconRt.anchorMin = new Vector2(0, 1);
+        iconRt.anchorMax = new Vector2(0, 1);
+        iconRt.pivot = new Vector2(0, 1);
+        iconRt.anchoredPosition = new Vector2(x, 0);
+        x += iconSize;
+
+        var text = MakeText(parent, "Value_" + initialValue, new Vector2(x, labelY), new Vector2(120, 50),
+            initialValue, 34, FontStyle.Bold, valueColor, TextAnchor.MiddleLeft);
+        x += 120;
+        return text;
+    }
+
+    void MakeVerticalSeparator(Transform parent, float x)
+    {
+        var sep = new GameObject("Sep");
+        sep.transform.SetParent(parent, false);
+        var rt = sep.AddComponent<RectTransform>();
+        rt.anchorMin = new Vector2(0, 1);
+        rt.anchorMax = new Vector2(0, 1);
+        rt.pivot = new Vector2(0, 1);
+        rt.anchoredPosition = new Vector2(x, -22);
+        rt.sizeDelta = new Vector2(2, 70);
+        var img = sep.AddComponent<Image>();
+        img.color = new Color(0.55f, 0.40f, 0.18f, 0.7f);
+        img.raycastTarget = false;
     }
 
     void Update()
@@ -194,15 +146,33 @@ public class HUDController : MonoBehaviour
         if (goldText != null) goldText.text = $"{Gold}";
         if (woodText != null) woodText.text = $"{Wood}";
         if (foodText != null) foodText.text = $"{Food}";
-        if (dayText != null) dayText.text = $"\u2600 Day {Day}";
+        if (dayText != null) dayText.text = ChapterName;
+
+        // Auto-fade events after EVENT_LIFETIME seconds
+        if (events.Count > 0)
+        {
+            bool changed = false;
+            while (events.Count > 0 && Time.time - eventTimestamps[eventTimestamps.Count - 1] > EVENT_LIFETIME)
+            {
+                events.RemoveAt(events.Count - 1);
+                eventTimestamps.RemoveAt(eventTimestamps.Count - 1);
+                changed = true;
+            }
+            if (changed && eventText != null)
+                eventText.text = string.Join("\n\n", events);
+        }
     }
 
     public static void PushEvent(string msg)
     {
         if (instance == null) return;
         instance.events.Insert(0, msg);
+        instance.eventTimestamps.Insert(0, Time.time);
         if (instance.events.Count > 5)
+        {
             instance.events.RemoveAt(instance.events.Count - 1);
+            instance.eventTimestamps.RemoveAt(instance.eventTimestamps.Count - 1);
+        }
         if (instance.eventText != null)
             instance.eventText.text = string.Join("\n\n", instance.events);
     }

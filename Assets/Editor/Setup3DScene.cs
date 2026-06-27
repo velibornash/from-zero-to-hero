@@ -1,7 +1,9 @@
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.SceneManagement;
+using UnityEditor.Animations;
 using System.Collections.Generic;
+using System.IO;
 
 public class Setup3DScene
 {
@@ -9,49 +11,100 @@ public class Setup3DScene
     const string NaturePrefabs = "Assets/Polytope Studio/Lowpoly_Environments/Prefabs";
     const string Kayak = "Assets/3D/KayKit/KayKit_Adventurers_2.0_FREE";
 
-    [MenuItem("Tools/Setup 3D Scene")]
+    const string OutputScenePath = "Assets/Village.unity";
+    const string OldScenePath = "Assets/Main.unity";
+
+    [MenuItem("Tools/Build 3D Scene")]
     public static void Build()
     {
+        ForceCleanCachedScene();
         Cleanup();
+        EnsureGoldIcon();
         CreateGround();
         PlaceVillage();
         PlaceNatureFeatures();
         PlaceForest();
-        PlaceNPCs();
+        PlaceDecorations();
+        SetupEnemySpawner();
+        SetupVillageWalls();
         PlacePlayer();
-        CreateBuildZones();
+        CreateSlots();
         SetupUI();
         SetupCamera();
         SetupLights();
         SetupPlayerSettings();
 
         var scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
-        if (!string.IsNullOrEmpty(scene.path))
-            EditorSceneManager.SaveScene(scene);
-        else
-            EditorSceneManager.SaveScene(scene, "Assets/Main.unity");
+        EditorSceneManager.SaveScene(scene, OutputScenePath);
 
-        Debug.Log("Scene saved! Press Play to see the village.");
+        // Make sure the standalone build always uses the generated Village scene.
+        EditorBuildSettings.scenes = new[] {
+            new EditorBuildSettingsScene(OutputScenePath, true)
+        };
+
+        // Open the freshly generated scene so the editor view refreshes immediately.
+        if (File.Exists(OutputScenePath))
+            EditorSceneManager.OpenScene(OutputScenePath);
+
+        Debug.Log($"Scene saved to {OutputScenePath}! Press Play to test the slots.");
     }
 
-    public static GameObject CreateInfoPanel()
+    [MenuItem("Tools/Clean Cache")]
+    public static void CleanCache()
     {
-        var canvasObj = GameObject.Find("InfoPanelCanvas");
-        if (canvasObj != null) return canvasObj;
-        canvasObj = new GameObject("InfoPanelCanvas");
-        var canvas = canvasObj.AddComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvas.sortingOrder = 100;
-        var scaler = canvasObj.AddComponent<UnityEngine.UI.CanvasScaler>();
-        scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920, 1080);
-        canvasObj.AddComponent<UnityEngine.UI.GraphicRaycaster>();
-        canvasObj.AddComponent<ObjectClickInfo>();
-        return canvasObj;
+        ForceCleanCachedScene();
+        Debug.Log("Cache cleaned. Run 'Build 3D Scene' to regenerate.");
+    }
+
+    static void ForceCleanCachedScene()
+    {
+        // Create a brand new empty active scene first so we don't operate on a deleted file.
+        var newScene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene);
+        EditorSceneManager.SetActiveScene(newScene);
+
+        // Always start from a fresh scene file so we never load stale cached content.
+        foreach (var path in new[] { OutputScenePath, OldScenePath })
+        {
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+                Debug.Log($"Deleted old {path}");
+            }
+
+            var metaPath = path + ".meta";
+            if (File.Exists(metaPath))
+            {
+                File.Delete(metaPath);
+                Debug.Log($"Deleted old {metaPath}");
+            }
+        }
+
+        // Delete cached prefabs and materials so they are rebuilt with proper shaders.
+        // Also delete the cached flag texture so color order fix takes effect.
+        string[] deleteDirs = { "Assets/Prefabs", "Assets/Materials", "Assets/Data/Slots", "Assets/Textures" };
+        foreach (var dir in deleteDirs)
+        {
+            if (Directory.Exists(dir))
+            {
+                Directory.Delete(dir, true);
+                Debug.Log($"Deleted {dir} (will be recreated)");
+            }
+            string meta = dir + ".meta";
+            if (File.Exists(meta))
+            {
+                File.Delete(meta);
+                Debug.Log($"Deleted {meta}");
+            }
+        }
+
+        AssetDatabase.Refresh();
     }
 
     static void Cleanup()
     {
+        var river = GameObject.Find("River");
+        if (river != null) Object.DestroyImmediate(river);
+
         var all = Object.FindObjectsByType<GameObject>(FindObjectsInactive.Include);
         foreach (var go in all)
         {
@@ -64,25 +117,37 @@ public class Setup3DScene
 
     static void CreateGround()
     {
-        var go = GameObject.CreatePrimitive(PrimitiveType.Plane);
+        // Use a very thick cube so the orthographic camera never sees past it.
+        var go = GameObject.CreatePrimitive(PrimitiveType.Cube);
         go.name = "Ground";
-        go.transform.localScale = new Vector3(30, 1, 28);
-        var tex = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/3D/NatureLite/T_Landscape_Grass.png");
-        var mat = new Material(Shader.Find("Standard"));
-        if (tex != null) { mat.mainTexture = tex; mat.mainTextureScale = new Vector2(200, 200); }
-        else { mat.color = new Color(0.25f, 0.5f, 0.18f); }
+        go.transform.localScale = new Vector3(1600f, 1200f, 1600f);
+        go.transform.position = new Vector3(0f, -600f, 0f);
+
+        string matPath = "Assets/Materials/Ground.mat";
+        var mat = AssetDatabase.LoadAssetAtPath<Material>(matPath);
+        if (mat == null)
+        {
+            Directory.CreateDirectory("Assets/Materials");
+            mat = new Material(Shader.Find("Standard"));
+            var tex = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/3D/NatureLite/T_Landscape_Grass.png");
+            if (tex != null)
+            {
+                mat.mainTexture = tex;
+                mat.mainTextureScale = new Vector2(200f, 200f);
+            }
+            else
+            {
+                mat.color = new Color(0.25f, 0.5f, 0.18f);
+            }
+            AssetDatabase.CreateAsset(mat, matPath);
+        }
         go.GetComponent<Renderer>().sharedMaterial = mat;
     }
 
     static void PlaceVillage()
     {
-        float left = -70f, right = 70f, bottom = -50f, top = 50f;
-
-        PlaceFence(left, right, bottom, top);
-        PlaceChurch();
-        PlaceCornerTowers(left, right, bottom, top);
-        PlaceHouses();
-        PlaceWatermill();
+        // Fence removed for now to keep the Hierarchy clean while debugging slots.
+        // Houses and watermill are now buildable slots, not pre-placed.
     }
 
     static void PlaceFence(float left, float right, float bottom, float top)
@@ -93,12 +158,19 @@ public class Setup3DScene
 
         int count = 0;
         float step = 2f, fy = 0;
-        float gateLeft = -5f, gateRight = 5f;
+        float gateLeft = -8f, gateRight = 8f;
+        float gateBuffer = 2.5f;
         const float fenceScaleY = 3f;
 
-        for (float x = left + 1f; x <= right - 1f; x += step)
+        for (float x = left + 1f; x <= gateLeft - gateBuffer; x += step)
         {
-            if (x >= gateLeft && x <= gateRight) continue;
+            var seg = (GameObject)Object.Instantiate(fencePrefab);
+            seg.transform.position = new Vector3(x, fy, bottom);
+            seg.transform.localScale = new Vector3(1f, fenceScaleY, 1f);
+            count++;
+        }
+        for (float x = gateRight + gateBuffer; x <= right - 1f; x += step)
+        {
             var seg = (GameObject)Object.Instantiate(fencePrefab);
             seg.transform.position = new Vector3(x, fy, bottom);
             seg.transform.localScale = new Vector3(1f, fenceScaleY, 1f);
@@ -251,57 +323,71 @@ public class Setup3DScene
         }
     }
 
-    static void AddBuildZoneLabel(GameObject zone, int cost)
+    static Texture2D CreateSerbianFlagTexture()
     {
-        var label = new GameObject("ZoneCostLabel");
-        label.transform.SetParent(zone.transform);
-        label.transform.localPosition = new Vector3(0, 0.7f, 0);
-        var tm = label.AddComponent<TextMesh>();
-        tm.text = $"\u25C6 {cost}g";
-        tm.fontSize = 28;
-        tm.alignment = TextAlignment.Center;
-        tm.anchor = TextAnchor.MiddleCenter;
-        tm.color = new Color(1f, 0.85f, 0.2f);
-        label.transform.localScale = new Vector3(0.06f, 0.06f, 0.06f);
-        label.AddComponent<Billboard>();
+        int w = 256, h = 170;
+        var tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
+        Color red = new Color(0.9f, 0.08f, 0.08f);
+        Color blue = new Color(0.05f, 0.18f, 0.55f);
+        Color white = Color.white;
 
-        var arrow = new GameObject("Arrow");
-        arrow.transform.SetParent(zone.transform);
-        arrow.transform.localPosition = new Vector3(0, 1.5f, 0);
-        var aTm = arrow.AddComponent<TextMesh>();
-        aTm.text = "\u25BC";
-        aTm.fontSize = 24;
-        aTm.alignment = TextAlignment.Center;
-        aTm.anchor = TextAnchor.MiddleCenter;
-        aTm.color = new Color(1f, 0.55f, 0f);
-        arrow.transform.localScale = new Vector3(0.06f, 0.06f, 0.06f);
-        arrow.AddComponent<Billboard>();
+        // Serbian tricolor: red top, blue middle, white bottom.
+        // Texture y=0 is bottom-left, so invert the order.
+        for (int y = 0; y < h; y++)
+        {
+            Color stripe = y < h / 3 ? white : (y < 2 * h / 3 ? blue : red);
+            for (int x = 0; x < w; x++)
+                tex.SetPixel(x, y, stripe);
+        }
+
+        // Stylized coat of arms near the hoist (left side), as on the Serbian state flag
+        int cx = w / 4, cy = h / 2;
+        int shieldW = 44, shieldH = 52;
+        for (int y = cy - shieldH / 2; y < cy + shieldH / 2; y++)
+            for (int x = cx - shieldW / 2; x < cx + shieldW / 2; x++)
+                tex.SetPixel(x, y, red);
+
+        int crossThick = 6;
+        for (int y = cy - shieldH / 2; y < cy + shieldH / 2; y++)
+            for (int x = cx - crossThick / 2; x < cx + crossThick / 2; x++)
+                tex.SetPixel(x, y, white);
+        for (int x = cx - shieldW / 2; x < cx + shieldW / 2; x++)
+            for (int y = cy - crossThick / 2; y < cy + crossThick / 2; y++)
+                tex.SetPixel(x, y, white);
+
+        // Four stylized ocila (small white crosses)
+        int ox = shieldW / 4, oy = shieldH / 4;
+        int[][] ocila = {
+            new[] { cx - ox, cy + oy },
+            new[] { cx + ox, cy + oy },
+            new[] { cx - ox, cy - oy },
+            new[] { cx + ox, cy - oy }
+        };
+        foreach (var o in ocila)
+        {
+            for (int dx = -3; dx <= 3; dx++) tex.SetPixel(o[0] + dx, o[1], white);
+            for (int dy = -3; dy <= 3; dy++) tex.SetPixel(o[0], o[1] + dy, white);
+        }
+
+        tex.Apply();
+        return tex;
+    }
+
+    static Texture2D EnsureSerbianFlagAsset()
+    {
+        string path = "Assets/Textures/SerbianFlag.png";
+        var existing = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+        if (existing != null) return existing;
+
+        var tex = CreateSerbianFlagTexture();
+        Directory.CreateDirectory(Path.GetDirectoryName(path));
+        File.WriteAllBytes(path, tex.EncodeToPNG());
+        AssetDatabase.Refresh();
+        return AssetDatabase.LoadAssetAtPath<Texture2D>(path);
     }
 
     static void PlaceNatureFeatures()
     {
-        var flagPole = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-        flagPole.name = "FlagPole";
-        flagPole.transform.position = new Vector3(-2f, 3f, -48f);
-        flagPole.transform.localScale = new Vector3(0.12f, 5f, 0.12f);
-        var poleMat = new Material(Shader.Find("Standard"));
-        poleMat.color = new Color(0.6f, 0.6f, 0.6f);
-        flagPole.GetComponent<Renderer>().sharedMaterial = poleMat;
-
-        string[] stripeColors = { "FF0000", "0033CC", "FFFFFF" };
-        for (int i = 0; i < 3; i++)
-        {
-            var stripe = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            stripe.name = "FlagStripe_" + stripeColors[i];
-            stripe.transform.position = new Vector3(-1f, 5.2f + i * 0.5f, -48f);
-            stripe.transform.localScale = new Vector3(2.5f, 0.5f, 0.05f);
-            Color c;
-            ColorUtility.TryParseHtmlString("#" + stripeColors[i], out c);
-            var stripeMat = new Material(Shader.Find("Standard"));
-            stripeMat.color = c;
-            stripe.GetComponent<Renderer>().sharedMaterial = stripeMat;
-        }
-
         var wheatMat = new Material(Shader.Find("Standard"));
         wheatMat.color = new Color(0.85f, 0.7f, 0.15f);
         for (int i = 0; i < 40; i++)
@@ -372,7 +458,8 @@ public class Setup3DScene
             }
         }
 
-        BuildProceduralRiver();
+        // River removed for now — it was clipping into the right edge of the screen.
+        // BuildProceduralRiver();
 
         var pond = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
         pond.name = "Pond";
@@ -400,8 +487,14 @@ public class Setup3DScene
     static void BuildProceduralRiver()
     {
         var river = new GameObject("River");
-        var matShallow = MakeWaterMaterial(0.28f, 0.62f, 0.78f, 0.78f);
-        var matDeep = MakeWaterMaterial(0.10f, 0.32f, 0.52f, 0.92f);
+
+        // Use the Polytope Studio water material with waves/foam instead of a flat blue plane.
+        var waterMat = AssetDatabase.LoadAssetAtPath<Material>("Assets/Polytope Studio/Lowpoly_Environments/Sources/Materials/PT_Water_mat.mat");
+        if (waterMat == null)
+        {
+            Debug.LogWarning("PT_Water_mat not found, falling back to flat water.");
+            waterMat = MakeWaterMaterial(0.28f, 0.62f, 0.78f, 0.78f);
+        }
 
         var bankMat = new Material(Shader.Find("Standard"));
         bankMat.color = new Color(0.45f, 0.36f, 0.22f);
@@ -443,9 +536,7 @@ public class Setup3DScene
             Object.DestroyImmediate(seg.GetComponent<MeshCollider>());
 
             var rend = seg.GetComponent<Renderer>();
-            float t = (float)i / (path.Length - 2);
-            float depthT = 1f - Mathf.Abs(t * 2f - 1f);
-            rend.sharedMaterial = depthT > 0.4f ? matDeep : matShallow;
+            rend.sharedMaterial = waterMat;
 
             var flow = seg.AddComponent<RiverFlow>();
             flow.flowDirection = new Vector2(Mathf.Sin(yaw * Mathf.Deg2Rad), Mathf.Cos(yaw * Mathf.Deg2Rad));
@@ -525,52 +616,586 @@ public class Setup3DScene
         var pine = AssetDatabase.LoadAssetAtPath<GameObject>(NaturePrefabs + "/Trees/PT_Pine_Tree_03_green.prefab");
         if (pine == null) return;
 
-        float[][] treePositions = new float[][] {
-            new float[] { -110f, -90f },
-            new float[] { -125f, -80f },
-            new float[] { -95f, -105f },
-            new float[] { -130f, -105f },
-            new float[] { -85f, -120f },
-            new float[] { -115f, -115f },
-            new float[] { -140f, -95f },
-            new float[] { -100f, -130f },
-            new float[] { -120f, -125f },
-            new float[] { -135f, -115f },
-        };
-
-        foreach (var pos in treePositions)
+        // Dense forest on the west (left) side — this is where enemies emerge.
+        for (int i = 0; i < 55; i++)
         {
+            float x = Random.Range(-160f, -80f);
+            float z = Random.Range(-140f, 140f);
+            // Leave a small opening near the village approach.
+            if (x > -100f && Mathf.Abs(z) < 30f) continue;
+
             var go = (GameObject)Object.Instantiate(pine);
-            go.transform.position = new Vector3(pos[0], 0, pos[1]);
-            go.transform.localScale = Vector3.one * Random.Range(3f, 5f);
+            go.transform.position = new Vector3(x, 0, z);
+            go.transform.localScale = Vector3.one * Random.Range(2.5f, 5f);
             go.transform.rotation = Quaternion.Euler(0, Random.Range(0, 360), 0);
+            go.name = "ForestTree";
+        }
+
+        // A smaller grove to the north for visual framing.
+        for (int i = 0; i < 15; i++)
+        {
+            float x = Random.Range(-60f, 60f);
+            float z = Random.Range(100f, 150f);
+            var go = (GameObject)Object.Instantiate(pine);
+            go.transform.position = new Vector3(x, 0, z);
+            go.transform.localScale = Vector3.one * Random.Range(2.5f, 4.5f);
+            go.transform.rotation = Quaternion.Euler(0, Random.Range(0, 360), 0);
+            go.name = "NorthTree";
         }
     }
 
     static void PlaceNPCs()
     {
-        string basePath = Kayak + "/Characters/fbx";
-        var npcDefs = new[] {
-            ("Barbarian", new Vector3(-15f, 0, -10f)),
-            ("Mage", new Vector3(15f, 0, -10f)),
-            ("Ranger", new Vector3(10f, 0, 15f)),
-            ("Rogue", new Vector3(-10f, 0, 15f))
+        // Friendly NPCs removed — the village starts empty until the player builds it.
+    }
+
+    static void SetupEnemySpawner()
+    {
+        var spawnerObj = new GameObject("EnemySpawner");
+        var spawner = spawnerObj.AddComponent<EnemySpawner>();
+
+        spawner.wolfPrefab = EnsureWolfPrefab();
+        spawner.barbarianPrefab = EnsureBarbarianPrefab();
+
+        // Spawn points closer to the village so enemies arrive faster
+        var points = new Transform[4];
+        var positions = new Vector3[] {
+            new Vector3(-90f, 0f, -60f),
+            new Vector3(-105f, 0f,   0f),
+            new Vector3(-90f, 0f,  60f),
+            new Vector3(-80f, 0f,  80f)
         };
-
-        foreach (var (name, pos) in npcDefs)
+        for (int i = 0; i < positions.Length; i++)
         {
-            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(basePath + "/" + name + ".fbx");
-            if (prefab == null) continue;
+            var p = new GameObject("SpawnPoint_" + i).transform;
+            p.position = positions[i];
+            p.SetParent(spawnerObj.transform);
+            points[i] = p;
+        }
+        spawner.spawnPoints = points;
+        spawner.enemiesPerWave = 3;
+        spawner.waveInterval = 6f;
+        spawner.maxConcurrentEnemies = 12;
+    }
 
-            var go = (GameObject)Object.Instantiate(prefab);
-            go.name = name;
-            go.transform.position = pos;
-            go.transform.localScale = Vector3.one * 1.8f;
+    static void SetupVillageWalls()
+    {
+        string fencePath = "Assets/Polytope Studio/Lowpoly_Village/Prefabs/Modular/Fence/PT_Modular_Fence_Wood_01.prefab";
+        var fencePrefab = AssetDatabase.LoadAssetAtPath<GameObject>(fencePath);
+        if (fencePrefab == null)
+        {
+            Debug.LogWarning("Fence prefab not found, VillageWalls disabled.");
+            return;
+        }
 
-            var patrol = go.AddComponent<NPCPatrol>();
-            patrol.idleOnly = false;
-            patrol.patrolRadius = 8f;
-            patrol.moveSpeed = 1.5f;
+        var wallsObj = new GameObject("VillageWalls");
+        var walls = wallsObj.AddComponent<VillageWalls>();
+        walls.fencePrefab = fencePrefab;
+        walls.fenceHeight = 2.5f;
+    }
+
+    static GameObject EnsureBarbarianPrefab()
+    {
+        string path = "Assets/Prefabs/BarbarianEnemy.prefab";
+        var existing = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+        if (existing != null) return existing;
+
+        Directory.CreateDirectory("Assets/Prefabs");
+        Directory.CreateDirectory("Assets/Materials");
+
+        var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(Kayak + "/Characters/fbx/Barbarian.fbx");
+        if (prefab == null)
+        {
+            Debug.LogWarning("Barbarian FBX not found, enemy spawner will skip barbarians.");
+            return null;
+        }
+
+        var go = (GameObject)Object.Instantiate(prefab);
+        go.name = "BarbarianEnemy";
+        go.transform.localScale = Vector3.one * 2.8f;
+        go.transform.position = new Vector3(0, 0.3f, 0);
+
+        // Assign animator controller so the barbarian walks instead of sliding.
+        var barbAnimator = go.GetComponentInChildren<Animator>();
+        if (barbAnimator != null)
+        {
+            barbAnimator.runtimeAnimatorController = EnsureBarbarianAnimatorController();
+            barbAnimator.applyRootMotion = false;
+        }
+
+        // Replace FBX materials with a saved Standard material to avoid pink shader issues.
+        string matPath = "Assets/Materials/BarbarianEnemy.mat";
+        var barbarianMat = AssetDatabase.LoadAssetAtPath<Material>(matPath);
+        if (barbarianMat == null)
+        {
+            barbarianMat = new Material(Shader.Find("Standard"));
+            barbarianMat.color = new Color(0.55f, 0.32f, 0.22f);
+            AssetDatabase.CreateAsset(barbarianMat, matPath);
+        }
+        foreach (var rend in go.GetComponentsInChildren<Renderer>())
+            rend.sharedMaterial = barbarianMat;
+
+        var cap = go.AddComponent<CapsuleCollider>();
+        cap.height = 2f;
+        cap.radius = 0.5f;
+        cap.center = new Vector3(0, 1f, 0);
+
+        // TODO: Add barbarian weapon from a free asset (check Downloads folder)
+        var enemy = go.AddComponent<Enemy>();
+        enemy.maxHealth = 4;
+        enemy.goldReward = 8;
+        enemy.moveSpeed = 5.5f;
+        enemy.enemyName = "Barbarian";
+
+        PrefabUtility.SaveAsPrefabAsset(go, path);
+        Object.DestroyImmediate(go);
+        return AssetDatabase.LoadAssetAtPath<GameObject>(path);
+    }
+
+    static GameObject EnsureWolfPrefab()
+    {
+        string path = "Assets/Prefabs/Wolf.prefab";
+        var existing = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+        if (existing != null) return existing;
+
+        Directory.CreateDirectory("Assets/Prefabs");
+
+        // Prefer the imported Wolf pack if the user has it in the project.
+        string importedPath = "Assets/Wolf/LRP(Built-in)/Wolf/Prefab/Wolf_LRP.prefab";
+        var imported = AssetDatabase.LoadAssetAtPath<GameObject>(importedPath);
+        if (imported != null)
+        {
+            var wolf = (GameObject)Object.Instantiate(imported);
+            wolf.name = "Wolf";
+            wolf.transform.localScale = Vector3.one * 3.5f;
+            wolf.transform.position = new Vector3(0, 0.2f, 0);
+
+            // Replace the broken demo Animator Controller (no parameters, auto-cycles)
+            // with our proper controller that supports Speed/Death parameters.
+            var wolfAnimator = wolf.GetComponentInChildren<Animator>();
+            if (wolfAnimator != null)
+            {
+                wolfAnimator.runtimeAnimatorController = EnsureWolfAnimatorController();
+                wolfAnimator.applyRootMotion = false;
+            }
+
+            // The imported prefab usually has its own collider; if not, add one.
+            if (wolf.GetComponentInChildren<Collider>() == null)
+            {
+                var cap = wolf.AddComponent<CapsuleCollider>();
+                cap.height = 1.6f;
+                cap.radius = 0.4f;
+                cap.center = new Vector3(0, 0.8f, 0);
+            }
+
+            var enemy = wolf.AddComponent<Enemy>();
+            enemy.maxHealth = 2;
+            enemy.goldReward = 5;
+            enemy.moveSpeed = 6.5f;
+            enemy.enemyName = "Wolf";
+
+            PrefabUtility.SaveAsPrefabAsset(wolf, path);
+            Object.DestroyImmediate(wolf);
+            return AssetDatabase.LoadAssetAtPath<GameObject>(path);
+        }
+
+        // Fallback procedural wolf if the imported pack is missing.
+        Directory.CreateDirectory("Assets/Materials");
+        string matPath = "Assets/Materials/Wolf.mat";
+        var wolfMat = AssetDatabase.LoadAssetAtPath<Material>(matPath);
+        if (wolfMat == null)
+        {
+            wolfMat = new Material(Shader.Find("Standard"));
+            wolfMat.color = new Color(0.45f, 0.42f, 0.38f);
+            AssetDatabase.CreateAsset(wolfMat, matPath);
+        }
+
+        var wolf2 = new GameObject("Wolf");
+        wolf2.transform.localScale = Vector3.one * 3.5f;
+
+        // Body — oriented along +Z so the wolf actually runs forward.
+        var body = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+        body.name = "Body";
+        body.transform.SetParent(wolf2.transform);
+        body.transform.localPosition = new Vector3(0f, 0.65f, 0f);
+        body.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
+        body.transform.localScale = new Vector3(0.55f, 1.1f, 0.55f);
+        body.GetComponent<Renderer>().sharedMaterial = wolfMat;
+        Object.DestroyImmediate(body.GetComponent<CapsuleCollider>());
+
+        // Head
+        var head = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        head.name = "Head";
+        head.transform.SetParent(wolf2.transform);
+        head.transform.localPosition = new Vector3(0f, 0.85f, 1.1f);
+        head.transform.localScale = Vector3.one * 0.45f;
+        head.GetComponent<Renderer>().sharedMaterial = wolfMat;
+        Object.DestroyImmediate(head.GetComponent<SphereCollider>());
+
+        // Ears
+        for (int side = -1; side <= 1; side += 2)
+        {
+            var ear = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            ear.name = "Ear";
+            ear.transform.SetParent(wolf2.transform);
+            ear.transform.localPosition = new Vector3(side * 0.18f, 1.15f, 1.25f);
+            ear.transform.localRotation = Quaternion.Euler(-15f, 0f, side * 10f);
+            ear.transform.localScale = new Vector3(0.1f, 0.2f, 0.1f);
+            ear.GetComponent<Renderer>().sharedMaterial = wolfMat;
+            Object.DestroyImmediate(ear.GetComponent<CapsuleCollider>());
+        }
+
+        // Tail
+        var tail = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+        tail.name = "Tail";
+        tail.transform.SetParent(wolf2.transform);
+        tail.transform.localPosition = new Vector3(0f, 0.75f, -1.1f);
+        tail.transform.localRotation = Quaternion.Euler(-70f, 0f, 0f);
+        tail.transform.localScale = new Vector3(0.12f, 0.55f, 0.12f);
+        tail.GetComponent<Renderer>().sharedMaterial = wolfMat;
+        Object.DestroyImmediate(tail.GetComponent<CapsuleCollider>());
+
+        // Legs
+        var legs = new Transform[4];
+        int legIndex = 0;
+        for (int x = -1; x <= 1; x += 2)
+        {
+            for (int z = -1; z <= 1; z += 2)
+            {
+                var leg = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                leg.name = "Leg";
+                leg.transform.SetParent(wolf2.transform);
+                leg.transform.localPosition = new Vector3(x * 0.25f, 0.25f, z * 0.55f);
+                leg.transform.localScale = new Vector3(0.12f, 0.5f, 0.12f);
+                leg.GetComponent<Renderer>().sharedMaterial = wolfMat;
+                Object.DestroyImmediate(leg.GetComponent<CapsuleCollider>());
+                legs[legIndex++] = leg.transform;
+            }
+        }
+
+        // Collider
+        var cap2 = wolf2.AddComponent<CapsuleCollider>();
+        cap2.direction = 2; // Z-axis
+        cap2.height = 2.4f;
+        cap2.radius = 0.45f;
+        cap2.center = new Vector3(0, 0.65f, 0);
+
+        var enemy2 = wolf2.AddComponent<Enemy>();
+        enemy2.maxHealth = 2;
+        enemy2.goldReward = 5;
+        enemy2.moveSpeed = 4.5f;
+        enemy2.enemyName = "Wolf";
+
+        var walker = wolf2.AddComponent<SimpleWalker>();
+        walker.body = body.transform;
+        walker.legs = legs;
+
+        PrefabUtility.SaveAsPrefabAsset(wolf2, path);
+        Object.DestroyImmediate(wolf2);
+        return AssetDatabase.LoadAssetAtPath<GameObject>(path);
+    }
+
+    static AnimationClip LoadKayKitClip(string fbxPath, string clipName)
+    {
+        var assets = AssetDatabase.LoadAllAssetsAtPath(fbxPath);
+        string log = $"Searching for '{clipName}' in {fbxPath}: ";
+        AnimationClip firstClip = null;
+        foreach (var obj in assets)
+        {
+            if (obj is AnimationClip clip)
+            {
+                if (firstClip == null) firstClip = clip;
+                log += $"[{clip.name}] ";
+                if (clip.name == clipName) { Debug.Log(log + "FOUND exact match."); return clip; }
+            }
+        }
+        if (firstClip != null)
+        {
+            // contains match
+            foreach (var obj in assets)
+            {
+                if (obj is AnimationClip clip && clip.name.ToLower().Contains(clipName.ToLower()))
+                { Debug.Log(log + "FOUND contains match: " + clip.name); return clip; }
+            }
+            Debug.Log(log + $"No match for '{clipName}', using first clip: {firstClip.name}");
+            return firstClip;
+        }
+
+        // No clips at all in this FBX – search all KayKit FBX files as fallback
+        Debug.LogWarning(log + $"NO clips found in {fbxPath}. Searching ALL KayKit FBX files...");
+        // Also generate procedural clips as last-resort fallback (see GenerateProceduralClip)
+        string kayakDir = "Assets/3D/KayKit";
+        string[] fbxFiles = System.IO.Directory.GetFiles(Application.dataPath + "/3D/KayKit",
+            "*.fbx", System.IO.SearchOption.AllDirectories);
+        foreach (string fullPath in fbxFiles)
+        {
+            string relPath = "Assets" + fullPath.Substring(Application.dataPath.Length);
+            var fbxAssets = AssetDatabase.LoadAllAssetsAtPath(relPath);
+            foreach (var obj in fbxAssets)
+            {
+                if (obj is AnimationClip clip)
+                {
+                    if (clip.name.ToLower().Contains(clipName.ToLower()))
+                    { Debug.Log($"Found '{clipName}' in {relPath}: {clip.name}"); return clip; }
+                }
+            }
+        }
+        // Absolute last resort: return any clip from any KayKit FBX
+        foreach (string fullPath in fbxFiles)
+        {
+            string relPath = "Assets" + fullPath.Substring(Application.dataPath.Length);
+            var fbxAssets = AssetDatabase.LoadAllAssetsAtPath(relPath);
+            foreach (var obj in fbxAssets)
+            {
+                if (obj is AnimationClip clip)
+                { Debug.LogWarning($"Fallback clip from {relPath}: {clip.name}"); return clip; }
+            }
+        }
+        Debug.LogError($"NO animation clips found in ANY KayKit FBX file!");
+        return null;
+    }
+
+    static AnimatorController EnsureHeroAnimatorController()
+    {
+        string path = "Assets/Animations/HeroAnimator.controller";
+        var existing = AssetDatabase.LoadAssetAtPath<AnimatorController>(path);
+        if (existing != null) return existing;
+
+        Directory.CreateDirectory("Assets/Animations");
+
+        string movementFbx = "Assets/3D/KayKit/KayKit_Adventurers_2.0_FREE/Animations/fbx/Rig_Medium/Rig_Medium_MovementBasic.fbx";
+        string generalFbx = "Assets/3D/KayKit/KayKit_Adventurers_2.0_FREE/Animations/fbx/Rig_Medium/Rig_Medium_General.fbx";
+
+        var walkClip = LoadKayKitClip(movementFbx, "Walking_A");
+        var idleClip = LoadKayKitClip(generalFbx, "Idle_A");
+
+        var controller = new AnimatorController();
+        controller.name = "HeroAnimator";
+        AssetDatabase.CreateAsset(controller, path);
+
+        controller.AddParameter("Speed", AnimatorControllerParameterType.Float);
+        controller.AddLayer("Base Layer");
+
+        var rootStateMachine = controller.layers[0].stateMachine;
+
+        var idleState = rootStateMachine.AddState("Idle");
+        if (idleClip != null) idleState.motion = idleClip;
+
+        var walkState = rootStateMachine.AddState("Walk");
+        if (walkClip != null) walkState.motion = walkClip;
+
+        var idleToWalk = idleState.AddTransition(walkState);
+        idleToWalk.AddCondition(AnimatorConditionMode.Greater, 0.1f, "Speed");
+        idleToWalk.duration = 0.1f;
+
+        var walkToIdle = walkState.AddTransition(idleState);
+        walkToIdle.AddCondition(AnimatorConditionMode.Less, 0.1f, "Speed");
+        walkToIdle.duration = 0.1f;
+
+        EditorUtility.SetDirty(controller);
+        AssetDatabase.SaveAssets();
+        Debug.Log($"Created AnimatorController at {path} (Walk: {walkClip?.name}, Idle: {idleClip?.name})");
+        return controller;
+    }
+
+    static AnimatorController EnsureBarbarianAnimatorController()
+    {
+        string path = "Assets/Animations/BarbarianAnimator.controller";
+        var existing = AssetDatabase.LoadAssetAtPath<AnimatorController>(path);
+        if (existing != null) return existing;
+
+        Directory.CreateDirectory("Assets/Animations");
+
+        string movementFbx = "Assets/3D/KayKit/KayKit_Adventurers_2.0_FREE/Animations/fbx/Rig_Medium/Rig_Medium_MovementBasic.fbx";
+        string generalFbx = "Assets/3D/KayKit/KayKit_Adventurers_2.0_FREE/Animations/fbx/Rig_Medium/Rig_Medium_General.fbx";
+
+        var walkClip = LoadKayKitClip(movementFbx, "Walking_A");
+        var idleClip = LoadKayKitClip(generalFbx, "Idle_A");
+        var deathClip = LoadKayKitClip(generalFbx, "Death_A");
+
+        var controller = new AnimatorController();
+        controller.name = "BarbarianAnimator";
+        AssetDatabase.CreateAsset(controller, path);
+
+        controller.AddParameter("Speed", AnimatorControllerParameterType.Float);
+        controller.AddParameter("Attack", AnimatorControllerParameterType.Trigger);
+        controller.AddParameter("Death", AnimatorControllerParameterType.Trigger);
+        controller.AddLayer("Base Layer");
+
+        var rootStateMachine = controller.layers[0].stateMachine;
+
+        var idleState = rootStateMachine.AddState("Idle");
+        if (idleClip != null) idleState.motion = idleClip;
+
+        var walkState = rootStateMachine.AddState("Walk");
+        if (walkClip != null) walkState.motion = walkClip;
+
+        var attackState = rootStateMachine.AddState("Attack");
+        if (walkClip != null) attackState.motion = walkClip; // Use walk clip as attack placeholder
+
+        var deathState = rootStateMachine.AddState("Death");
+        if (deathClip != null) deathState.motion = deathClip;
+
+        var idleToWalk = idleState.AddTransition(walkState);
+        idleToWalk.AddCondition(AnimatorConditionMode.Greater, 0.1f, "Speed");
+        idleToWalk.duration = 0.1f;
+
+        var walkToIdle = walkState.AddTransition(idleState);
+        walkToIdle.AddCondition(AnimatorConditionMode.Less, 0.1f, "Speed");
+        walkToIdle.duration = 0.1f;
+
+        var idleToAttack = idleState.AddTransition(attackState);
+        idleToAttack.AddCondition(AnimatorConditionMode.If, 0f, "Attack");
+        idleToAttack.duration = 0.15f;
+        var attackToIdle = attackState.AddTransition(idleState);
+        attackToIdle.duration = 0.3f;
+
+        var anyToDeath = rootStateMachine.AddAnyStateTransition(deathState);
+        anyToDeath.AddCondition(AnimatorConditionMode.If, 0f, "Death");
+        anyToDeath.duration = 0.2f;
+
+        EditorUtility.SetDirty(controller);
+        AssetDatabase.SaveAssets();
+        Debug.Log($"Created AnimatorController at {path}");
+        return controller;
+    }
+
+    static AnimatorController EnsureWolfAnimatorController()
+    {
+        string path = "Assets/Animations/WolfAnimator.controller";
+        var existing = AssetDatabase.LoadAssetAtPath<AnimatorController>(path);
+        if (existing != null) return existing;
+
+        Directory.CreateDirectory("Assets/Animations");
+
+        // Try to use the imported pack's controller as a base, adding parameters.
+        string importedControllerPath = "Assets/Wolf/Animations/Wolf_Controller/WolfAnimations.controller";
+        var importedCtrl = AssetDatabase.LoadAssetAtPath<AnimatorController>(importedControllerPath);
+        if (importedCtrl != null)
+        {
+            // Clone it into our path with added parameters
+            var controller = Object.Instantiate(importedCtrl);
+            controller.name = "WolfAnimator";
+            AssetDatabase.CreateAsset(controller, path);
+
+            bool hasSpeed = false, hasDeath = false;
+            foreach (var p in controller.parameters)
+            {
+                if (p.name == "Speed") hasSpeed = true;
+                if (p.name == "Death") hasDeath = true;
+            }
+            if (!hasSpeed) controller.AddParameter("Speed", AnimatorControllerParameterType.Float);
+            if (!hasDeath) controller.AddParameter("Death", AnimatorControllerParameterType.Trigger);
+
+            EditorUtility.SetDirty(controller);
+            AssetDatabase.SaveAssets();
+            Debug.Log($"WolfAnimator: cloned from imported pack with added parameters.");
+            return controller;
+        }
+
+        // Fallback: create from scratch using clips from the wolf model FBX
+        string wolfFbx = "Assets/Wolf/Models/Wolf.fbx";
+        var walkClip = LoadKayKitClip(wolfFbx, "Walk");
+        if (walkClip == null)
+        {
+            var assets = AssetDatabase.LoadAllAssetsAtPath(wolfFbx);
+            foreach (var obj in assets)
+                if (obj is AnimationClip clip) { walkClip = clip; break; }
+        }
+
+        var ctrl = new AnimatorController();
+        ctrl.name = "WolfAnimator";
+        AssetDatabase.CreateAsset(ctrl, path);
+
+        ctrl.AddParameter("Speed", AnimatorControllerParameterType.Float);
+        ctrl.AddParameter("Death", AnimatorControllerParameterType.Trigger);
+        ctrl.AddLayer("Base Layer");
+
+        var rootSM = ctrl.layers[0].stateMachine;
+
+        var idleSt = rootSM.AddState("Idle");
+        if (walkClip != null) idleSt.motion = walkClip;
+
+        var walkSt = rootSM.AddState("Walk");
+        if (walkClip != null) walkSt.motion = walkClip;
+
+        var deathSt = rootSM.AddState("Death");
+        if (walkClip != null) deathSt.motion = walkClip;
+
+        var i2w = idleSt.AddTransition(walkSt);
+        i2w.AddCondition(AnimatorConditionMode.Greater, 0.1f, "Speed");
+        i2w.duration = 0.1f;
+
+        var w2i = walkSt.AddTransition(idleSt);
+        w2i.AddCondition(AnimatorConditionMode.Less, 0.1f, "Speed");
+        w2i.duration = 0.1f;
+
+        var anyD = rootSM.AddAnyStateTransition(deathSt);
+        anyD.AddCondition(AnimatorConditionMode.If, 0f, "Death");
+        anyD.duration = 0.2f;
+
+        EditorUtility.SetDirty(ctrl);
+        AssetDatabase.SaveAssets();
+        Debug.Log($"WolfAnimator: created from scratch (walkClip: {walkClip?.name ?? "null"})");
+        return ctrl;
+    }
+
+    static void PlaceDecorations()
+    {
+        // A small lake on the east side, away from the village.
+        var lake = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+        lake.name = "Lake";
+        lake.transform.position = new Vector3(95f, 0.02f, 45f);
+        lake.transform.localScale = new Vector3(18f, 0.05f, 14f);
+        lake.GetComponent<Renderer>().sharedMaterial = MakeWaterMaterial(0.18f, 0.48f, 0.72f, 0.8f);
+
+        // Rocks around the lake and near the forest edge.
+        var rockPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(NaturePrefabs + "/Rocks/PT_Generic_Rock_01.prefab");
+        if (rockPrefab != null)
+        {
+            for (int i = 0; i < 18; i++)
+            {
+                float rx = Random.Range(80f, 120f);
+                float rz = Random.Range(20f, 80f);
+                var r = (GameObject)Object.Instantiate(rockPrefab);
+                r.transform.position = new Vector3(rx, 0, rz);
+                r.transform.localScale = Vector3.one * Random.Range(1.5f, 3.5f);
+                r.transform.rotation = Quaternion.Euler(0, Random.Range(0, 360), 0);
+            }
+        }
+
+        // Flowers sprinkled around the safe meadow.
+        var flowerPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(NaturePrefabs + "/Flowers/PT_Poppy_02.prefab");
+        if (flowerPrefab != null)
+        {
+            for (int i = 0; i < 45; i++)
+            {
+                float fx = Random.Range(-70f, 70f);
+                float fz = Random.Range(-70f, 70f);
+                // Keep flowers off the path and the church footprint.
+                if (Mathf.Abs(fx) < 4f && fz < 5f && fz > -55f) continue;
+
+                var f = (GameObject)Object.Instantiate(flowerPrefab);
+                f.transform.position = new Vector3(fx, 0, fz);
+                f.transform.localScale = Vector3.one * Random.Range(0.6f, 1.1f);
+                f.transform.rotation = Quaternion.Euler(0, Random.Range(0, 360), 0);
+            }
+        }
+
+        // A few bushes for low cover.
+        var bushPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(NaturePrefabs + "/Bushes/PT_Bush_02.prefab");
+        if (bushPrefab != null)
+        {
+            for (int i = 0; i < 12; i++)
+            {
+                float bx = Random.Range(-75f, 75f);
+                float bz = Random.Range(-75f, 75f);
+                if (Mathf.Abs(bx) < 6f && bz > -55f && bz < 10f) continue;
+                var b = (GameObject)Object.Instantiate(bushPrefab);
+                b.transform.position = new Vector3(bx, 0, bz);
+                b.transform.localScale = Vector3.one * Random.Range(1f, 2f);
+                b.transform.rotation = Quaternion.Euler(0, Random.Range(0, 360), 0);
+            }
         }
     }
 
@@ -587,37 +1212,256 @@ public class Setup3DScene
 
         go.tag = "Player";
         go.AddComponent<PlayerController3D>();
+
+        // Assign animator controller so the hero walks instead of sliding.
+        var heroAnimator = go.GetComponentInChildren<Animator>();
+        if (heroAnimator != null)
+        {
+            heroAnimator.runtimeAnimatorController = EnsureHeroAnimatorController();
+            heroAnimator.applyRootMotion = false;
+        }
+
+        // Simple sword for visual combat feedback.
+        Directory.CreateDirectory("Assets/Materials");
+        string swordMatPath = "Assets/Materials/HeroSword.mat";
+        var swordMat = AssetDatabase.LoadAssetAtPath<Material>(swordMatPath);
+        if (swordMat == null)
+        {
+            swordMat = new Material(Shader.Find("Standard"));
+            swordMat.color = new Color(0.75f, 0.75f, 0.8f);
+            AssetDatabase.CreateAsset(swordMat, swordMatPath);
+        }
+
+        var sword = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        sword.name = "HeroSword";
+        sword.transform.SetParent(go.transform);
+        sword.transform.localPosition = new Vector3(0.65f, 1.2f, 0.4f);
+        sword.transform.localRotation = Quaternion.Euler(0f, 0f, -30f);
+        sword.transform.localScale = new Vector3(0.12f, 1.4f, 0.05f);
+        sword.GetComponent<Renderer>().sharedMaterial = swordMat;
+        Object.DestroyImmediate(sword.GetComponent<BoxCollider>());
+
+        var weapon = go.AddComponent<SimpleWeapon>();
+        weapon.weapon = sword.transform;
     }
 
-    static void CreateBuildZones()
+    static void CreateSlots()
     {
-        var spots = new Vector3[] {
-            new Vector3(12f, 0f, -35f),
-            new Vector3(-75f, 0f, 0f),
-            new Vector3(75f, 0f, 0f),
-            new Vector3(0f, 0f, -55f)
+        var slotManagerObj = new GameObject("SlotManager");
+        slotManagerObj.AddComponent<SlotManager>();
+
+        var churchSlot = EnsureSlotAsset("ChurchSlot", "Church", 10,
+            Village + "/building_church_green.fbx",
+            new Vector3(0f, 0f, 0f), Vector3.zero, Vector3.one * 8f,
+            "Church built! The village has a heart.");
+        CreateSlotGameObject(churchSlot, 0, true);
+
+        var flagSlot = EnsureSlotAsset("FlagSlot", "Flag", 10,
+            null,
+            new Vector3(-2f, 0f, -48f), Vector3.zero, Vector3.one,
+            "Flag raised! The Serbian banner flies high.");
+        flagSlot.buildingPrefab = EnsureFlagPrefab();
+        CreateSlotGameObject(flagSlot, 1, false);
+
+        float left = -70f, right = 70f, bottom = -50f, top = 50f;
+        var towerPositions = new Vector3[] {
+            new Vector3(left, 0, bottom),
+            new Vector3(right, 0, bottom),
+            new Vector3(right, 0, top),
+            new Vector3(left, 0, top)
         };
-
-        var mat = new Material(Shader.Find("Standard"));
-        mat.color = new Color(0.2f, 0.55f, 0.9f, 0.3f);
-        mat.SetFloat("_Mode", 3);
-        mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-        mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-        mat.SetInt("_ZWrite", 0);
-
-        foreach (var pos in spots)
+        for (int i = 0; i < 4; i++)
         {
-            var zone = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            zone.name = "BuildZone";
-            zone.transform.position = pos;
-            zone.transform.localScale = new Vector3(6f, 2f, 6f);
-            zone.GetComponent<BoxCollider>().isTrigger = true;
-            zone.GetComponent<Renderer>().sharedMaterial = mat;
-
-            var bz = zone.AddComponent<BuildZone>();
-            bz.cost = 15;
-            AddBuildZoneLabel(zone, bz.cost);
+            string assetName = $"TowerSlot_{i + 1}";
+            var towerSlot = EnsureSlotAsset(assetName, "Tower", 10,
+                Village + "/building_tower_A_green.fbx",
+                towerPositions[i], new Vector3(0f, 45f, 0f), new Vector3(4f, 7.5f, 4f),
+                "Tower built!");
+            CreateSlotGameObject(towerSlot, i + 2, false);
         }
+
+        // Mage tiles inside the village, near each corner tower
+        Vector3[] mageOffsets = new Vector3[] {
+            new Vector3( 15f, 0f,  15f),  // tower 1 (SW corner): inward
+            new Vector3(-15f, 0f,  15f),  // tower 2 (SE corner): inward
+            new Vector3(-15f, 0f, -15f),  // tower 3 (NE corner): inward
+            new Vector3( 15f, 0f, -15f),  // tower 4 (NW corner): inward
+        };
+        for (int i = 0; i < 4; i++)
+        {
+            string assetName = $"MageSlot_{i + 1}";
+            var magePos = towerPositions[i] + mageOffsets[i];
+            var mageSlot = EnsureSlotAsset(assetName, "Mage Tile", 10,
+                null,
+                magePos, Vector3.zero, Vector3.one,
+                "Mage joins the defense!");
+            CreateSlotGameObject(mageSlot, 6 + i, false);
+        }
+    }
+
+    static void CreateSlotGameObject(BuildSlotData data, int index, bool unlocked)
+    {
+        var slotObj = new GameObject("Slot_" + data.slotName);
+        slotObj.transform.position = data.position;
+        slotObj.transform.rotation = Quaternion.Euler(data.rotation);
+
+        var col = slotObj.AddComponent<BoxCollider>();
+        col.isTrigger = true;
+        col.size = new Vector3(8.5f, 4f, 8.5f);
+        col.center = new Vector3(0, 2f, 0);
+
+        var slot = slotObj.AddComponent<BuildSlot>();
+        slot.Init(data, index, unlocked);
+    }
+
+    static BuildSlotData EnsureSlotAsset(string assetName, string slotName, int cost,
+        string prefabPath, Vector3 pos, Vector3 rot, Vector3 scale, string message)
+    {
+        string path = $"Assets/Data/Slots/{assetName}.asset";
+        var existing = AssetDatabase.LoadAssetAtPath<BuildSlotData>(path);
+        if (existing != null)
+        {
+            existing.slotName = slotName;
+            existing.cost = cost;
+            existing.position = pos;
+            existing.rotation = rot;
+            existing.scale = scale;
+            existing.completedMessage = message;
+            if (!string.IsNullOrEmpty(prefabPath))
+                existing.buildingPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+            EditorUtility.SetDirty(existing);
+            return existing;
+        }
+
+        Directory.CreateDirectory("Assets/Data/Slots");
+        var asset = ScriptableObject.CreateInstance<BuildSlotData>();
+        asset.name = assetName;
+        asset.slotName = slotName;
+        asset.cost = cost;
+        asset.position = pos;
+        asset.rotation = rot;
+        asset.scale = scale;
+        asset.completedMessage = message;
+        if (!string.IsNullOrEmpty(prefabPath))
+            asset.buildingPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+        AssetDatabase.CreateAsset(asset, path);
+        AssetDatabase.SaveAssets();
+        return asset;
+    }
+
+    static GameObject EnsureFlagPrefab()
+    {
+        string path = "Assets/Prefabs/Flag.prefab";
+        var existing = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+        if (existing != null) return existing;
+
+        Directory.CreateDirectory("Assets/Prefabs");
+        Directory.CreateDirectory("Assets/Materials");
+
+        var flagTex = EnsureSerbianFlagAsset();
+
+        string flagMatPath = "Assets/Materials/Flag.mat";
+        var flagMat = AssetDatabase.LoadAssetAtPath<Material>(flagMatPath);
+        if (flagMat == null)
+        {
+            flagMat = new Material(Shader.Find("Unlit/Texture"));
+            flagMat.mainTexture = flagTex;
+            AssetDatabase.CreateAsset(flagMat, flagMatPath);
+        }
+
+        string poleMatPath = "Assets/Materials/FlagPole.mat";
+        var poleMat = AssetDatabase.LoadAssetAtPath<Material>(poleMatPath);
+        if (poleMat == null)
+        {
+            poleMat = new Material(Shader.Find("Standard"));
+            poleMat.color = new Color(0.6f, 0.6f, 0.6f);
+            AssetDatabase.CreateAsset(poleMat, poleMatPath);
+        }
+
+        var flag = new GameObject("Flag");
+
+        var pole = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+        pole.name = "FlagPole";
+        pole.transform.SetParent(flag.transform);
+        pole.transform.localPosition = new Vector3(0f, 5f, 0f);
+        pole.transform.localScale = new Vector3(0.2f, 10f, 0.2f);
+        pole.GetComponent<Renderer>().sharedMaterial = poleMat;
+        Object.DestroyImmediate(pole.GetComponent<CapsuleCollider>());
+
+        for (int side = 0; side < 2; side++)
+        {
+            var quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            quad.name = side == 0 ? "FlagFront" : "FlagBack";
+            quad.transform.SetParent(flag.transform);
+            quad.transform.localPosition = new Vector3(2.2f, 9f, 0f);
+            quad.transform.localScale = new Vector3(4.5f, 3f, 1f);
+            quad.transform.rotation = Quaternion.Euler(0, side * 180f, 0);
+            Object.DestroyImmediate(quad.GetComponent<MeshCollider>());
+            quad.GetComponent<Renderer>().sharedMaterial = flagMat;
+        }
+
+        PrefabUtility.SaveAsPrefabAsset(flag, path);
+        Object.DestroyImmediate(flag);
+        return AssetDatabase.LoadAssetAtPath<GameObject>(path);
+    }
+
+    static void EnsureGoldIcon()
+    {
+        string path = "Assets/Resources/HUDIcons/gold_icon.png";
+        bool existed = File.Exists(path);
+
+        int size = 128;
+        var tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        Color clear = new Color(0, 0, 0, 0);
+        Color gold = new Color(1f, 0.84f, 0.12f);
+        Color goldMid = new Color(0.95f, 0.7f, 0.08f);
+        Color goldDark = new Color(0.7f, 0.45f, 0.04f);
+        Color shine = new Color(1f, 0.96f, 0.6f);
+
+        int r = size / 2 - 2;
+        int cx = size / 2, cy = size / 2;
+        for (int x = 0; x < size; x++)
+        {
+            for (int y = 0; y < size; y++)
+            {
+                int dx = x - cx, dy = y - cy;
+                int d2 = dx * dx + dy * dy;
+                if (d2 > r * r) { tex.SetPixel(x, y, clear); continue; }
+
+                if (d2 > (r - 4) * (r - 4)) tex.SetPixel(x, y, goldDark);
+                else if (dy > size / 6 && dx < size / 6) tex.SetPixel(x, y, shine);
+                else tex.SetPixel(x, y, gold);
+            }
+        }
+
+        // Stylized "$" in the centre to read as coin/money
+        int thick = 8;
+        for (int x = cx - 10; x <= cx + 10; x++)
+            for (int y = cy - thick / 2; y <= cy + thick / 2; y++)
+                tex.SetPixel(x, y, goldMid);
+        for (int y = cy - 22; y <= cy + 22; y++)
+            for (int x = cx - thick / 2; x <= cx + thick / 2; x++)
+                tex.SetPixel(x, y, goldMid);
+        for (int x = cx - 14; x <= cx + 14; x++)
+        {
+            tex.SetPixel(x, cy + 20, goldMid);
+            tex.SetPixel(x, cy - 20, goldMid);
+        }
+
+        tex.Apply();
+        Directory.CreateDirectory(Path.GetDirectoryName(path));
+        File.WriteAllBytes(path, tex.EncodeToPNG());
+        AssetDatabase.Refresh();
+
+        var importer = AssetImporter.GetAtPath(path) as TextureImporter;
+        if (importer != null)
+        {
+            importer.textureType = TextureImporterType.Sprite;
+            importer.spriteImportMode = SpriteImportMode.Single;
+            importer.SaveAndReimport();
+        }
+
+        Debug.Log($"Generated gold coin icon at {path}");
     }
 
     static void SetupUI()
@@ -628,11 +1472,21 @@ public class Setup3DScene
         var scaler = canvasObj.AddComponent<UnityEngine.UI.CanvasScaler>();
         scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1920, 1080);
+        scaler.screenMatchMode = UnityEngine.UI.CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+        scaler.matchWidthOrHeight = 0f;
         canvasObj.AddComponent<UnityEngine.UI.GraphicRaycaster>();
+        // Add EventSystem for UI input (clicks, taps)
+        var es = Object.FindObjectOfType<UnityEngine.EventSystems.EventSystem>();
+        if (es == null)
+        {
+            var esObj = new GameObject("EventSystem");
+            esObj.AddComponent<UnityEngine.EventSystems.EventSystem>();
+            esObj.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
+        }
         canvasObj.AddComponent<HUDController>();
         canvasObj.AddComponent<HUDInfoPanel>();
         canvasObj.AddComponent<MinimapController>();
-        CreateInfoPanel();
+        canvasObj.AddComponent<MobileControls>();
     }
 
     static void SetupCamera()
@@ -646,16 +1500,22 @@ public class Setup3DScene
         }
 
         cam.orthographic = true;
-        cam.orthographicSize = 30;
-        cam.transform.position = new Vector3(0, 15, -30);
-        cam.transform.rotation = Quaternion.Euler(30, 0, 0);
+        cam.orthographicSize = 30f;
+        cam.transform.position = new Vector3(0, 28, -30);
+        cam.transform.rotation = Quaternion.Euler(35, 0, 0);
+        cam.farClipPlane = 300f;
+        cam.nearClipPlane = 0.5f;
         cam.clearFlags = CameraClearFlags.SolidColor;
-        cam.backgroundColor = new Color(0.45f, 0.7f, 0.88f);
+        cam.backgroundColor = new Color(0.25f, 0.5f, 0.18f);
 
         var follow = cam.gameObject.AddComponent<CameraFollow3D>();
-        follow.baseDist = 25f;
-        follow.currentDist = 25f;
-        follow.pitch = 30f;
+        follow.baseDist = 28f;
+        follow.currentDist = 28f;
+        follow.minDist = 10f;
+        follow.maxDist = 60f;
+        follow.pitch = 35f;
+        follow.yaw = 0f;
+        follow.smoothSpeed = 6f;
     }
 
     static void SetupLights()
@@ -667,7 +1527,7 @@ public class Setup3DScene
         light.type = LightType.Directional;
         light.transform.rotation = Quaternion.Euler(50, -30, 0);
         light.intensity = 1.3f;
-        light.shadows = LightShadows.Soft;
+        light.shadows = LightShadows.None;
     }
 
     static void SetupPlayerSettings()
@@ -677,5 +1537,16 @@ public class Setup3DScene
         PlayerSettings.defaultScreenHeight = 1080;
         PlayerSettings.runInBackground = true;
         PlayerSettings.resizableWindow = true;
+
+        // Mobile-first: lock to landscape on phones/tablets
+        PlayerSettings.defaultInterfaceOrientation = UIOrientation.LandscapeLeft;
+        PlayerSettings.allowedAutorotateToLandscapeLeft = true;
+        PlayerSettings.allowedAutorotateToLandscapeRight = true;
+        PlayerSettings.allowedAutorotateToPortrait = false;
+        PlayerSettings.allowedAutorotateToPortraitUpsideDown = false;
+
+        // iOS/Android common quality of life
+        PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.iOS, "com.yourname.fromzerotohero");
+        PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android, "com.yourname.fromzerotohero");
     }
 }

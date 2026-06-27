@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 public static class SceneCleanup
 {
-    [MenuItem("Tools/Cleanup Scene (remove broken refs)")]
+    // Menu item removed - use "Tools/Clean Cache" instead
     public static void Run()
     {
         var scene = SceneManager.GetActiveScene();
@@ -65,26 +65,5 @@ public static class SceneCleanup
                 if (m == null) return true;
         }
         return false;
-    }
-
-    [MenuItem("Tools/Cleanup Library (delete Library/, Logs/, Temp/)")]
-    public static void CleanLibrary()
-    {
-        if (!EditorUtility.DisplayDialog("Cleanup Library",
-            "Delete Library/, Logs/, Temp/ and force a reimport?\n" +
-            "This can take several minutes. Unity will not be usable during the reimport.",
-            "Yes, clean", "Cancel")) return;
-
-        var projectRoot = System.IO.Directory.GetParent(Application.dataPath).FullName;
-        foreach (var dir in new[] { "Library", "Logs", "Temp", "obj" })
-        {
-            var path = System.IO.Path.Combine(projectRoot, dir);
-            if (System.IO.Directory.Exists(path))
-            {
-                try { System.IO.Directory.Delete(path, true); Debug.Log($"Deleted {dir}/"); }
-                catch (System.Exception e) { Debug.LogWarning($"Could not delete {dir}/: {e.Message}"); }
-            }
-        }
-        AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
     }
 }

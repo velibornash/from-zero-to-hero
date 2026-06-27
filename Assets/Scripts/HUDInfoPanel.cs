@@ -24,28 +24,26 @@ public class HUDInfoPanel : MonoBehaviour
         oRt.anchorMax = Vector2.one;
         oRt.sizeDelta = Vector2.zero;
         var oImg = overlay.AddComponent<Image>();
-        oImg.color = new Color(0, 0, 0, 0.6f);
+        oImg.color = new Color(0, 0, 0, 0.75f);
         oImg.raycastTarget = false;
 
         goldIcon = LoadIcon("HUDIcons/gold_icon");
         woodIcon = LoadIcon("HUDIcons/wood_icon");
         foodIcon = LoadIcon("HUDIcons/wheat_icon");
         BuildParchmentPanel();
-        BuildTabIcons();
         introSeen = false;
         ShowIntro();
     }
 
     void BuildParchmentPanel()
     {
-        Color woodDark = new Color(0.25f, 0.14f, 0.06f);
-        Color woodMid = new Color(0.35f, 0.20f, 0.08f);
+        Color woodDark = new Color(0.20f, 0.10f, 0.04f);
+        Color woodMid = new Color(0.32f, 0.18f, 0.07f);
         Color parchmentBg = new Color(0.92f, 0.85f, 0.72f);
-        Color parchmentDark = new Color(0.80f, 0.68f, 0.48f);
+        Color goldAccent = new Color(0.85f, 0.65f, 0.20f);
+        Color goldLight = new Color(0.95f, 0.78f, 0.30f);
+        Color bannerRed = new Color(0.55f, 0.10f, 0.08f);
         Color inkDark = new Color(0.18f, 0.10f, 0.03f);
-        Color inkBrown = new Color(0.40f, 0.25f, 0.12f);
-        Color bannerRed = new Color(0.55f, 0.12f, 0.08f);
-        Color goldAccent = new Color(0.75f, 0.55f, 0.12f);
 
         // Drop shadow
         var shadowPanel = new GameObject("ShadowPanel");
@@ -54,13 +52,28 @@ public class HUDInfoPanel : MonoBehaviour
         sRt.anchorMin = new Vector2(0.5f, 0.5f);
         sRt.anchorMax = new Vector2(0.5f, 0.5f);
         sRt.pivot = new Vector2(0.5f, 0.5f);
-        sRt.anchoredPosition = new Vector2(5, -5);
-        sRt.sizeDelta = new Vector2(590, 510);
+        sRt.anchoredPosition = new Vector2(8, -8);
+        sRt.sizeDelta = new Vector2(680, 580);
         var sImg = shadowPanel.AddComponent<Image>();
-        sImg.color = new Color(0, 0, 0, 0.45f);
+        sImg.color = new Color(0, 0, 0, 0.55f);
         sImg.raycastTarget = false;
 
-        // Main panel
+        // Procedural ornate gold border (outer)
+        var goldBorder = new GameObject("GoldBorder");
+        goldBorder.transform.SetParent(overlay.transform, false);
+        var gbRt = goldBorder.AddComponent<RectTransform>();
+        gbRt.anchorMin = new Vector2(0.5f, 0.5f);
+        gbRt.anchorMax = new Vector2(0.5f, 0.5f);
+        gbRt.pivot = new Vector2(0.5f, 0.5f);
+        gbRt.anchoredPosition = Vector2.zero;
+        gbRt.sizeDelta = new Vector2(680, 580);
+        var gbImg = goldBorder.AddComponent<Image>();
+        gbImg.sprite = UIStyleHelper.Make9SliceBorder(96, 96, 18, 24);
+        gbImg.type = Image.Type.Sliced;
+        gbImg.color = Color.white;
+        gbImg.raycastTarget = false;
+
+        // Procedural parchment background
         panel = new GameObject("InfoPanel");
         panel.transform.SetParent(overlay.transform, false);
         var pRt = panel.AddComponent<RectTransform>();
@@ -68,42 +81,14 @@ public class HUDInfoPanel : MonoBehaviour
         pRt.anchorMax = new Vector2(0.5f, 0.5f);
         pRt.pivot = new Vector2(0.5f, 0.5f);
         pRt.anchoredPosition = Vector2.zero;
-        pRt.sizeDelta = new Vector2(590, 510);
+        pRt.sizeDelta = new Vector2(640, 540);
         var pImg = panel.AddComponent<Image>();
-        pImg.color = parchmentBg;
+        pImg.sprite = UIStyleHelper.MakeParchmentSprite(256, 256);
+        pImg.type = Image.Type.Sliced;
+        pImg.color = Color.white;
         pImg.raycastTarget = false;
 
-        // Wood frame - outer thick border
-        var woodFrame = new GameObject("WoodFrame");
-        woodFrame.transform.SetParent(panel.transform, false);
-        var wfRt = woodFrame.AddComponent<RectTransform>();
-        wfRt.anchorMin = Vector2.zero;
-        wfRt.anchorMax = Vector2.one;
-        wfRt.sizeDelta = new Vector2(-10, -10);
-        var wfImg = woodFrame.AddComponent<Image>();
-        wfImg.color = woodMid;
-
-        // Wood frame inner
-        var woodInner = new GameObject("WoodInner");
-        woodInner.transform.SetParent(woodFrame.transform, false);
-        var wiRt = woodInner.AddComponent<RectTransform>();
-        wiRt.anchorMin = Vector2.zero;
-        wiRt.anchorMax = Vector2.one;
-        wiRt.sizeDelta = new Vector2(-6, -6);
-        var wiImg = woodInner.AddComponent<Image>();
-        wiImg.color = woodDark;
-
-        // Inner parchment border
-        var innerBorder = new GameObject("InnerBorder");
-        innerBorder.transform.SetParent(woodInner.transform, false);
-        var ibRt = innerBorder.AddComponent<RectTransform>();
-        ibRt.anchorMin = Vector2.zero;
-        ibRt.anchorMax = Vector2.one;
-        ibRt.sizeDelta = new Vector2(-8, -8);
-        var ibImg = innerBorder.AddComponent<Image>();
-        ibImg.color = new Color(0.90f, 0.82f, 0.68f);
-
-        // Top banner / ribbon
+        // Top banner / ribbon with red background and gold trim
         var banner = new GameObject("Banner");
         banner.transform.SetParent(panel.transform, false);
         var bRt = banner.AddComponent<RectTransform>();
@@ -111,12 +96,12 @@ public class HUDInfoPanel : MonoBehaviour
         bRt.anchorMax = new Vector2(1, 1);
         bRt.pivot = new Vector2(0.5f, 1);
         bRt.anchoredPosition = Vector2.zero;
-        bRt.sizeDelta = new Vector2(-28, -68);
+        bRt.sizeDelta = new Vector2(-40, -84);
         var bImg = banner.AddComponent<Image>();
         bImg.color = bannerRed;
         bImg.raycastTarget = false;
 
-        // Gold trim on banner (top)
+        // Banner gold trim top
         var trimTop = new GameObject("TrimTop");
         trimTop.transform.SetParent(banner.transform, false);
         var ttRt = trimTop.AddComponent<RectTransform>();
@@ -124,25 +109,25 @@ public class HUDInfoPanel : MonoBehaviour
         ttRt.anchorMax = new Vector2(1, 1);
         ttRt.pivot = new Vector2(0.5f, 1);
         ttRt.anchoredPosition = Vector2.zero;
-        ttRt.sizeDelta = new Vector2(0, -3);
+        ttRt.sizeDelta = new Vector2(0, -4);
         var ttImg = trimTop.AddComponent<Image>();
-        ttImg.color = goldAccent;
+        ttImg.color = goldLight;
         ttImg.raycastTarget = false;
 
-        // Gold trim on banner (bottom)
+        // Banner gold trim bottom
         var trimBottom = new GameObject("TrimBottom");
         trimBottom.transform.SetParent(banner.transform, false);
         var tbRt = trimBottom.AddComponent<RectTransform>();
         tbRt.anchorMin = new Vector2(0, 1);
         tbRt.anchorMax = new Vector2(1, 1);
         tbRt.pivot = new Vector2(0.5f, 1);
-        tbRt.anchoredPosition = new Vector2(0, -68);
-        tbRt.sizeDelta = new Vector2(0, -3);
+        tbRt.anchoredPosition = new Vector2(0, -84);
+        tbRt.sizeDelta = new Vector2(0, -4);
         var tbImg = trimBottom.AddComponent<Image>();
-        tbImg.color = goldAccent;
+        tbImg.color = goldLight;
         tbImg.raycastTarget = false;
 
-        // Side pillars (left + right wood strips flanking banner)
+        // Side pillars
         for (int side = -1; side <= 1; side += 2)
         {
             var pillar = new GameObject("Pillar");
@@ -151,43 +136,42 @@ public class HUDInfoPanel : MonoBehaviour
             plRt.anchorMin = new Vector2(side == -1 ? 0 : 1, 1);
             plRt.anchorMax = new Vector2(side == -1 ? 0 : 1, 1);
             plRt.pivot = new Vector2(side == -1 ? 0 : 1, 1);
-            plRt.anchoredPosition = new Vector2(side * 14, -8);
-            plRt.sizeDelta = new Vector2(8, -40);
+            plRt.anchoredPosition = new Vector2(side * 18, -10);
+            plRt.sizeDelta = new Vector2(10, -50);
             var plImg = pillar.AddComponent<Image>();
             plImg.color = woodDark;
         }
 
-        // Chapter title
+        // Resource icons at top (inside the banner area)
+        float iconY = -26f;
+        AddOrnateIcon(panel, goldIcon, -200f, iconY, 56, 0);
+        AddOrnateIcon(panel, woodIcon, 0f, iconY, 56, 1);
+        AddOrnateIcon(panel, foodIcon, 200f, iconY, 56, 2);
+
+        // Chapter title (above banner) — bold dark color on parchment for contrast
         titleText = MakeLabel(panel, "Chapter I: The Awakening",
-            new Vector2(0, -90), new Vector2(550, 40),
-            new Color(1, 1, 0.85f), 32, FontStyle.Bold, TextAnchor.MiddleCenter);
+            new Vector2(0, -110), new Vector2(640, 50),
+            new Color(0.30f, 0.12f, 0.0f), 34, FontStyle.Bold, TextAnchor.MiddleCenter);
 
         // Subtitle
         var subtitle = MakeLabel(panel, "From Zero to Hero",
-            new Vector2(0, -126), new Vector2(550, 26),
-            goldAccent, 20, FontStyle.Normal, TextAnchor.MiddleCenter);
+            new Vector2(0, -155), new Vector2(640, 30),
+            new Color(0.50f, 0.25f, 0.05f), 20, FontStyle.Italic, TextAnchor.MiddleCenter);
 
-        // Corner ornaments (4 corners) - larger, richer
-        var cornerSize = new Vector2(36, 36);
-        var cornerColor = new Color(0.60f, 0.40f, 0.15f);
-        MakeCorner(panel, new Vector2(-260, 220), cornerSize, cornerColor, 0);
-        MakeCorner(panel, new Vector2(260, 220), cornerSize, cornerColor, 90);
-        MakeCorner(panel, new Vector2(-260, -220), cornerSize, cornerColor, -90);
-        MakeCorner(panel, new Vector2(260, -220), cornerSize, cornerColor, 180);
-
-        // Ornamental separator line
+        // Ornamental separator with diamond center
         var separator = new GameObject("Separator");
         separator.transform.SetParent(panel.transform, false);
         var sepRt = separator.AddComponent<RectTransform>();
         sepRt.anchorMin = new Vector2(0.5f, 1);
         sepRt.anchorMax = new Vector2(0.5f, 1);
         sepRt.pivot = new Vector2(0.5f, 1);
-        sepRt.anchoredPosition = new Vector2(0, -165);
-        sepRt.sizeDelta = new Vector2(430, 3);
+        sepRt.anchoredPosition = new Vector2(0, -195);
+        sepRt.sizeDelta = new Vector2(500, 4);
         var sepImg = separator.AddComponent<Image>();
-        sepImg.color = new Color(0.55f, 0.35f, 0.15f);
+        sepImg.color = goldAccent;
+        sepImg.raycastTarget = false;
 
-        // Small diamond ornament on separator
+        // Diamond on separator
         var diamond = new GameObject("Diamond");
         diamond.transform.SetParent(separator.transform, false);
         var dRt = diamond.AddComponent<RectTransform>();
@@ -195,36 +179,46 @@ public class HUDInfoPanel : MonoBehaviour
         dRt.anchorMax = new Vector2(0.5f, 0.5f);
         dRt.pivot = new Vector2(0.5f, 0.5f);
         dRt.anchoredPosition = Vector2.zero;
-        dRt.sizeDelta = new Vector2(12, 12);
+        dRt.sizeDelta = new Vector2(14, 14);
         var dImg = diamond.AddComponent<Image>();
-        dImg.color = new Color(0.55f, 0.12f, 0.08f);
+        dImg.color = bannerRed;
         dRt.localRotation = Quaternion.Euler(0, 0, 45);
 
-        // Decorative rope loops on each side of diamond
-        for (int side = -1; side <= 1; side += 2)
-        {
-            var loop = new GameObject("Loop");
-            loop.transform.SetParent(separator.transform, false);
-            var lRt = loop.AddComponent<RectTransform>();
-            lRt.anchorMin = new Vector2(0.5f, 0.5f);
-            lRt.anchorMax = new Vector2(0.5f, 0.5f);
-            lRt.pivot = new Vector2(0.5f, 0.5f);
-            lRt.anchoredPosition = new Vector2(side * 20, 0);
-            lRt.sizeDelta = new Vector2(6, 6);
-            var lImg = loop.AddComponent<Image>();
-            lImg.color = goldAccent;
-            lRt.localRotation = Quaternion.Euler(0, 0, 45);
-        }
-
-        // Body text
+        // Body text — normal weight for readability, not bold
         bodyText = MakeLabel(panel, "",
-            new Vector2(0, -179), new Vector2(520, 260),
-            inkDark, 16, FontStyle.Normal, TextAnchor.UpperLeft);
+            new Vector2(0, -220), new Vector2(560, 270),
+            new Color(0.22f, 0.12f, 0.03f), 17, FontStyle.Normal, TextAnchor.UpperCenter);
 
         // Hint text at bottom
         var hintText = MakeLabel(panel, "Press any key to begin",
-            new Vector2(0, -478), new Vector2(530, 24),
-            inkBrown, 14, FontStyle.Normal, TextAnchor.MiddleCenter);
+            new Vector2(0, -508), new Vector2(560, 28),
+            new Color(0.95f, 0.80f, 0.40f), 15, FontStyle.Bold, TextAnchor.MiddleCenter);
+
+        // Corner ornaments (4 corners) - larger
+        var cornerSize = new Vector2(40, 40);
+        var cornerColor = goldAccent;
+        MakeCorner(panel, new Vector2(-300, 250), cornerSize, cornerColor, 0);
+        MakeCorner(panel, new Vector2(300, 250), cornerSize, cornerColor, 90);
+        MakeCorner(panel, new Vector2(-300, -250), cornerSize, cornerColor, -90);
+        MakeCorner(panel, new Vector2(300, -250), cornerSize, cornerColor, 180);
+    }
+
+    void AddOrnateIcon(GameObject parent, Sprite sprite, float x, float y, int size, int slotIdx)
+    {
+        UIStyleHelper.MakeOrnateIcon(parent.transform, sprite, size);
+        var iconObj = parent.transform.GetChild(parent.transform.childCount - 1).gameObject;
+        var iRt = iconObj.GetComponent<RectTransform>();
+        iRt.anchorMin = new Vector2(0.5f, 1);
+        iRt.anchorMax = new Vector2(0.5f, 1);
+        iRt.pivot = new Vector2(0.5f, 1);
+        iRt.anchoredPosition = new Vector2(x, y);
+
+        // Value text next to icon
+        var val = MakeLabel(parent, "0", new Vector2(x + 24, y - 6), new Vector2(50, 26),
+            new Color(0.95f, 0.78f, 0.30f), 18, FontStyle.Bold, TextAnchor.MiddleLeft);
+        if (slotIdx == 0) goldVal = val;
+        else if (slotIdx == 1) woodVal = val;
+        else foodVal = val;
     }
 
     void MakeCorner(GameObject parent, Vector2 pos, Vector2 size, Color color, float rotation)
@@ -254,6 +248,9 @@ public class HUDInfoPanel : MonoBehaviour
                         "Build your village, gather resources, and forge your destiny\n" +
                         "from nothing but grit and ambition.\n\n" +
                         "[WASD]  Move  |  [E] Build/Interact  |  [TAB] Info Panel";
+        if (goldVal != null) goldVal.text = $"{HUDController.Gold}";
+        if (woodVal != null) woodVal.text = $"{HUDController.Wood}";
+        if (foodVal != null) foodVal.text = $"{HUDController.Food}";
     }
 
     Text MakeLabel(GameObject parent, string content, Vector2 pos, Vector2 size,
@@ -289,7 +286,15 @@ public class HUDInfoPanel : MonoBehaviour
             return;
         }
 
-        if (Input.GetKeyDown(KeyCode.Tab))
+        // Close any open BuildingPopup with the same keys
+        if (BuildingPopup.IsVisible &&
+            (Input.GetKeyDown(KeyCode.Tab) || Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.X)))
+        {
+            BuildingPopup.Hide();
+            return;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Tab) || Input.GetKeyDown(KeyCode.Escape))
         {
             panelVisible = !panelVisible;
             overlay.SetActive(panelVisible);
@@ -305,57 +310,10 @@ public class HUDInfoPanel : MonoBehaviour
         return null;
     }
 
-    void BuildTabIcons()
-    {
-        float ix = -220f;
-        float iy = -60f;
-
-        AddTabIcon(panel, ref ix, goldIcon, "Gold", ref goldVal, new Color(1f, 0.84f, 0f));
-        ix += 40f;
-        AddTabIcon(panel, ref ix, woodIcon, "Wood", ref woodVal, new Color(0.65f, 0.45f, 0.15f));
-        ix += 40f;
-        AddTabIcon(panel, ref ix, foodIcon, "Food", ref foodVal, new Color(1f, 0.85f, 0.2f));
-    }
-
-    void AddTabIcon(GameObject parent, ref float x, Sprite sprite, string label, ref Text valText, Color tint)
-    {
-        var icon = new GameObject("TabIcon");
-        icon.transform.SetParent(parent.transform, false);
-        var iRt = icon.AddComponent<RectTransform>();
-        iRt.anchorMin = new Vector2(0.5f, 1);
-        iRt.anchorMax = new Vector2(0.5f, 1);
-        iRt.pivot = new Vector2(0, 1);
-        iRt.anchoredPosition = new Vector2(x, -55f);
-        iRt.sizeDelta = new Vector2(22, 22);
-        var iImg = icon.AddComponent<Image>();
-        iImg.sprite = sprite;
-        iImg.color = tint;
-
-        var val = new GameObject("TabVal");
-        val.transform.SetParent(parent.transform, false);
-        var vRt = val.AddComponent<RectTransform>();
-        vRt.anchorMin = new Vector2(0.5f, 1);
-        vRt.anchorMax = new Vector2(0.5f, 1);
-        vRt.pivot = new Vector2(0, 1);
-        vRt.anchoredPosition = new Vector2(x + 28, -55f);
-        vRt.sizeDelta = new Vector2(50, 22);
-        var vText = val.AddComponent<Text>();
-        vText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        vText.fontSize = 16;
-        vText.fontStyle = FontStyle.Bold;
-        vText.color = new Color(0.18f, 0.10f, 0.03f);
-        vText.alignment = TextAnchor.MiddleLeft;
-        vText.text = "0";
-        valText = vText;
-
-        x += 110f;
-    }
-
     void Refresh()
     {
         if (bodyText == null) return;
-        bodyText.text = $"\n\n\n\n" +  // offset past the icon row
-                        $"Day {HUDController.Day}\n\n" +
+        bodyText.text = $"Day {HUDController.Day}\n\n" +
                         "[WASD] Move  |  [E] Build/Interact\n" +
                         "[TAB] Close";
         if (goldVal != null) goldVal.text = $"{HUDController.Gold}";
