@@ -44,7 +44,7 @@ public class PopupBase : MonoBehaviour
 
         var trigger = overlay.AddComponent<EventTrigger>();
         var entry = new EventTrigger.Entry { eventID = EventTriggerType.PointerClick };
-        entry.callback.AddListener(_ => Hide());
+        entry.callback.AddListener(_ => HidePopup());
         trigger.triggers.Add(entry);
 
         // Panel (parchment background, centered on screen)
@@ -153,7 +153,7 @@ public class PopupBase : MonoBehaviour
         closeImg.color = new Color(0.55f, 0.10f, 0.08f);
         closeImg.raycastTarget = true;
         var closeBtn = closeGo.AddComponent<Button>();
-        closeBtn.onClick.AddListener(Hide);
+        closeBtn.onClick.AddListener(HidePopup);
         // Close button text
         var closeTextGo = new GameObject("CloseLabel");
         closeTextGo.transform.SetParent(closeGo.transform, false);
