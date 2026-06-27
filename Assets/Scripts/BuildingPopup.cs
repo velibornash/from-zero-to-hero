@@ -218,27 +218,42 @@ public class BuildingPopup : MonoBehaviour
         if (worldPos != default && panel != null)
         {
             Camera cam = Camera.main;
+            RectTransform panelRt = panel.GetComponent<RectTransform>();
+            RectTransform canvasRt = canvas.transform as RectTransform;
+            float halfW = panelRt.sizeDelta.x * 0.5f;
+            float halfH = panelRt.sizeDelta.y * 0.5f;
+            float maxX = canvasRt.rect.width * 0.5f - halfW - 16f;
+            float maxY = canvasRt.rect.height * 0.5f - halfH - 16f;
+
             if (cam != null)
             {
                 Vector3 screenPos = cam.WorldToScreenPoint(worldPos);
-                // Add a small offset so the popup is above the building, not overlapping
+                // Add offset so popup is above the building
                 screenPos.y += 100f;
 
-                RectTransform panelRt = panel.GetComponent<RectTransform>();
-                RectTransform canvasRt = canvas.transform as RectTransform;
-                Vector2 localPos;
-                RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                    canvasRt, screenPos, canvas.worldCamera, out localPos);
+                // Check if building is visible on screen
+                bool onScreen = screenPos.x >= 0 && screenPos.x <= Screen.width
+                    && screenPos.y >= 0 && screenPos.y <= Screen.height
+                    && screenPos.z > 0;
 
-                // Clamp to keep panel visible on screen
-                float halfW = panelRt.sizeDelta.x * 0.5f;
-                float halfH = panelRt.sizeDelta.y * 0.5f;
-                float maxX = canvasRt.rect.width * 0.5f - halfW - 16f;
-                float maxY = canvasRt.rect.height * 0.5f - halfH - 16f;
-                localPos.x = Mathf.Clamp(localPos.x, -maxX, maxX);
-                localPos.y = Mathf.Clamp(localPos.y, -maxY, maxY);
-
-                panelRt.anchoredPosition = localPos;
+                if (onScreen)
+                {
+                    Vector2 localPos;
+                    RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                        canvasRt, screenPos, canvas.worldCamera, out localPos);
+                    localPos.x = Mathf.Clamp(localPos.x, -maxX, maxX);
+                    localPos.y = Mathf.Clamp(localPos.y, -maxY, maxY);
+                    panelRt.anchoredPosition = localPos;
+                }
+                else
+                {
+                    // Building is off-screen — center the popup so it's visible
+                    panelRt.anchoredPosition = Vector2.zero;
+                }
+            }
+            else
+            {
+                panelRt.anchoredPosition = Vector2.zero;
             }
         }
 
