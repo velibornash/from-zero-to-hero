@@ -215,53 +215,8 @@ public class BuildingPopup : MonoBehaviour
         titleText.text = title;
         bodyText.text = body;
 
-        // Position popup at the building's screen location (or center if no world pos)
-        if (worldPos != default && panel != null)
-        {
-            Camera cam = Camera.main;
-            RectTransform panelRt = panel.GetComponent<RectTransform>();
-            RectTransform canvasRt = canvas.transform as RectTransform;
-            float halfW = panelRt.sizeDelta.x * 0.5f;
-            float halfH = panelRt.sizeDelta.y * 0.5f;
-            float maxX = canvasRt.rect.width * 0.5f - halfW - 16f;
-            float maxY = canvasRt.rect.height * 0.5f - halfH - 16f;
-
-            if (cam != null)
-            {
-                Vector3 screenPos = cam.WorldToScreenPoint(worldPos);
-                // Add offset so popup is above the building
-                screenPos.y += 100f;
-
-                // Check if building is visible on screen
-                bool onScreen = screenPos.x >= 0 && screenPos.x <= Screen.width
-                    && screenPos.y >= 0 && screenPos.y <= Screen.height
-                    && screenPos.z > 0;
-
-                if (onScreen)
-                {
-                    Vector2 localPos;
-                    RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                        canvasRt, screenPos, canvas.worldCamera, out localPos);
-                    localPos.x = Mathf.Clamp(localPos.x, -maxX, maxX);
-                    localPos.y = Mathf.Clamp(localPos.y, -maxY, maxY);
-                    panelRt.anchoredPosition = localPos;
-                }
-                else
-                {
-                    // Building is off-screen — center the popup so it's visible
-                    panelRt.anchoredPosition = Vector2.zero;
-                }
-            }
-            else
-            {
-                panelRt.anchoredPosition = Vector2.zero;
-            }
-        }
-        else
-        {
-            // No world position — center the popup
-            panel.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
-        }
+        // Always center the popup for now — world-to-screen positioning was unreliable
+        panel.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
 
         overlay.SetActive(true);
     }
