@@ -205,14 +205,14 @@ public class PopupBase : MonoBehaviour
         tImg.raycastTarget = false;
     }
 
-    public void Show(string title, string body)
+    public virtual void ShowPopup(string title, string body)
     {
         if (overlay != null) overlay.SetActive(true);
         if (titleText != null) titleText.text = title;
         if (bodyText != null) bodyText.text = body;
     }
 
-    public void Hide()
+    public virtual void HidePopup()
     {
         if (overlay != null) overlay.SetActive(false);
     }

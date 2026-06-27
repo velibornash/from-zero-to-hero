@@ -27,12 +27,7 @@ public class GameOverScreen : PopupBase
                 if (lbl != null) lbl.GetComponent<Text>().text = "TRY AGAIN";
             }
         }
-        instance.DoShow();
-    }
-
-    public void DoShow()
-    {
-        Show("DEFEAT", "The village has fallen.");
+        instance.ShowPopup("DEFEAT", "The village has fallen.");
     }
 
     void RestartGame()

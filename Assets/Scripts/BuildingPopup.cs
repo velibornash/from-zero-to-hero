@@ -16,21 +16,18 @@ public class BuildingPopup : PopupBase
             instance = go.AddComponent<BuildingPopup>();
             instance.BuildUI(title, body);
         }
-        else
-        {
-            instance.Show(title, body);
-        }
+        instance.ShowPopup(title, body);
     }
 
-    public new static void Hide()
+    public static void Hide()
     {
-        if (instance != null) instance.Hide();
+        if (instance != null) instance.HidePopup();
     }
 
     void Update()
     {
         if (overlay == null || !overlay.activeSelf) return;
         if (Input.GetKeyDown(KeyCode.Tab) || Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.X))
-            Hide();
+            HidePopup();
     }
 }
