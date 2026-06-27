@@ -142,7 +142,9 @@ public class GameOverScreen : MonoBehaviour
     public void DoShow()
     {
         if (overlay != null) overlay.SetActive(true);
-        Time.timeScale = 0f; // Pause game
+        // Note: we do NOT use Time.timeScale = 0 because that breaks
+        // Button.onClick in Unity 6. Player input is already blocked
+        // by PlayerController3D.Update checking PlayerController3D.IsDead.
     }
 
     void RestartGame()
