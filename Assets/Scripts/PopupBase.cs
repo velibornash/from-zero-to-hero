@@ -16,14 +16,21 @@ public class PopupBase : MonoBehaviour
     protected Text bodyText;
 
     // Standard dimensions
-    public const float PANEL_WIDTH = 600f;
+    public const float PANEL_WIDTH = 560f;
     public const float PANEL_HEIGHT = 500f;
     public const float TITLE_BAR_HEIGHT = 70f;
     public const float BORDER_INSET = 10f;
 
-    public void BuildUI(string defaultTitle, string defaultBody)
+    public void BuildUI(string defaultTitle, string defaultBody, Canvas targetCanvas = null)
     {
-        canvas = FindAnyObjectByType<Canvas>();
+        canvas = targetCanvas;
+        if (canvas == null)
+        {
+            canvas = GetComponent<Canvas>();
+            if (canvas == null)
+                canvas = FindAnyObjectByType<Canvas>();
+        }
+        Debug.Log($"PopupBase.BuildUI canvas: {canvas != null}, canvas.name: {canvas?.name}, canvas.enabled: {canvas?.enabled}");
         if (canvas == null)
         {
             Debug.LogError("PopupBase: no Canvas found!");
@@ -123,8 +130,8 @@ public class PopupBase : MonoBehaviour
         var bodyRt = bodyGo.AddComponent<RectTransform>();
         bodyRt.anchorMin = new Vector2(0, 0);
         bodyRt.anchorMax = new Vector2(1, 1);
-        bodyRt.offsetMin = new Vector2(20, 90);    // bottom inset: above close button
-        bodyRt.offsetMax = new Vector2(-20, -TITLE_BAR_HEIGHT - 20);  // top inset: below title bar
+        bodyRt.offsetMin = new Vector2(28, 90);    // bottom inset: above close button
+        bodyRt.offsetMax = new Vector2(-28, -TITLE_BAR_HEIGHT - 20);  // top inset: below title bar
         // Body parchment (so text shows on light background, not dark overlay)
         var bodyBgImg = bodyGo.AddComponent<Image>();
         bodyBgImg.sprite = UIStyleHelper.MakeParchmentSprite(128, 128);
@@ -194,7 +201,7 @@ public class PopupBase : MonoBehaviour
         hintText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         hintText.fontSize = 13;
         hintText.fontStyle = FontStyle.Bold;
-        hintText.color = new Color(0.50f, 0.28f, 0.08f);
+        hintText.color = new Color(0.80f, 0.70f, 0.30f);
         hintText.alignment = TextAnchor.MiddleCenter;
         hintText.text = "[TAB]  [ESC]  [X]  —  Close";
         hintText.raycastTarget = false;
@@ -220,9 +227,15 @@ public class PopupBase : MonoBehaviour
 
     public virtual void ShowPopup(string title, string body)
     {
-        if (overlay != null) overlay.SetActive(true);
+        Debug.Log($"PopupBase.ShowPopup overlay null: {overlay == null}");
+        if (overlay != null)
+        {
+            overlay.SetActive(true);
+            Debug.Log($"PopupBase.ShowPopup overlay set active, activeSelf: {overlay.activeSelf}");
+        }
         if (titleText != null) titleText.text = title;
         if (bodyText != null) bodyText.text = body;
+        Debug.Log($"PopupBase.ShowPopup done, overlay active: {overlay?.activeSelf}");
     }
 
     public virtual void HidePopup()

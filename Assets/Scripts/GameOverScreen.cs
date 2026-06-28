@@ -7,10 +7,10 @@ public class GameOverScreen : PopupBase
 
     public static void Show()
     {
-        var canvas = FindAnyObjectByType<Canvas>();
+        var canvas = FindMainCanvas();
         if (canvas == null)
         {
-            Debug.LogWarning("GameOverScreen: no Canvas found.");
+            Debug.LogWarning("GameOverScreen: no main Canvas found.");
             return;
         }
 
@@ -65,6 +65,18 @@ public class GameOverScreen : PopupBase
     void OnDestroy()
     {
         if (instance == this) instance = null;
+    }
+
+    static Canvas FindMainCanvas()
+    {
+        var all = FindObjectsByType<Canvas>(FindObjectsInactive.Include);
+        foreach (var c in all)
+        {
+            Debug.Log($"GameOverScreen scanning Canvas: name='{c.name}', renderMode={c.renderMode}");
+            if (c.name == "Canvas" || c.renderMode == RenderMode.ScreenSpaceOverlay)
+                return c;
+        }
+        return all.Length > 0 ? all[0] : null;
     }
 }
 

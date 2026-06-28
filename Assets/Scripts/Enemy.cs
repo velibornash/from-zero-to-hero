@@ -10,6 +10,7 @@ public class Enemy : MonoBehaviour
     public float knockbackForce = 3f;
     public int heroDamage = 12;
     public float attackInterval = 0.7f;
+    public float attackRange = 3f;
     public string enemyName = "Enemy";
 
     int currentHealth;
@@ -39,6 +40,7 @@ public class Enemy : MonoBehaviour
         if (player != null) target = player.transform;
 
         anim = GetComponentInChildren<Animator>();
+        Debug.Log($"Enemy '{enemyName}' Start: anim={(anim != null)}, controller={(anim != null ? anim.runtimeAnimatorController?.name : "null")}, avatar={(anim != null ? (anim.avatar != null ? anim.avatar.name : "null") : "null")}");
         col = GetComponentInChildren<Collider>();
 
         foreach (Transform child in transform)
@@ -50,19 +52,19 @@ public class Enemy : MonoBehaviour
         // Add Rigidbody so fences and other physics colliders block the enemy
         rb = GetComponent<Rigidbody>();
         if (rb == null) rb = gameObject.AddComponent<Rigidbody>();
-        rb.useGravity = false;
-        rb.freezeRotation = true;
+        rb.constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionY;
         rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
 
         // Cache animator parameter existence to avoid spammy warnings
-        if (anim != null)
+        if (anim != null && anim.runtimeAnimatorController != null)
         {
             foreach (var p in anim.parameters)
             {
                 if (p.name == "Attack") hasAttackParam = true;
                 if (p.name == "Death") hasDeathParam = true;
             }
+            Debug.Log($"Enemy '{enemyName}' anim params: hasAttack={hasAttackParam}, hasDeath={hasDeathParam}");
         }
     }
 
@@ -75,7 +77,7 @@ public class Enemy : MonoBehaviour
             stunTimer -= Time.fixedDeltaTime;
             knockbackVelocity *= 0.85f;
             rb.linearVelocity = knockbackVelocity;
-            if (anim != null) anim.SetFloat("Speed", 0f);
+            if (anim != null && anim.runtimeAnimatorController != null) anim.SetFloat("Speed", 0f);
             return;
         }
 
@@ -89,16 +91,16 @@ public class Enemy : MonoBehaviour
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, rotateSpeed * Time.fixedDeltaTime);
         }
 
-        if (dist > 2.5f)
+        if (dist > attackRange)
         {
             Vector3 moveDir = dir.normalized;
             rb.linearVelocity = new Vector3(moveDir.x * moveSpeed, 0, moveDir.z * moveSpeed);
-            if (anim != null) anim.SetFloat("Speed", 1f);
+            if (anim != null && anim.runtimeAnimatorController != null) anim.SetFloat("Speed", 1f);
         }
         else
         {
             rb.linearVelocity = Vector3.zero;
-            if (anim != null)
+            if (anim != null && anim.runtimeAnimatorController != null)
             {
                 anim.SetFloat("Speed", 0f);
                 if (hasAttackParam) anim.SetTrigger("Attack");
@@ -178,18 +180,14 @@ public class Enemy : MonoBehaviour
         SpawnCoinPuff();
         SpawnDeathBurst();
 
-        if (anim != null)
+        if (anim != null && anim.runtimeAnimatorController != null)
         {
             if (hasDeathParam) anim.SetTrigger("Death");
-            enabled = false;
-            if (col != null) col.enabled = false;
-            if (rb != null) rb.linearVelocity = Vector3.zero;
-            Destroy(gameObject, 1.5f);
         }
-        else
-        {
-            Destroy(gameObject);
-        }
+        enabled = false;
+        if (col != null) col.enabled = false;
+        if (rb != null) rb.linearVelocity = Vector3.zero;
+        Destroy(gameObject, anim != null && anim.runtimeAnimatorController != null ? 1.5f : 0f);
     }
 
     void SpawnDeathBurst()

@@ -15,6 +15,7 @@ public class BuildSlot : MonoBehaviour
     int spentGold;
     float tickTimer;
     const float TICK_INTERVAL = 0.12f;
+    Transform mageFirePoint;
 
     [SerializeField] GameObject tileQuad;
     [SerializeField] Canvas slotCanvas;
@@ -102,12 +103,20 @@ public class BuildSlot : MonoBehaviour
         canvasRt.sizeDelta = new Vector2(320f, 320f);
         canvasObj.transform.localScale = Vector3.one * 0.04f;
 
-        // Progress bar (top)
-        var progressBg = MakeUiImage(canvasObj.transform, "ProgressBg",
-            new Vector2(0f, 150f), new Vector2(260f, 22f), new Color(0.1f, 0.08f, 0.06f, 0.85f));
+        // Progress bar (top) with gold frame
+        var progressFrame = MakeUiImage(canvasObj.transform, "ProgressFrame",
+            new Vector2(0f, 150f), new Vector2(268f, 30f), new Color(0, 0, 0, 0));
+        progressFrame.raycastTarget = false;
+        var pFrameImg = progressFrame.GetComponent<Image>();
+        pFrameImg.sprite = UIStyleHelper.Make9SliceBorder(96, 96, 8, 12);
+        pFrameImg.type = Image.Type.Sliced;
+        pFrameImg.color = Color.white;
+
+        var progressBg = MakeUiImage(progressFrame.transform, "ProgressBg",
+            new Vector2(0f, 0f), new Vector2(252f, 14f), new Color(0.08f, 0.06f, 0.04f, 0.9f));
         progressBg.raycastTarget = false;
-        progressFill = MakeUiImage(canvasObj.transform, "ProgressFill",
-            new Vector2(-130f, 150f), new Vector2(260f, 22f), new Color(0.25f, 0.9f, 0.3f, 0.95f));
+        progressFill = MakeUiImage(progressFrame.transform, "ProgressFill",
+            new Vector2(-126f, 0f), new Vector2(252f, 14f), new Color(0.25f, 0.9f, 0.3f, 0.95f));
         progressFill.raycastTarget = false;
         progressFill.type = Image.Type.Filled;
         progressFill.fillMethod = Image.FillMethod.Horizontal;
@@ -871,6 +880,35 @@ public class BuildSlot : MonoBehaviour
             mage = (GameObject)Object.Instantiate(magePrefab, transform.position, Quaternion.identity);
             mage.name = "TowerMage";
             mage.transform.localScale = Vector3.one * 2.0f;
+
+            // Attach a magical staff to the right hand
+            string staffPath = "Assets/3D/KayKit/KayKit_Adventurers_2.0_FREE/Weapons/staff.fbx";
+            var staffPrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(staffPath);
+            if (staffPrefab != null)
+            {
+                var staff = (GameObject)Object.Instantiate(staffPrefab);
+                staff.name = "MageStaff";
+                var handSlot = FindHandSlot(mage.transform);
+                if (handSlot != null)
+                {
+                    staff.transform.SetParent(handSlot);
+                    staff.transform.localPosition = new Vector3(0, 0, 0.5f);
+                    staff.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
+                    staff.transform.localScale = Vector3.one * 0.6f;
+                }
+                else
+                {
+                    staff.transform.SetParent(mage.transform);
+                    staff.transform.localPosition = new Vector3(0.8f, 1.5f, 0.3f);
+                    staff.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
+                    staff.transform.localScale = Vector3.one * 0.6f;
+                }
+                // firePoint at the staff tip
+                var fp = new GameObject("FirePoint");
+                fp.transform.SetParent(staff.transform);
+                fp.transform.localPosition = new Vector3(0, 0, 0.7f);
+                mageFirePoint = fp.transform;
+            }
         }
         else
         {
@@ -888,6 +926,7 @@ public class BuildSlot : MonoBehaviour
         shooter.damage = 2;
         shooter.projectileSpeed = 30f;
         shooter.projectileSpawnHeight = 2.5f;
+        shooter.firePoint = mageFirePoint;
         shooter.projectileColor = new Color(0.6f, 0.3f, 1f);
         shooter.isUpgraded = false;
         shooter.enabled = true;
@@ -914,6 +953,19 @@ public class BuildSlot : MonoBehaviour
         var mat = new Material(Shader.Find("Standard"));
         mat.color = color;
         return mat;
+    }
+
+    Transform FindHandSlot(Transform parent)
+    {
+        string name = parent.name.ToLowerInvariant();
+        if (name.Contains("handslot") && (name.EndsWith("r") || name.EndsWith("_r")))
+            return parent;
+        for (int i = 0; i < parent.childCount; i++)
+        {
+            var result = FindHandSlot(parent.GetChild(i));
+            if (result != null) return result;
+        }
+        return null;
     }
 
     IEnumerator ScalePuff(Transform t)

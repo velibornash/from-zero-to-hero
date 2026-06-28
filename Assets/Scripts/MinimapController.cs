@@ -37,7 +37,17 @@ public class MinimapController : MonoBehaviour
             if (player != null) target = player.transform;
         }
 
-        var canvas = Object.FindAnyObjectByType<Canvas>();
+        Canvas canvas = null;
+        var allCanvases = FindObjectsByType<Canvas>(FindObjectsInactive.Include);
+        foreach (var c in allCanvases)
+        {
+            if (c.name == "Canvas" || c.renderMode == RenderMode.ScreenSpaceOverlay)
+            {
+                canvas = c;
+                break;
+            }
+        }
+        if (canvas == null) canvas = FindAnyObjectByType<Canvas>();
         if (canvas == null) return;
 
         // Recreate camera if missing
@@ -113,6 +123,7 @@ public class MinimapController : MonoBehaviour
 
     void Start()
     {
+        Debug.Log("MinimapController.Start()");
         EnsureMinimap();
         ForceMinimapPosition();
     }

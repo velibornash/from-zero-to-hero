@@ -24,6 +24,7 @@ public class HUDController : MonoBehaviour
 
     void Start()
     {
+        Debug.Log("HUDController.Start()");
         ResetState();
         goldSprite = LoadIcon("HUDIcons/gold_icon");
         woodSprite = LoadIcon("HUDIcons/wood_icon");
@@ -64,34 +65,55 @@ public class HUDController : MonoBehaviour
 
     void BuildHUD()
     {
-        // Top ribbon
-        var topBar = UIStyleHelper.MakeOrnatePanel(transform, 1600, 110);
-        var barRt = topBar.GetComponent<RectTransform>();
+        // Top ribbon — Travian-style red banner with gold trim
+        var topBar = new GameObject("TopBar");
+        topBar.transform.SetParent(transform, false);
+        var barRt = topBar.AddComponent<RectTransform>();
         barRt.anchorMin = new Vector2(0, 1);
         barRt.anchorMax = new Vector2(1, 1);
         barRt.pivot = new Vector2(0.5f, 1);
-        barRt.offsetMin = new Vector2(0, -110);
+        barRt.offsetMin = new Vector2(0, -96);
         barRt.offsetMax = new Vector2(0, 0);
 
-        float x = 32f;
-        const float iconSize = 64f;
-        const float labelY = -22f;
+        var barImg = topBar.AddComponent<Image>();
+        barImg.color = new Color(0.38f, 0.06f, 0.04f);
+        barImg.raycastTarget = true;
+
+        // Gold trim lines (top and bottom edges)
+        for (int i = 0; i < 2; i++)
+        {
+            var trim = new GameObject(i == 0 ? "GoldTrimTop" : "GoldTrimBottom");
+            trim.transform.SetParent(topBar.transform, false);
+            var tRt = trim.AddComponent<RectTransform>();
+            tRt.anchorMin = new Vector2(0, i == 0 ? 1 : 0);
+            tRt.anchorMax = new Vector2(1, i == 0 ? 1 : 0);
+            tRt.pivot = new Vector2(0.5f, i == 0 ? 1 : 0);
+            tRt.anchoredPosition = Vector2.zero;
+            tRt.sizeDelta = new Vector2(0, 4);
+            var tImg = trim.AddComponent<Image>();
+            tImg.color = new Color(0.90f, 0.70f, 0.18f);
+            tImg.raycastTarget = false;
+        }
+
+        float x = 24f;
+        const float iconSize = 60f;
+        const float labelY = -18f;
 
         goldText = BuildResourceSlot(topBar.transform, ref x, goldSprite, "10", iconSize, labelY,
             new Color(1f, 0.95f, 0.40f));
-        x += 18f;
+        x += 12f;
         woodText = BuildResourceSlot(topBar.transform, ref x, woodSprite, "0", iconSize, labelY,
             new Color(0.95f, 0.82f, 0.50f));
-        x += 18f;
+        x += 12f;
         foodText = BuildResourceSlot(topBar.transform, ref x, foodSprite, "0", iconSize, labelY,
             new Color(1f, 0.90f, 0.35f));
-        x += 32f;
+        x += 24f;
 
         MakeVerticalSeparator(topBar.transform, x);
-        x += 18f;
+        x += 16f;
 
-        dayText = MakeText(topBar.transform, "Chapter", new Vector2(x, labelY), new Vector2(360, 50),
-            ChapterName, 28, FontStyle.Bold,
+        dayText = MakeText(topBar.transform, "Chapter", new Vector2(x, labelY), new Vector2(380, 44),
+            ChapterName, 26, FontStyle.Bold,
             new Color(1f, 0.95f, 0.55f), TextAnchor.MiddleLeft);
 
         // Health bar in the top ribbon (right side)
@@ -103,8 +125,7 @@ public class HUDController : MonoBehaviour
         evRt.anchorMin = new Vector2(1, 1);
         evRt.anchorMax = new Vector2(1, 1);
         evRt.pivot = new Vector2(1, 1);
-        evRt.anchoredPosition = new Vector2(-18, -130);
-        evRt.sizeDelta = new Vector2(360, 320);
+        evRt.anchoredPosition = new Vector2(-18, -116);
         evRt.sizeDelta = new Vector2(360, 320);
 
         MakeText(evPanel.transform, "Header", new Vector2(40, -22), new Vector2(320, 50),
@@ -198,6 +219,8 @@ public class HUDController : MonoBehaviour
 
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Tab)) ActionMenu.Toggle();
+
         if (goldText != null) goldText.text = $"{Gold}";
         if (woodText != null) woodText.text = $"{Wood}";
         if (foodText != null) foodText.text = $"{Food}";

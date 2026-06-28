@@ -3,6 +3,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEditor.Animations;
 using System.Collections.Generic;
+using System.Linq;
 using System.IO;
 
 public class Setup3DScene
@@ -32,9 +33,14 @@ public class Setup3DScene
             return;
         }
         ForceCleanCachedScene();
+        ConfigureKayKitHumanoidAvatars();
+        EnsureKnightGeneric();
         ConfigureKayKitAnimations();
         AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
         EnsureGoldIcon();
+        EnsureWoodIcon();
+        EnsureWheatIcon();
+        EnsureStoneIcon();
         CreateGround();
         PlaceVillage();
         PlaceNatureFeatures();
@@ -43,6 +49,7 @@ public class Setup3DScene
         SetupEnemySpawner();
         SetupVillageWalls();
         PlacePlayer();
+        PlaceTestNPC();
         CreateSlots();
         SetupUI();
         SetupCamera();
@@ -56,12 +63,15 @@ public class Setup3DScene
         var scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
         EditorSceneManager.SaveScene(scene, OutputScenePath);
 
+        // Open Village.unity so the editor shows it when Play is pressed
+        EditorSceneManager.OpenScene(OutputScenePath);
+
         // Make sure the standalone build always uses the generated Village scene.
         EditorBuildSettings.scenes = new[] {
             new EditorBuildSettingsScene(OutputScenePath, true)
         };
 
-        Debug.Log($"Scene saved to {OutputScenePath}! Press Play to test the slots.");
+        Debug.Log($"Scene saved and opened at {OutputScenePath}! Press Play to test.");
     }
 
     static void ForceCleanCachedScene()
@@ -90,9 +100,56 @@ public class Setup3DScene
             }
         }
 
-        // NOTE: We do NOT delete generated asset directories (Data, Prefabs, etc.)
-        // because that changes their GUIDs and breaks scene references.
-        // Existing assets are simply overwritten/reused by EnsureSlotAsset etc.
+        // Delete generated prefabs so they are recreated with latest settings
+        string[] prefabPaths = {
+            "Assets/Prefabs/Wolf.prefab",
+            "Assets/Prefabs/BarbarianEnemy.prefab",
+            "Assets/Prefabs/Flag.prefab",
+            "Assets/Animations/WolfAnimator.controller",
+        };
+        foreach (var pf in prefabPaths)
+        {
+            if (File.Exists(pf))
+            {
+                File.Delete(pf);
+                Debug.Log($"Deleted stale prefab {pf}");
+            }
+            var metaPf = pf + ".meta";
+            if (File.Exists(metaPf)) File.Delete(metaPf);
+        }
+
+        // Delete animation FBX meta files so Unity reimports with auto-detected clips (no stale custom definitions)
+        // NOTE: Wolf.fbx is intentionally excluded — it defines its own clips (Walking, Idle_New, etc.) with
+        // correct take names and material remapping (EyeGlass, Fur_2, Hair). Deleting its meta would lose those.
+        string[] animFbxs = {
+            "Assets/3D/KayKit/KayKit_Adventurers_2.0_FREE/Animations/fbx/Rig_Medium/Rig_Medium_MovementBasic.fbx",
+            "Assets/3D/KayKit/KayKit_Adventurers_2.0_FREE/Animations/fbx/Rig_Medium/Rig_Medium_General.fbx",
+            "Assets/3D/KayKit/KayKit_Adventurers_2.0_FREE/Animations/fbx/Rig_Medium/Rig_Medium_CombatMelee.fbx",
+            "Assets/3D/KayKit/KayKit_Adventurers_2.0_FREE/Animations/fbx/Rig_Medium/Rig_Medium_CombatRanged.fbx",
+        };
+        foreach (var fbx in animFbxs)
+        {
+            var metaPath = fbx + ".meta";
+            if (File.Exists(metaPath))
+            {
+                File.Delete(metaPath);
+                Debug.Log($"Deleted animation FBX meta {metaPath}");
+            }
+        }
+
+        // Delete stale generated materials that may have been replaced by FBX-native textures
+        string[] staleMats = {
+            "Assets/Materials/BarbarianEnemy.mat",
+        };
+        foreach (var mp in staleMats)
+        {
+            if (File.Exists(mp))
+            {
+                File.Delete(mp);
+                File.Delete(mp + ".meta");
+                Debug.Log($"Deleted stale material {mp}");
+            }
+        }
 
         AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
         Debug.Log("Asset database refreshed — scene is clean.");
@@ -711,55 +768,119 @@ public class Setup3DScene
 
         var go = (GameObject)Object.Instantiate(prefab);
         go.name = "BarbarianEnemy";
-        go.transform.localScale = Vector3.one * 2.8f;
+        go.transform.localScale = Vector3.one * 3.5f;
         go.transform.position = new Vector3(0, 0.3f, 0);
 
-        // Assign animator controller so the barbarian walks instead of sliding.
         var barbAnimator = go.GetComponentInChildren<Animator>();
         if (barbAnimator == null)
-        {
             barbAnimator = go.AddComponent<Animator>();
-            var avatar = AssetDatabase.LoadAssetAtPath<Avatar>(barbPath);
-            if (avatar != null) barbAnimator.avatar = avatar;
-        }
+
         barbAnimator.runtimeAnimatorController = EnsureBarbarianAnimatorController();
         barbAnimator.applyRootMotion = false;
 
-        // Replace FBX materials with a saved Standard material to avoid pink shader issues.
-        string matPath = "Assets/Materials/BarbarianEnemy.mat";
-        var barbarianMat = AssetDatabase.LoadAssetAtPath<Material>(matPath);
-        if (barbarianMat == null)
-        {
-            barbarianMat = new Material(Shader.Find("Standard"));
-            barbarianMat.color = new Color(0.55f, 0.32f, 0.22f);
-            AssetDatabase.CreateAsset(barbarianMat, matPath);
-        }
-        foreach (var rend in go.GetComponentsInChildren<Renderer>())
-            rend.sharedMaterial = barbarianMat;
+        // Barbarian uses Generic animation clips (bone curves from KayKit animation FBX files).
+        // Using a Humanoid Avatar would prevent Generic clips from driving bones correctly,
+        // so we explicitly set avatar = null (Generic mode even if FBX is imported as Humanoid).
+        barbAnimator.avatar = null;
+
+        // Keep original FBX materials — Barbarian.fbx has its own texture (barbarian_texture.png)
+        // Do NOT override with a flat color material.
 
         var cap = go.AddComponent<CapsuleCollider>();
         cap.height = 2f;
         cap.radius = 0.5f;
         cap.center = new Vector3(0, 1f, 0);
 
-        // TODO: Add barbarian weapon from a free asset (check Downloads folder)
+        // Barbarian club from KayKit weapons pack
+        string clubPath = Kayak + "/Weapons/axe_1handed.fbx";
+        var clubPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(clubPath);
+        if (clubPrefab != null)
+        {
+            var club = (GameObject)Object.Instantiate(clubPrefab);
+            club.name = "BarbarianClub";
+            var handSlot = FindHandSlot(go.transform);
+            if (handSlot != null)
+            {
+                club.transform.SetParent(handSlot);
+                club.transform.localPosition = new Vector3(0f, 0.15f, 0.4f);
+                club.transform.localRotation = Quaternion.Euler(270f, 180f, 0f);
+                club.transform.localScale = Vector3.one * 0.7f;
+            }
+            else
+            {
+                club.transform.SetParent(go.transform);
+                club.transform.localPosition = new Vector3(0.6f, 1.0f, 0f);
+                club.transform.localRotation = Quaternion.Euler(0f, 0f, -60f);
+                club.transform.localScale = Vector3.one * 0.8f;
+            }
+
+            // Fix white/pink materials: replace all FBX embedded materials with Standard shader
+            foreach (var rend in club.GetComponentsInChildren<Renderer>())
+            {
+                var mats = rend.sharedMaterials;
+                for (int mi = 0; mi < mats.Length; mi++)
+                {
+                    var newMat = new Material(Shader.Find("Standard"));
+                    newMat.color = mi == 0 ? new Color(0.6f, 0.35f, 0.15f) : new Color(0.3f, 0.3f, 0.3f);
+                    newMat.name = "ClubMat_" + mi;
+                    AssetDatabase.CreateAsset(newMat, "Assets/Materials/ClubMat_" + mi + ".mat");
+                    mats[mi] = newMat;
+                }
+                rend.sharedMaterials = mats;
+            }
+        }
+
         var enemy = go.AddComponent<Enemy>();
         enemy.maxHealth = 4;
         enemy.goldReward = 8;
         enemy.moveSpeed = 5.5f;
+        enemy.attackRange = 4f;
         enemy.enemyName = "Barbarian";
 
         PrefabUtility.SaveAsPrefabAsset(go, path);
         Object.DestroyImmediate(go);
-        return AssetDatabase.LoadAssetAtPath<GameObject>(path);
+        var result = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+        Debug.Log($"Created BarbarianEnemy prefab at {path}");
+        return result;
+    }
+
+    static void FixWolfMaterials(GameObject wolf)
+    {
+        // Replace ALL materials with Standard shader — the Wolf pack uses a custom ShaderGraph
+        // (AnimalFurShader_URP_HDRP) that requires URP/HDRP, and the prefab incorrectly
+        // references URP materials on the fur mesh. Without URP/HDRP installed, every material
+        // that isn't Standard shows up as pink.
+        foreach (var rend in wolf.GetComponentsInChildren<Renderer>())
+        {
+            var mats = rend.sharedMaterials;
+            bool needFix = false;
+            for (int mi = 0; mi < mats.Length; mi++)
+            {
+                if (mats[mi] == null || mats[mi].shader == null || mats[mi].shader.name != "Standard")
+                    { needFix = true; break; }
+            }
+            if (!needFix) continue;
+
+            for (int mi = 0; mi < mats.Length; mi++)
+            {
+                var mat = new Material(Shader.Find("Standard"));
+                string rn = rend.name.ToLower();
+                if (rn.Contains("glass") || rn.Contains("eye"))
+                    mat.color = new Color(0.6f, 0.7f, 0.8f, 0.5f);
+                else if (rn.Contains("fur") || rn.Contains("hair"))
+                    mat.color = new Color(0.15f, 0.1f, 0.08f);
+                else
+                    mat.color = new Color(0.2f, 0.15f, 0.1f);
+                mat.name = "Wolf_Fix_" + rend.name + "_" + mi;
+                mats[mi] = mat;
+            }
+            rend.sharedMaterials = mats;
+        }
     }
 
     static GameObject EnsureWolfPrefab()
     {
         string path = "Assets/Prefabs/Wolf.prefab";
-        var existing = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-        if (existing != null) return existing;
-
         Directory.CreateDirectory("Assets/Prefabs");
 
         // Prefer the imported Wolf pack if the user has it in the project.
@@ -769,8 +890,12 @@ public class Setup3DScene
         {
             var wolf = (GameObject)Object.Instantiate(imported);
             wolf.name = "Wolf";
-            wolf.transform.localScale = Vector3.one * 3.5f;
+            wolf.transform.localScale = Vector3.one * 10f;
             wolf.transform.position = new Vector3(0, 0.2f, 0);
+
+            // Always fix materials — this runs even if the prefab already exists
+            // to ensure pink/URP materials are replaced with Standard shader.
+            FixWolfMaterials(wolf);
 
             // Replace the broken demo Animator Controller (no parameters, auto-cycles)
             // with our proper controller that supports Speed/Death parameters.
@@ -790,10 +915,15 @@ public class Setup3DScene
                 cap.center = new Vector3(0, 0.8f, 0);
             }
 
+            // Remove and re-add Enemy to ensure fresh component
+            var oldEnemy = wolf.GetComponent<Enemy>();
+            if (oldEnemy != null) Object.DestroyImmediate(oldEnemy);
+
             var enemy = wolf.AddComponent<Enemy>();
             enemy.maxHealth = 2;
             enemy.goldReward = 5;
             enemy.moveSpeed = 6.5f;
+            enemy.attackRange = 3.5f;
             enemy.enemyName = "Wolf";
 
             PrefabUtility.SaveAsPrefabAsset(wolf, path);
@@ -813,7 +943,7 @@ public class Setup3DScene
         }
 
         var wolf2 = new GameObject("Wolf");
-        wolf2.transform.localScale = Vector3.one * 3.5f;
+        wolf2.transform.localScale = Vector3.one * 10f;
 
         // Body — oriented along +Z so the wolf actually runs forward.
         var body = GameObject.CreatePrimitive(PrimitiveType.Capsule);
@@ -886,6 +1016,7 @@ public class Setup3DScene
         enemy2.maxHealth = 2;
         enemy2.goldReward = 5;
         enemy2.moveSpeed = 4.5f;
+        enemy2.attackRange = 3.5f;
         enemy2.enemyName = "Wolf";
 
         var walker = wolf2.AddComponent<SimpleWalker>();
@@ -901,55 +1032,69 @@ public class Setup3DScene
     {
         var assets = AssetDatabase.LoadAllAssetsAtPath(fbxPath);
         string log = $"Searching for '{clipName}' in {fbxPath}: ";
-        AnimationClip firstClip = null;
+        AnimationClip firstValid = null;
         foreach (var obj in assets)
         {
             if (obj is AnimationClip clip)
             {
-                if (firstClip == null) firstClip = clip;
-                log += $"[{clip.name}] ";
-                if (clip.name == clipName) { Debug.Log(log + "FOUND exact match."); return clip; }
+                log += $"[{clip.name}:{clip.length:F2}s empty={clip.empty}] ";
+                bool valid = clip.length > 0f && !clip.empty;
+                if (clip.name == clipName)
+                {
+                    if (valid)
+                    {
+                        Debug.Log(log + "FOUND exact match.");
+                        return clip;
+                    }
+                    Debug.LogWarning(log + $"Clip '{clipName}' found but EMPTY. Skipping.");
+                    continue;
+                }
+                if (firstValid == null && valid) firstValid = clip;
             }
         }
-        if (firstClip != null)
+        if (firstValid != null)
         {
             // contains match
             foreach (var obj in assets)
             {
                 if (obj is AnimationClip clip && clip.name.ToLower().Contains(clipName.ToLower()))
-                { Debug.Log(log + "FOUND contains match: " + clip.name); return clip; }
+                {
+                    bool valid = clip.length > 0f && !clip.empty;
+                    if (valid) { Debug.Log(log + "FOUND contains match: " + clip.name); return clip; }
+                }
             }
-            Debug.Log(log + $"No match for '{clipName}', using first clip: {firstClip.name}");
-            return firstClip;
+            Debug.Log(log + $"No match for '{clipName}', using first valid clip: {firstValid.name} ({firstValid.length:F2}s)");
+            return firstValid;
         }
 
         // No clips at all in this FBX – search all KayKit FBX files as fallback
-        Debug.LogWarning(log + $"NO clips found in {fbxPath}. Searching ALL KayKit FBX files...");
-        // Also generate procedural clips as last-resort fallback (see GenerateProceduralClip)
+        Debug.LogWarning(log + $"NO valid clips found in {fbxPath}. Searching ALL KayKit FBX files...");
         string[] fbxFiles = System.IO.Directory.GetFiles(Application.dataPath + "/3D/KayKit",
             "*.fbx", System.IO.SearchOption.AllDirectories);
         foreach (string fullPath in fbxFiles)
         {
             string relPath = "Assets" + fullPath.Substring(Application.dataPath.Length);
+            if (relPath.Contains("Characters") || relPath.Contains("Weapons")) continue; // skip mesh FBX files
             var fbxAssets = AssetDatabase.LoadAllAssetsAtPath(relPath);
             foreach (var obj in fbxAssets)
             {
-                if (obj is AnimationClip clip)
+                if (obj is AnimationClip clip && clip.length > 0f && !clip.empty && !clip.name.Contains("T-Pose") && !clip.name.Contains("TPose"))
                 {
                     if (clip.name.ToLower().Contains(clipName.ToLower()))
-                    { Debug.Log($"Found '{clipName}' in {relPath}: {clip.name}"); return clip; }
+                    { Debug.Log($"Found '{clipName}' in {relPath}: {clip.name} ({clip.length:F2}s)"); return clip; }
                 }
             }
         }
-        // Absolute last resort: return any clip from any KayKit FBX
+        // Absolute last resort: return any valid clip from any KayKit FBX (skip Characters/Weapons)
         foreach (string fullPath in fbxFiles)
         {
             string relPath = "Assets" + fullPath.Substring(Application.dataPath.Length);
+            if (relPath.Contains("Characters") || relPath.Contains("Weapons")) continue;
             var fbxAssets = AssetDatabase.LoadAllAssetsAtPath(relPath);
             foreach (var obj in fbxAssets)
             {
-                if (obj is AnimationClip clip)
-                { Debug.LogWarning($"Fallback clip from {relPath}: {clip.name}"); return clip; }
+                if (obj is AnimationClip clip && clip.length > 0f && !clip.empty && !clip.name.Contains("T-Pose") && !clip.name.Contains("TPose"))
+                { Debug.LogWarning($"Fallback clip from {relPath}: {clip.name} ({clip.length:F2}s)"); return clip; }
             }
         }
         Debug.LogError($"NO animation clips found in ANY KayKit FBX file!");
@@ -960,21 +1105,31 @@ public class Setup3DScene
     {
         string path = "Assets/Animations/HeroAnimator.controller";
         var existing = AssetDatabase.LoadAssetAtPath<AnimatorController>(path);
-        if (existing != null) return existing;
+        if (existing != null)
+        {
+            var sIdle = existing.layers[0].stateMachine.states.FirstOrDefault(s => s.state.name == "Idle");
+            var sWalk = existing.layers[0].stateMachine.states.FirstOrDefault(s => s.state.name == "Walk");
+            var sAtk = existing.layers[0].stateMachine.states.FirstOrDefault(s => s.state.name == "Attack");
+            Debug.Log($"Reusing HeroAnimatorController. States: Idle={sIdle.state?.motion?.name}, Walk={sWalk.state?.motion?.name}, Attack={sAtk.state?.motion?.name}");
+            return existing;
+        }
 
         Directory.CreateDirectory("Assets/Animations");
 
         string movementFbx = "Assets/3D/KayKit/KayKit_Adventurers_2.0_FREE/Animations/fbx/Rig_Medium/Rig_Medium_MovementBasic.fbx";
         string generalFbx = "Assets/3D/KayKit/KayKit_Adventurers_2.0_FREE/Animations/fbx/Rig_Medium/Rig_Medium_General.fbx";
+        string combatFbx = "Assets/3D/KayKit/KayKit_Adventurers_2.0_FREE/Animations/fbx/Rig_Medium/Rig_Medium_CombatMelee.fbx";
 
         var walkClip = LoadKayKitClip(movementFbx, "Walking_A");
         var idleClip = LoadKayKitClip(generalFbx, "Idle_A");
+        var attackClip = LoadKayKitClip(combatFbx, "Melee_1H_Attack_Chop");
 
         var controller = new AnimatorController();
         controller.name = "HeroAnimator";
         AssetDatabase.CreateAsset(controller, path);
 
         controller.AddParameter("Speed", AnimatorControllerParameterType.Float);
+        controller.AddParameter("Attack", AnimatorControllerParameterType.Trigger);
         controller.AddLayer("Base Layer");
 
         var rootStateMachine = controller.layers[0].stateMachine;
@@ -985,6 +1140,9 @@ public class Setup3DScene
         var walkState = rootStateMachine.AddState("Walk");
         if (walkClip != null) walkState.motion = walkClip;
 
+        var attackState = rootStateMachine.AddState("Attack");
+        if (attackClip != null) attackState.motion = attackClip;
+
         var idleToWalk = idleState.AddTransition(walkState);
         idleToWalk.AddCondition(AnimatorConditionMode.Greater, 0.1f, "Speed");
         idleToWalk.duration = 0.1f;
@@ -993,9 +1151,17 @@ public class Setup3DScene
         walkToIdle.AddCondition(AnimatorConditionMode.Less, 0.1f, "Speed");
         walkToIdle.duration = 0.1f;
 
+        var idleToAttack = idleState.AddTransition(attackState);
+        idleToAttack.AddCondition(AnimatorConditionMode.If, 0f, "Attack");
+        idleToAttack.duration = 0.15f;
+        var attackToIdle = attackState.AddTransition(idleState);
+        attackToIdle.hasExitTime = true;
+        attackToIdle.exitTime = 1f;
+        attackToIdle.duration = 0.3f;
+
         EditorUtility.SetDirty(controller);
         AssetDatabase.SaveAssets();
-        Debug.Log($"Created AnimatorController at {path} (Walk: {walkClip?.name}, Idle: {idleClip?.name})");
+        Debug.Log($"Created HeroAnimatorController (Walk: {walkClip?.name}, Idle: {idleClip?.name}, Attack: {attackClip?.name})");
         return controller;
     }
 
@@ -1003,16 +1169,26 @@ public class Setup3DScene
     {
         string path = "Assets/Animations/BarbarianAnimator.controller";
         var existing = AssetDatabase.LoadAssetAtPath<AnimatorController>(path);
-        if (existing != null) return existing;
+        if (existing != null)
+        {
+            var sIdle = existing.layers[0].stateMachine.states.FirstOrDefault(s => s.state.name == "Idle");
+            var sWalk = existing.layers[0].stateMachine.states.FirstOrDefault(s => s.state.name == "Walk");
+            var sAtk = existing.layers[0].stateMachine.states.FirstOrDefault(s => s.state.name == "Attack");
+            var sDeath = existing.layers[0].stateMachine.states.FirstOrDefault(s => s.state.name == "Death");
+            Debug.Log($"Reusing BarbarianAnimatorController. States: Idle={sIdle.state?.motion?.name}, Walk={sWalk.state?.motion?.name}, Attack={sAtk.state?.motion?.name}, Death={sDeath.state?.motion?.name}");
+            return existing;
+        }
 
         Directory.CreateDirectory("Assets/Animations");
 
         string movementFbx = "Assets/3D/KayKit/KayKit_Adventurers_2.0_FREE/Animations/fbx/Rig_Medium/Rig_Medium_MovementBasic.fbx";
         string generalFbx = "Assets/3D/KayKit/KayKit_Adventurers_2.0_FREE/Animations/fbx/Rig_Medium/Rig_Medium_General.fbx";
+        string combatFbx = "Assets/3D/KayKit/KayKit_Adventurers_2.0_FREE/Animations/fbx/Rig_Medium/Rig_Medium_CombatMelee.fbx";
 
         var walkClip = LoadKayKitClip(movementFbx, "Walking_A");
         var idleClip = LoadKayKitClip(generalFbx, "Idle_A");
         var deathClip = LoadKayKitClip(generalFbx, "Death_A");
+        var attackClip = LoadKayKitClip(combatFbx, "Melee_1H_Attack_Chop");
 
         var controller = new AnimatorController();
         controller.name = "BarbarianAnimator";
@@ -1032,7 +1208,7 @@ public class Setup3DScene
         if (walkClip != null) walkState.motion = walkClip;
 
         var attackState = rootStateMachine.AddState("Attack");
-        if (walkClip != null) attackState.motion = walkClip; // Use walk clip as attack placeholder
+        if (attackClip != null) attackState.motion = attackClip;
 
         var deathState = rootStateMachine.AddState("Death");
         if (deathClip != null) deathState.motion = deathClip;
@@ -1049,6 +1225,8 @@ public class Setup3DScene
         idleToAttack.AddCondition(AnimatorConditionMode.If, 0f, "Attack");
         idleToAttack.duration = 0.15f;
         var attackToIdle = attackState.AddTransition(idleState);
+        attackToIdle.hasExitTime = true;
+        attackToIdle.exitTime = 1f;
         attackToIdle.duration = 0.3f;
 
         var anyToDeath = rootStateMachine.AddAnyStateTransition(deathState);
@@ -1069,40 +1247,32 @@ public class Setup3DScene
 
         Directory.CreateDirectory("Assets/Animations");
 
-        // Try to use the imported pack's controller as a base, adding parameters.
-        string importedControllerPath = "Assets/Wolf/Animations/Wolf_Controller/WolfAnimations.controller";
-        var importedCtrl = AssetDatabase.LoadAssetAtPath<AnimatorController>(importedControllerPath);
-        if (importedCtrl != null)
-        {
-            // Clone it into our path with added parameters
-            var controller = Object.Instantiate(importedCtrl);
-            controller.name = "WolfAnimator";
-            AssetDatabase.CreateAsset(controller, path);
-
-            bool hasSpeed = false, hasDeath = false;
-            foreach (var p in controller.parameters)
-            {
-                if (p.name == "Speed") hasSpeed = true;
-                if (p.name == "Death") hasDeath = true;
-            }
-            if (!hasSpeed) controller.AddParameter("Speed", AnimatorControllerParameterType.Float);
-            if (!hasDeath) controller.AddParameter("Death", AnimatorControllerParameterType.Trigger);
-
-            EditorUtility.SetDirty(controller);
-            AssetDatabase.SaveAssets();
-            Debug.Log($"WolfAnimator: cloned from imported pack with added parameters.");
-            return controller;
-        }
-
-        // Fallback: create from scratch using clips from the wolf model FBX
+        // Load clips from the Wolf FBX
         string wolfFbx = "Assets/Wolf/Models/Wolf.fbx";
-        var walkClip = LoadKayKitClip(wolfFbx, "Walk");
-        if (walkClip == null)
+        AnimationClip walkClip = null, idleClip = null, attackClip = null, deathClip = null;
+
+        var assets = AssetDatabase.LoadAllAssetsAtPath(wolfFbx);
+        string clipLog = "Wolf FBX clips: ";
+        foreach (var obj in assets)
         {
-            var assets = AssetDatabase.LoadAllAssetsAtPath(wolfFbx);
-            foreach (var obj in assets)
-                if (obj is AnimationClip clip) { walkClip = clip; break; }
+            if (obj is AnimationClip clip)
+            {
+                clipLog += $"[{clip.name}:{clip.length:F2}s] ";
+                bool valid = clip.length > 0f && !clip.empty;
+                if (!valid) continue;
+                string n = clip.name.ToLower();
+                if (n.Contains("walking")) walkClip = clip;
+                else if (walkClip == null && n.Contains("walk")) walkClip = clip;
+                else if (walkClip == null && n.Contains("run")) walkClip = clip;
+                if (idleClip == null && n.Contains("idle")) idleClip = clip;
+                if (attackClip == null && n.Contains("attack")) attackClip = clip;
+                if (deathClip == null && (n.Contains("dead") || n.Contains("death"))) deathClip = clip;
+            }
         }
+        if (idleClip == null) idleClip = walkClip;
+        if (attackClip == null) attackClip = walkClip;
+        if (deathClip == null) deathClip = walkClip;
+        Debug.Log(clipLog);
 
         var ctrl = new AnimatorController();
         ctrl.name = "WolfAnimator";
@@ -1110,19 +1280,24 @@ public class Setup3DScene
 
         ctrl.AddParameter("Speed", AnimatorControllerParameterType.Float);
         ctrl.AddParameter("Death", AnimatorControllerParameterType.Trigger);
+        ctrl.AddParameter("Attack", AnimatorControllerParameterType.Trigger);
         ctrl.AddLayer("Base Layer");
 
         var rootSM = ctrl.layers[0].stateMachine;
 
         var idleSt = rootSM.AddState("Idle");
-        if (walkClip != null) idleSt.motion = walkClip;
+        if (idleClip != null) idleSt.motion = idleClip;
 
         var walkSt = rootSM.AddState("Walk");
         if (walkClip != null) walkSt.motion = walkClip;
 
-        var deathSt = rootSM.AddState("Death");
-        if (walkClip != null) deathSt.motion = walkClip;
+        var attackSt = rootSM.AddState("Attack");
+        if (attackClip != null) attackSt.motion = attackClip;
 
+        var deathSt = rootSM.AddState("Death");
+        if (deathClip != null) deathSt.motion = deathClip;
+
+        // Idle ↔ Walk on Speed
         var i2w = idleSt.AddTransition(walkSt);
         i2w.AddCondition(AnimatorConditionMode.Greater, 0.1f, "Speed");
         i2w.duration = 0.1f;
@@ -1131,13 +1306,29 @@ public class Setup3DScene
         w2i.AddCondition(AnimatorConditionMode.Less, 0.1f, "Speed");
         w2i.duration = 0.1f;
 
+        // Enter Attack state from idle/walk on trigger
+        var i2a = idleSt.AddTransition(attackSt);
+        i2a.AddCondition(AnimatorConditionMode.If, 0f, "Attack");
+        i2a.duration = 0.1f;
+
+        var w2a = walkSt.AddTransition(attackSt);
+        w2a.AddCondition(AnimatorConditionMode.If, 0f, "Attack");
+        w2a.duration = 0.1f;
+
+        // Attack → Idle after clip finishes (no condition needed, just hasExitTime)
+        var a2i = attackSt.AddTransition(idleSt);
+        a2i.hasExitTime = true;
+        a2i.exitTime = 1f;
+        a2i.duration = 0.1f;
+
+        // Any → Death
         var anyD = rootSM.AddAnyStateTransition(deathSt);
         anyD.AddCondition(AnimatorConditionMode.If, 0f, "Death");
         anyD.duration = 0.2f;
 
         EditorUtility.SetDirty(ctrl);
         AssetDatabase.SaveAssets();
-        Debug.Log($"WolfAnimator: created from scratch (walkClip: {walkClip?.name ?? "null"})");
+        Debug.Log($"WolfAnimator: created from scratch (walk:{walkClip?.name ?? "∅"} idle:{idleClip?.name ?? "∅"} attack:{attackClip?.name ?? "∅"} death:{deathClip?.name ?? "∅"})");
         return ctrl;
     }
 
@@ -1200,6 +1391,46 @@ public class Setup3DScene
         }
     }
 
+    static Transform FindHandSlot(Transform parent)
+    {
+        string name = parent.name.ToLowerInvariant();
+        if (name.Contains("handslot") && (name.EndsWith("r") || name.EndsWith("_r")))
+            return parent;
+        for (int i = 0; i < parent.childCount; i++)
+        {
+            var result = FindHandSlot(parent.GetChild(i));
+            if (result != null) return result;
+        }
+        return null;
+    }
+
+    static Transform FindBone(Transform parent, System.Func<string, bool> match)
+    {
+        if (match(parent.name.ToLowerInvariant())) return parent;
+        for (int i = 0; i < parent.childCount; i++)
+        {
+            var result = FindBone(parent.GetChild(i), match);
+            if (result != null) return result;
+        }
+        return null;
+    }
+
+    static Material CreateMedievalMat(string matPath, string texturePath, Color tint)
+    {
+        var tex = AssetDatabase.LoadAssetAtPath<Texture2D>(texturePath);
+        var mat = AssetDatabase.LoadAssetAtPath<Material>(matPath);
+        if (mat == null)
+        {
+            mat = new Material(Shader.Find("Standard"));
+            if (tex != null) mat.mainTexture = tex;
+            mat.color = tint;
+            mat.SetFloat("_Metallic", 0.7f);
+            mat.SetFloat("_Glossiness", 0.5f);
+            AssetDatabase.CreateAsset(mat, matPath);
+        }
+        return mat;
+    }
+
     static void PlacePlayer()
     {
         string basePath = Kayak + "/Characters/fbx";
@@ -1209,62 +1440,246 @@ public class Setup3DScene
         var go = (GameObject)Object.Instantiate(prefab);
         go.name = "Knight";
         go.transform.position = new Vector3(0, 0, -55);
-        go.transform.localScale = Vector3.one * 2.2f;
+        go.transform.localScale = Vector3.one * 3.0f;
 
         go.tag = "Player";
         go.AddComponent<PlayerController3D>();
 
-        // Knight.fbx has no Animator (KayKit characters use transform-based
-        // Generic animation, not Humanoid). The Avatar should remain null.
         var heroAnimator = go.GetComponentInChildren<Animator>();
         if (heroAnimator == null)
             heroAnimator = go.AddComponent<Animator>();
-        // No avatar — KayKit uses Generic animation curves targeting bone Transforms.
+
+        string knightFbxPath = basePath + "/Knight.fbx";
+        var avatar = AssetDatabase.LoadAssetAtPath<Avatar>(knightFbxPath);
+        if (avatar != null && avatar.isHuman)
+        {
+            heroAnimator.avatar = avatar;
+            Debug.Log("Knight Avatar loaded and assigned (Humanoid)");
+        }
+        else
+        {
+            heroAnimator.avatar = null;
+            Debug.Log("Knight.fbx is Generic — no Humanoid avatar assigned");
+        }
 
         heroAnimator.runtimeAnimatorController = EnsureHeroAnimatorController();
         heroAnimator.applyRootMotion = false;
 
-        // One-handed sword from KayKit weapon pack — replaces the old cube "toothpick".
-        string swordPath = Kayak + "/Weapons/sword_1handed.fbx";
-        var swordPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(swordPath);
-        GameObject sword;
-        if (swordPrefab != null)
+        Directory.CreateDirectory("Assets/Materials");
+
+        // Medieval sword from Knight Medieval Pack — parented to handslot.r
+        string medSwordPath = "Assets/3D/KnightMedieval/Sword.Asset/Sword.obj";
+        var medSwordPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(medSwordPath);
+        Transform swordTransform = null;
+        if (medSwordPrefab != null)
         {
-            sword = (GameObject)Object.Instantiate(swordPrefab);
-            sword.name = "HeroSword";
-            sword.transform.SetParent(go.transform);
-            sword.transform.localPosition = new Vector3(1.2f, 0.8f, 0.4f);
-            sword.transform.localRotation = Quaternion.Euler(-60f, 90f, 0f);
-            sword.transform.localScale = Vector3.one * 0.8f;
-            // Disable sword shadows so the hero casting toggle is consistent
-            foreach (var r in sword.GetComponentsInChildren<Renderer>())
-                r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-        }
-        else
-        {
-            // Fallback cube if the KayKit weapon FBX hasn't been imported yet
-            Directory.CreateDirectory("Assets/Materials");
-            string swordMatPath = "Assets/Materials/HeroSword.mat";
-            var swordMat = AssetDatabase.LoadAssetAtPath<Material>(swordMatPath);
-            if (swordMat == null)
+            var medSword = (GameObject)Object.Instantiate(medSwordPrefab);
+            medSword.name = "HeroSword";
+
+            var handslot = FindHandSlot(go.transform);
+            if (handslot != null)
             {
-                swordMat = new Material(Shader.Find("Standard"));
-                swordMat.color = new Color(0.75f, 0.75f, 0.8f);
-                AssetDatabase.CreateAsset(swordMat, swordMatPath);
+                medSword.transform.SetParent(handslot);
+                medSword.transform.localPosition = new Vector3(0, 0, 0.5f);
+                medSword.transform.localRotation = Quaternion.Euler(90f, 180f, 0f);
+                medSword.transform.localScale = Vector3.one * 0.9f;
+                Debug.Log("Medieval sword parented to handslot.r");
+            }
+            else
+            {
+                medSword.transform.SetParent(go.transform);
+                medSword.transform.localPosition = new Vector3(1.2f, 2.2f, 0.7f);
+                medSword.transform.localRotation = Quaternion.Euler(90f, 180f, 0f);
+                medSword.transform.localScale = Vector3.one * 0.9f;
             }
 
-            sword = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            sword.name = "HeroSword";
-            sword.transform.SetParent(go.transform);
-            sword.transform.localPosition = new Vector3(0.65f, 1.2f, 0.4f);
-            sword.transform.localRotation = Quaternion.Euler(0f, 0f, -30f);
-            sword.transform.localScale = new Vector3(0.12f, 1.4f, 0.05f);
-            sword.GetComponent<Renderer>().sharedMaterial = swordMat;
-            Object.DestroyImmediate(sword.GetComponent<BoxCollider>());
+            var swordMat = CreateMedievalMat("Assets/Materials/MedievalSword.mat",
+                "Assets/3D/KnightMedieval/Sword.Asset/Sword.png", Color.white);
+            foreach (var r in medSword.GetComponentsInChildren<Renderer>())
+            {
+                r.sharedMaterial = swordMat;
+                r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            }
+            swordTransform = medSword.transform;
+        }
+
+        // Medieval shield from Knight Medieval Pack — parented to left hand slot
+        string medShieldPath = "Assets/3D/KnightMedieval/Shield.Asset/Shield.obj";
+        var medShieldPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(medShieldPath);
+        if (medShieldPrefab != null)
+        {
+            var medShield = (GameObject)Object.Instantiate(medShieldPrefab);
+            medShield.name = "HeroShield";
+
+            var leftSlot = FindBone(go.transform, n => n.Contains("handslot") && (n.EndsWith("l") || n.EndsWith("_l")));
+            if (leftSlot != null)
+            {
+                medShield.transform.SetParent(leftSlot);
+                medShield.transform.localPosition = new Vector3(0, 0, -0.2f);
+                medShield.transform.localRotation = Quaternion.Euler(-90f, 180f, 0f);
+                medShield.transform.localScale = Vector3.one * 0.7f;
+                Debug.Log("Medieval shield parented to left hand slot");
+            }
+            else
+            {
+                medShield.transform.SetParent(go.transform);
+                medShield.transform.localPosition = new Vector3(-0.9f, 2.2f, 0f);
+                medShield.transform.localRotation = Quaternion.Euler(-90f, 180f, 0f);
+                medShield.transform.localScale = Vector3.one * 0.7f;
+                Debug.Log("Medieval shield parented to hero root (no left hand slot found)");
+            }
+
+            var shieldMat = CreateMedievalMat("Assets/Materials/MedievalShield.mat",
+                "Assets/3D/KnightMedieval/Shield.Asset/Shield.png", Color.white);
+            foreach (var r in medShield.GetComponentsInChildren<Renderer>())
+            {
+                r.sharedMaterial = shieldMat;
+                r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            }
         }
 
         var weapon = go.AddComponent<SimpleWeapon>();
-        weapon.weapon = sword.transform;
+        if (swordTransform != null)
+            weapon.weapon = swordTransform;
+    }
+
+    static AnimationClip LoadMixamoClip(string fbxPath)
+    {
+        var all = AssetDatabase.LoadAllAssetsAtPath(fbxPath);
+        foreach (var obj in all)
+            if (obj is AnimationClip clip && clip.name.Trim() != "__preview__")
+                { Debug.Log($"Mixamo: loaded '{clip.name}' from {fbxPath}"); return clip; }
+        Debug.LogWarning($"No clip found in {fbxPath}");
+        return null;
+    }
+
+    static void PlaceTestNPC()
+    {
+        string charPath = UniversalBase + "/Characters/Superhero_Male_FullBody.fbx";
+        var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(charPath);
+        if (prefab == null) { Debug.LogWarning("Superhero FBX not found"); return; }
+
+        var npc = (GameObject)Object.Instantiate(prefab);
+        npc.name = "TestNPCHumanoid";
+        npc.transform.position = new Vector3(3f, 0f, -50f);
+        npc.transform.localScale = Vector3.one * 14.4f;
+
+        var animator = npc.GetComponentInChildren<Animator>();
+        if (animator == null) animator = npc.AddComponent<Animator>();
+        var avatar = AssetDatabase.LoadAssetAtPath<Avatar>(charPath);
+        if (avatar != null && avatar.isHuman)
+        {
+            animator.avatar = avatar;
+            Debug.Log("TestNPC: Avatar assigned");
+        }
+
+        // Create AnimatorController with Mixamo walk + idle
+        string ctrlPath = "Assets/Animations/MixamoHumanoid/TestNPC.controller";
+        var existingCtrl = AssetDatabase.LoadAssetAtPath<UnityEditor.Animations.AnimatorController>(ctrlPath);
+        UnityEditor.Animations.AnimatorController ctrl;
+        if (existingCtrl != null)
+            ctrl = existingCtrl;
+        else
+        {
+            Directory.CreateDirectory("Assets/Animations/MixamoHumanoid");
+            ctrl = new UnityEditor.Animations.AnimatorController();
+            ctrl.name = "TestNPC";
+            AssetDatabase.CreateAsset(ctrl, ctrlPath);
+
+            var speedP = new AnimatorControllerParameter { name = "Speed", type = UnityEngine.AnimatorControllerParameterType.Float };
+            ctrl.AddParameter(speedP);
+            ctrl.AddLayer("Base Layer");
+
+            var rootState = ctrl.layers[0].stateMachine;
+
+            var walkClip = LoadMixamoClip("Assets/Animations/Mixamo/walking.fbx");
+            var idleClip = LoadMixamoClip("Assets/Animations/Mixamo/idle.fbx");
+
+            var idleState = rootState.AddState("Idle");
+            if (idleClip != null) idleState.motion = idleClip;
+
+            var walkState = rootState.AddState("Walk");
+            if (walkClip != null) walkState.motion = walkClip;
+
+            var idleToWalk = idleState.AddTransition(walkState);
+            idleToWalk.AddCondition(UnityEditor.Animations.AnimatorConditionMode.Greater, 0.1f, "Speed");
+            idleToWalk.duration = 0.15f;
+
+            var walkToIdle = walkState.AddTransition(idleState);
+            walkToIdle.AddCondition(UnityEditor.Animations.AnimatorConditionMode.Less, 0.1f, "Speed");
+            walkToIdle.duration = 0.15f;
+
+            EditorUtility.SetDirty(ctrl);
+            AssetDatabase.SaveAssets();
+            Debug.Log("Created TestNPC controller with Mixamo clips");
+        }
+        animator.runtimeAnimatorController = ctrl;
+        animator.applyRootMotion = false;
+
+        // Attach armor from Knight Medieval Pack
+        string armorPath = "Assets/3D/KnightMedieval/Armor.Asset/Armor.fbx";
+        var armorPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(armorPath);
+        if (armorPrefab != null)
+        {
+            var armor = (GameObject)Object.Instantiate(armorPrefab);
+            armor.name = "NPCArmor";
+            armor.transform.SetParent(npc.transform);
+            armor.transform.localPosition = Vector3.zero;
+            armor.transform.localRotation = Quaternion.Euler(0, -90, 0);
+            armor.transform.localScale = Vector3.one * 0.0225f;
+            // Disable shadows on all renderers
+            foreach (var r in armor.GetComponentsInChildren<Renderer>())
+                r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            Debug.Log("TestNPC: Armor attached");
+        }
+
+        // Attach sword
+        string swordPath = "Assets/3D/KnightMedieval/Sword.Asset/Sword.obj";
+        var swordPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(swordPath);
+        if (swordPrefab != null)
+        {
+            var sword = (GameObject)Object.Instantiate(swordPrefab);
+            sword.name = "NPCSword";
+            sword.transform.SetParent(npc.transform);
+            sword.transform.localPosition = new Vector3(0.15f, 0.1875f, 0f);
+            sword.transform.localRotation = Quaternion.Euler(0, 90, -45);
+            sword.transform.localScale = Vector3.one * 0.5f;
+            foreach (var r in sword.GetComponentsInChildren<Renderer>())
+                r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            Debug.Log("TestNPC: Sword attached");
+        }
+
+        // Attach shield
+        string shieldPath = "Assets/3D/KnightMedieval/Shield.Asset/Shield.obj";
+        var shieldPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(shieldPath);
+        if (shieldPrefab != null)
+        {
+            var shield = (GameObject)Object.Instantiate(shieldPrefab);
+            shield.name = "NPCShield";
+            shield.transform.SetParent(npc.transform);
+            shield.transform.localPosition = new Vector3(-0.1f, 0.175f, 0.0375f);
+            shield.transform.localRotation = Quaternion.Euler(0, -90, 0);
+            shield.transform.localScale = Vector3.one * 0.1875f;
+            foreach (var r in shield.GetComponentsInChildren<Renderer>())
+                r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            Debug.Log("TestNPC: Shield attached");
+        }
+
+        // Add patrol behaviour
+        var patrol = npc.AddComponent<PatrolNPC>();
+        patrol.moveSpeed = 3f;
+        patrol.pauseTime = 2.5f;
+
+        // Create waypoints near flag and church
+        var wpA = new GameObject("NPC_Waypoint_A");
+        wpA.transform.position = new Vector3(0f, 0f, -45f);
+        var wpB = new GameObject("NPC_Waypoint_B");
+        wpB.transform.position = new Vector3(0f, 0f, 15f);
+        patrol.waypointA = wpA.transform;
+        patrol.waypointB = wpB.transform;
+
+        npc.SetActive(false);
+        Debug.Log("TestNPC placed near hero (hidden for now) — patrols between flag and church");
     }
 
     static void CreateSlots()
@@ -1427,51 +1842,132 @@ public class Setup3DScene
         return AssetDatabase.LoadAssetAtPath<GameObject>(path);
     }
 
-    static void ConfigureKayKitAnimations()
-    {
-        string movementFbx = "Assets/3D/KayKit/KayKit_Adventurers_2.0_FREE/Animations/fbx/Rig_Medium/Rig_Medium_MovementBasic.fbx";
-        string generalFbx = "Assets/3D/KayKit/KayKit_Adventurers_2.0_FREE/Animations/fbx/Rig_Medium/Rig_Medium_General.fbx";
+    const string UniversalBase = "Assets/3D/UniversalBase";
 
-        ConfigureAnimationClips(movementFbx, new[] {
-            "Walking_A", "Walking_B", "Walking_C",
-            "Running_A", "Running_B",
-            "Jump_Full_Long", "Jump_Full_Short", "Jump_Idle", "Jump_Land", "Jump_Start"
-        });
-        ConfigureAnimationClips(generalFbx, new[] {
-            "Idle_A", "Idle_B",
-            "Death_A", "Death_B",
-            "Hit_A", "Hit_B",
-            "Interact", "PickUp",
-            "Spawn_Air", "Spawn_Ground",
-            "Throw", "Use_Item"
-        });
+    static void ConfigureKayKitHumanoidAvatars()
+    {
+        // Set character FBX files to import as Humanoid so Unity auto-creates Avatars.
+        // Humanoid animation clips need an Avatar to map muscle curves to bone transforms.
+        string[] charFbxPaths = {
+            Kayak + "/Characters/fbx/Knight.fbx",
+            Kayak + "/Characters/fbx/Barbarian.fbx",
+            UniversalBase + "/Characters/Superhero_Male_FullBody.fbx",
+        };
+        foreach (string path in charFbxPaths)
+        {
+            var imp = AssetImporter.GetAtPath(path) as ModelImporter;
+            if (imp == null) { Debug.LogWarning($"Can't get ModelImporter for {path}"); continue; }
+
+            bool changed = false;
+            if (imp.animationType != ModelImporterAnimationType.Human)
+            {
+                imp.animationType = ModelImporterAnimationType.Human;
+                changed = true;
+            }
+            if (imp.avatarSetup != ModelImporterAvatarSetup.CreateFromThisModel)
+            {
+                imp.avatarSetup = ModelImporterAvatarSetup.CreateFromThisModel;
+                changed = true;
+            }
+
+            if (changed)
+            {
+                imp.SaveAndReimport();
+                Debug.Log($"Configured {path} as Humanoid with Avatar");
+            }
+            else
+            {
+                Debug.Log($"{path} already Humanoid");
+            }
+        }
     }
 
-    static void ConfigureAnimationClips(string fbxPath, string[] takeNames)
+    static void EnsureKnightGeneric()
+    {
+        // Only revert Knight to Generic (fixes invisible legs).
+        // Barbarian stays Humanoid so it can use Humanoid animation clips.
+        string path = Kayak + "/Characters/fbx/Knight.fbx";
+        var imp = AssetImporter.GetAtPath(path) as ModelImporter;
+        if (imp == null) { Debug.LogWarning($"Can't get Knight.fbx ModelImporter"); return; }
+        if (imp.animationType != ModelImporterAnimationType.Generic)
+        {
+            imp.animationType = ModelImporterAnimationType.Generic;
+            imp.SaveAndReimport();
+            Debug.Log("Reverted Knight.fbx to Generic import (fixes invisible legs in Game View)");
+        }
+        else
+        {
+            Debug.Log("Knight.fbx is already Generic");
+        }
+    }
+
+    static void ConfigureKayKitAnimations()
+    {
+        string basePath = "Assets/3D/KayKit/KayKit_Adventurers_2.0_FREE/Animations/fbx/Rig_Medium";
+        string movementFbx = basePath + "/Rig_Medium_MovementBasic.fbx";
+        string generalFbx = basePath + "/Rig_Medium_General.fbx";
+        string combatMeleeFbx = basePath + "/Rig_Medium_CombatMelee.fbx";
+        string combatRangedFbx = basePath + "/Rig_Medium_CombatRanged.fbx";
+
+        ConfigureAnimationClips(movementFbx, new[] { "Walking_A", "Walking_B", "Walking_C", "Running_A", "Running_B" });
+        ConfigureAnimationClips(generalFbx, new[] { "Idle_A", "Idle_B" });
+        ConfigureAnimationClips(combatMeleeFbx);
+        ConfigureAnimationClips(combatRangedFbx);
+        ConfigureAnimationClips("Assets/Wolf/Models/Wolf.fbx", new[] { "Walking", "Running_New (1)", "Idle_New (1)" });
+
+        // Delete old AnimatorControllers so they are rebuilt with fresh clip references
+        string[] oldCtrls = {
+            "Assets/Animations/HeroAnimator.controller",
+            "Assets/Animations/BarbarianAnimator.controller",
+            "Assets/Animations/WolfAnimator.controller"
+        };
+        foreach (var ctrl in oldCtrls)
+        {
+            if (File.Exists(ctrl))
+            {
+                File.Delete(ctrl);
+                var metaCtrl = ctrl + ".meta";
+                if (File.Exists(metaCtrl)) File.Delete(metaCtrl);
+                Debug.Log($"Deleted old controller {ctrl} so it gets rebuilt");
+            }
+        }
+        AssetDatabase.Refresh();
+    }
+
+    static void ConfigureAnimationClips(string fbxPath, string[] loopClips = null)
     {
         var importer = AssetImporter.GetAtPath(fbxPath) as ModelImporter;
         if (importer == null) { Debug.LogError($"Can't get ModelImporter for {fbxPath}"); return; }
 
-        // Check if already configured
-        var existing = importer.clipAnimations;
-        if (existing != null && existing.Length > 0)
+        importer.animationType = ModelImporterAnimationType.Generic;
+        importer.avatarSetup = ModelImporterAvatarSetup.NoAvatar;
+
+        importer.SaveAndReimport();
+
+        var assets = AssetDatabase.LoadAllAssetsAtPath(fbxPath);
+
+        // Patch loopTime on specific clips (auto-detected clips don't loop by default).
+        if (loopClips != null && loopClips.Length > 0)
         {
-            Debug.Log($"Animation clips already configured on {fbxPath} ({existing.Length} clips)");
-            return;
+            foreach (var obj in assets)
+            {
+                if (obj is AnimationClip clip && loopClips.Contains(clip.name))
+                {
+                    var settings = AnimationUtility.GetAnimationClipSettings(clip);
+                    settings.loopTime = true;
+                    settings.loopBlend = true;
+                    AnimationUtility.SetAnimationClipSettings(clip, settings);
+                    Debug.Log($"  Set loop=true on {clip.name}");
+                }
+            }
         }
 
-        var clips = new ModelImporterClipAnimation[takeNames.Length];
-        for (int i = 0; i < takeNames.Length; i++)
-        {
-            clips[i] = new ModelImporterClipAnimation();
-            clips[i].takeName = takeNames[i];
-            clips[i].name = takeNames[i];
-            clips[i].loop = true;
-            clips[i].loopPose = true;
-        }
-        importer.clipAnimations = clips;
-        importer.SaveAndReimport();
-        Debug.Log($"Configured {clips.Length} animation clips on {fbxPath}");
+        // Re-read to get updated isLooping status
+        assets = AssetDatabase.LoadAllAssetsAtPath(fbxPath);
+        string log = $"Clips on {fbxPath}: ";
+        foreach (var obj in assets)
+            if (obj is AnimationClip c) log += $"[{c.name}:{c.length:F2}s loop={c.isLooping}] ";
+        Debug.Log(log);
     }
 
     static void EnsureGoldIcon()
@@ -1533,6 +2029,219 @@ public class Setup3DScene
         Debug.Log($"Generated gold coin icon at {path}");
     }
 
+    static void DrawFilledCircle(Texture2D tex, int cx, int cy, int r, Color color)
+    {
+        for (int x = cx - r; x <= cx + r; x++)
+            for (int y = cy - r; y <= cy + r; y++)
+                if ((x - cx) * (x - cx) + (y - cy) * (y - cy) <= r * r)
+                    tex.SetPixel(x, y, color);
+    }
+
+    static void EnsureWoodIcon()
+    {
+        string path = "Assets/Resources/HUDIcons/wood_icon.png";
+        int size = 128;
+        var tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        Color clear = new Color(0, 0, 0, 0);
+        Color[] woodClr = {
+            new Color(0.50f, 0.28f, 0.10f),
+            new Color(0.65f, 0.38f, 0.14f),
+            new Color(0.42f, 0.22f, 0.08f),
+            new Color(0.72f, 0.45f, 0.18f)
+        };
+
+        int cx = size / 2, cy = size / 2;
+        for (int x = 0; x < size; x++)
+            for (int y = 0; y < size; y++)
+                tex.SetPixel(x, y, clear);
+
+        // Stacked logs: 3 logs in a triangle shape
+        // Bottom log (horizontal)
+        int lw = 56, lh = 18;
+        int bx = cx, by = cy + 14;
+        for (int x = bx - lw / 2; x <= bx + lw / 2; x++)
+            for (int y = by - lh / 2; y <= by + lh / 2; y++)
+                tex.SetPixel(x, y, woodClr[x % 2]);
+
+        // Middle log (horizontal, offset left)
+        int mx = cx - 4, my = cy;
+        for (int x = mx - lw / 2; x <= mx + lw / 2; x++)
+            for (int y = my - lh / 2; y <= my + lh / 2; y++)
+                tex.SetPixel(x, y, woodClr[(x + 1) % 2]);
+
+        // Top log (horizontal, offset right)
+        int tx = cx + 4, ty = cy - 14;
+        for (int x = tx - lw / 2; x <= tx + lw / 2; x++)
+            for (int y = ty - lh / 2; y <= ty + lh / 2; y++)
+                tex.SetPixel(x, y, woodClr[x % 2]);
+
+        // Ring lines on each log
+        void DrawRings(int rx, int ry, int spacing)
+        {
+            for (int r = -12; r <= 12; r += spacing)
+                for (int yy = ry - lh / 2 + 3; yy <= ry + lh / 2 - 3; yy++)
+                    tex.SetPixel(rx + r, yy, woodClr[3]);
+            for (int rr = -lh / 2 + 4; rr <= lh / 2 - 4; rr += 5)
+                for (int xx = rx - lw / 2 + 3; xx <= rx + lw / 2 - 3; xx++)
+                    tex.SetPixel(xx, ry + rr, woodClr[2]);
+        }
+        DrawRings(bx, by, 10);
+        DrawRings(mx, my, 10);
+        DrawRings(tx, ty, 10);
+
+        // Highlight top edges
+        for (int xx = bx - lw / 2 + 2; xx <= bx + lw / 2 - 2; xx++)
+            tex.SetPixel(xx, by - lh / 2, woodClr[3]);
+
+        tex.Apply();
+        Directory.CreateDirectory(Path.GetDirectoryName(path));
+        File.WriteAllBytes(path, tex.EncodeToPNG());
+        AssetDatabase.Refresh();
+
+        var importer = AssetImporter.GetAtPath(path) as TextureImporter;
+        if (importer != null)
+        {
+            importer.textureType = TextureImporterType.Sprite;
+            importer.spriteImportMode = SpriteImportMode.Single;
+            importer.SaveAndReimport();
+        }
+        Debug.Log($"Generated wood icon at {path}");
+    }
+
+    static void EnsureWheatIcon()
+    {
+        string path = "Assets/Resources/HUDIcons/wheat_icon.png";
+        int size = 128;
+        var tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        Color clear = new Color(0, 0, 0, 0);
+        Color wheat1 = new Color(0.95f, 0.82f, 0.15f);
+        Color wheat2 = new Color(0.85f, 0.70f, 0.10f);
+        Color wheat3 = new Color(0.70f, 0.55f, 0.08f);
+        Color stalkC = new Color(0.45f, 0.32f, 0.06f);
+
+        int cx = size / 2, cy = size / 2;
+        for (int x = 0; x < size; x++)
+            for (int y = 0; y < size; y++)
+                tex.SetPixel(x, y, clear);
+
+        // Stalk — curved slightly
+        for (int y = cy - 48; y <= cy + 20; y++)
+        {
+            int sx = cx + (cy - y) / 10;
+            tex.SetPixel(sx, y, stalkC);
+            tex.SetPixel(sx + 1, y, stalkC);
+        }
+
+        // Wheat head — large oval with grain texture
+        int hcx = cx + 4, hcy = cy + 22;
+        for (int x = hcx - 20; x <= hcx + 12; x++)
+        {
+            int dx = x - hcx;
+            int halfH = 22 - dx * dx / 18;
+            if (halfH < 0) continue;
+            for (int y = hcy - halfH; y <= hcy + halfH; y++)
+            {
+                if ((y - hcy) * (y - hcy) + dx * dx * 2 < 420)
+                    tex.SetPixel(x, y, (x + y) % 4 < 2 ? wheat1 : wheat2);
+            }
+        }
+
+        // Individual grain dots on the head
+        for (int i = 0; i < 18; i++)
+        {
+            int gx = hcx - 14 + (i % 6) * 5 + (i / 6) * 2;
+            int gy = hcy - 12 + (i / 6) * 10 + (i % 3);
+            tex.SetPixel(gx, gy, wheat3);
+            tex.SetPixel(gx + 1, gy, wheat3);
+            tex.SetPixel(gx, gy + 1, wheat3);
+        }
+
+        // Awn (spiky tips at top of head)
+        for (int a = -10; a <= 6; a += 4)
+        {
+            for (int y = hcy - 22; y >= hcy - 32; y--)
+            {
+                int ax = hcx + a + (hcy - 22 - y) / 3;
+                tex.SetPixel(ax, y, wheat1);
+            }
+        }
+
+        // Leaf on left side of stalk
+        for (int y = cy - 10; y <= cy + 10; y++)
+        {
+            int lx = cx - 8 - (cy - y) * (cy - y) / 30;
+            tex.SetPixel(lx, y, stalkC);
+        }
+
+        tex.Apply();
+        Directory.CreateDirectory(Path.GetDirectoryName(path));
+        File.WriteAllBytes(path, tex.EncodeToPNG());
+        AssetDatabase.Refresh();
+
+        var importer = AssetImporter.GetAtPath(path) as TextureImporter;
+        if (importer != null)
+        {
+            importer.textureType = TextureImporterType.Sprite;
+            importer.spriteImportMode = SpriteImportMode.Single;
+            importer.SaveAndReimport();
+        }
+        Debug.Log($"Generated wheat icon at {path}");
+    }
+
+    static void EnsureStoneIcon()
+    {
+        string path = "Assets/Resources/HUDIcons/stone_icon.png";
+        int size = 128;
+        var tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        Color clear = new Color(0, 0, 0, 0);
+        Color stone1 = new Color(0.55f, 0.52f, 0.48f);
+        Color stone2 = new Color(0.45f, 0.42f, 0.38f);
+        Color stone3 = new Color(0.35f, 0.32f, 0.28f);
+        Color light = new Color(0.70f, 0.67f, 0.62f);
+
+        int cx = size / 2, cy = size / 2;
+        for (int x = 0; x < size; x++)
+            for (int y = 0; y < size; y++)
+                tex.SetPixel(x, y, clear);
+
+        // Three rocks stacked
+        // Bottom rock (larger, rounded)
+        DrawFilledCircle(tex, cx - 4, cy + 12, 24, stone1);
+        // Middle rock
+        DrawFilledCircle(tex, cx + 6, cy - 4, 20, stone3);
+        // Top rock
+        DrawFilledCircle(tex, cx - 6, cy - 20, 16, stone2);
+
+        // Highlight/light on top edges
+        for (int x = cx - 28; x <= cx + 20; x++)
+            for (int y = cy - 12; y <= cy - 8; y++)
+                if (tex.GetPixel(x, y) != clear)
+                    tex.SetPixel(x, y, light);
+
+        // Crack lines
+        for (int i = 0; i < 6; i++)
+        {
+            int sx = cx - 16 + i * 6;
+            int sy = cy - 8 + i * 3;
+            for (int j = 0; j < 5; j++)
+                tex.SetPixel(sx + j, sy + j * 2, stone3);
+        }
+
+        tex.Apply();
+        Directory.CreateDirectory(Path.GetDirectoryName(path));
+        File.WriteAllBytes(path, tex.EncodeToPNG());
+        AssetDatabase.Refresh();
+
+        var importer = AssetImporter.GetAtPath(path) as TextureImporter;
+        if (importer != null)
+        {
+            importer.textureType = TextureImporterType.Sprite;
+            importer.spriteImportMode = SpriteImportMode.Single;
+            importer.SaveAndReimport();
+        }
+        Debug.Log($"Generated stone icon at {path}");
+    }
+
     static void SetupUI()
     {
         var canvasObj = new GameObject("Canvas");
@@ -1556,6 +2265,7 @@ public class Setup3DScene
         canvasObj.AddComponent<HUDInfoPanel>();
         canvasObj.AddComponent<MinimapController>();
         canvasObj.AddComponent<MobileControls>();
+        Debug.Log("Canvas created with HUD, InfoPanel, Minimap, MobileControls");
     }
 
     static void SetupCamera()

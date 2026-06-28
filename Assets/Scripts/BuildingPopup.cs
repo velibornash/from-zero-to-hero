@@ -11,10 +11,10 @@ public class BuildingPopup : PopupBase
 
     public static void Show(string title, string body, string iconType = "default", Vector3 worldPos = default, System.Action onClose = null)
     {
-        var canvas = Object.FindAnyObjectByType<Canvas>();
+        var canvas = FindMainCanvas();
         if (canvas == null)
         {
-            Debug.LogWarning("BuildingPopup: no Canvas, cannot show popup.");
+            Debug.LogWarning("BuildingPopup: no main Canvas found, cannot show popup.");
             return;
         }
 
@@ -23,7 +23,7 @@ public class BuildingPopup : PopupBase
             if (instance != null) Object.DestroyImmediate(instance.gameObject);
             var go = new GameObject("BuildingPopup");
             instance = go.AddComponent<BuildingPopup>();
-            instance.BuildUI(title, body);
+            instance.BuildUI(title, body, targetCanvas: canvas);
             // Wire close button to custom callback if provided
             var closeBtn = instance.panel?.transform.Find("CloseButton");
             if (closeBtn != null)
@@ -54,5 +54,17 @@ public class BuildingPopup : PopupBase
             if (closeCallback != null) closeCallback();
             else HidePopup();
         }
+    }
+
+    static Canvas FindMainCanvas()
+    {
+        var all = Object.FindObjectsByType<Canvas>(FindObjectsInactive.Include);
+        foreach (var c in all)
+        {
+            Debug.Log($"BuildingPopup scanning Canvas: name='{c.name}', renderMode={c.renderMode}");
+            if (c.name == "Canvas" || c.renderMode == UnityEngine.RenderMode.ScreenSpaceOverlay)
+                return c;
+        }
+        return all.Length > 0 ? all[0] : null;
     }
 }

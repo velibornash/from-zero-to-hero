@@ -1,9 +1,10 @@
 using UnityEngine;
+using System.Collections;
 
 public class PlayerController3D : MonoBehaviour
 {
     public float speed = 10f;
-    public float attackRadius = 2.2f;
+    public float attackRadius = 4f;
     public int attackDamage = 1;
     public float attackRate = 0.35f;
 
@@ -40,6 +41,8 @@ public class PlayerController3D : MonoBehaviour
         lastHitTime = -999f;
 
         anim = GetComponentInChildren<Animator>();
+        Debug.Log($"Hero Start: anim={(anim != null)}, controller={(anim != null ? anim.runtimeAnimatorController?.name : "null")}");
+        if (anim != null) StartCoroutine(LogAnimState());
         // Find the visual model root (first child with a renderer)
         foreach (Transform child in transform)
             if (child.GetComponentInChildren<SkinnedMeshRenderer>() != null)
@@ -49,6 +52,25 @@ public class PlayerController3D : MonoBehaviour
         // Remove the ugly square self-shadow under the hero; buildings still cast shadows.
         foreach (var rend in GetComponentsInChildren<Renderer>())
             rend.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+    }
+
+    IEnumerator LogAnimState()
+    {
+        yield return new WaitForSeconds(0.5f);
+        var info = anim.GetCurrentAnimatorStateInfo(0);
+        var clips = anim.GetCurrentAnimatorClipInfo(0);
+        string cInfo = clips.Length > 0 ? $"{clips[0].clip.name}({clips[0].clip.length:F2}s)" : "none";
+        Debug.Log($"Hero anim: stateHash={info.shortNameHash}, len={info.length:F2}s, speed={info.speedMultiplier}, clip={cInfo}");
+        // Check all state motions in the controller
+        var ctrl = anim.runtimeAnimatorController;
+        if (ctrl != null)
+        {
+            for (int li = 0; li < ctrl.animationClips.Length; li++)
+            {
+                var c = ctrl.animationClips[li];
+                Debug.Log($"Hero anim clip[{li}]: {c.name} ({c.length:F2}s empty={c.empty})");
+            }
+        }
     }
 
     void Update()
@@ -123,6 +145,7 @@ public class PlayerController3D : MonoBehaviour
         {
             var enemy = hit.GetComponent<Enemy>();
             if (enemy == null) continue;
+            Debug.Log($"Hero attacking {enemy.enemyName} at dist={Vector3.Distance(transform.position, hit.transform.position):F2}");
             enemy.TakeDamage(attackDamage);
             attacked = true;
         }
@@ -130,6 +153,7 @@ public class PlayerController3D : MonoBehaviour
         if (attacked)
         {
             attackTimer = 0f;
+            if (anim != null) anim.SetTrigger("Attack");
             GetComponent<SimpleWeapon>()?.Swing();
         }
     }

@@ -6,14 +6,27 @@ public class HUDInfoPanel : PopupBase
 {
     void Start()
     {
+        Debug.Log("HUDInfoPanel.Start() called");
         StartCoroutine(ShowWelcomeDelayed());
     }
 
     IEnumerator ShowWelcomeDelayed()
     {
+        Debug.Log("HUDInfoPanel.ShowWelcomeDelayed started");
         yield return null;
+        Debug.Log("HUDInfoPanel.ShowWelcomeDelayed after 1-frame yield");
 
-        canvas = FindAnyObjectByType<Canvas>();
+        var all = FindObjectsByType<Canvas>(FindObjectsInactive.Include);
+        foreach (var c in all)
+        {
+            if (c.name == "Canvas" || c.renderMode == RenderMode.ScreenSpaceOverlay)
+            {
+                canvas = c;
+                break;
+            }
+        }
+        if (canvas == null) canvas = FindAnyObjectByType<Canvas>();
+        Debug.Log($"HUDInfoPanel canvas found: {canvas?.name} (renderMode={canvas?.renderMode})");
         if (canvas == null)
         {
             Debug.LogError("HUDInfoPanel: no Canvas found after one-frame delay!");
@@ -30,8 +43,10 @@ public class HUDInfoPanel : PopupBase
             "Secure 300 gold, and the valley will be yours.\n\n" +
             "[WASD] Move  |  [E] Build  |  [TAB] Close";
 
-        BuildUI("Chapter I: The Awakening", body);
+        BuildUI("Chapter I: The Awakening", body, targetCanvas: canvas);
+        Debug.Log($"HUDInfoPanel after BuildUI, overlay null: {overlay == null}, overlay active: {overlay?.activeSelf}");
         ShowPopup("Chapter I: The Awakening", body);
+        Debug.Log($"HUDInfoPanel after ShowPopup, overlay active: {overlay?.activeSelf}");
 
         // Wait 3 frames before allowing dismiss — Unity can register
         // stale input events (anyKeyDown) on the first frame of play mode,
