@@ -222,7 +222,7 @@ public class ActionMenu : PopupBase
         }
 
         instance.UpdateStats();
-        instance.bodyText.text = instance.BuildObjectiveText() + "\n\nControls:\n[WASD]  Move\n[TAB]  Toggle\n[ESC] [X]  Close";
+        instance.bodyText.text = instance.BuildObjectiveText() + "\n\nControls:\n[WASD]  Move  |  [SHIFT]  Run\n[E]  Interact (chop trees, gather)\n[TAB]  Toggle  |  [ESC] [X]  Close";
 
         instance.bodyText.fontSize = 18;
         instance.bodyText.fontStyle = FontStyle.Bold;

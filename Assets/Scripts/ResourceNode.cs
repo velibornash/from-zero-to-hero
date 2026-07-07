@@ -2,44 +2,40 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-public class TreeController : MonoBehaviour
+public class ResourceNode : MonoBehaviour
 {
-    public static List<TreeController> AllTrees = new List<TreeController>();
+    public static List<ResourceNode> AllNodes = new List<ResourceNode>();
 
-    public int woodAmount = 5;
-    public bool chopped { get; private set; }
+    public string resourceType = "stone";
+    public int amount = 5;
+    public GameObject altPrefab;
 
-    static GameObject _stumpPrefab;
-    static GameObject _logsPrefab;
+    bool harvested;
 
     void Awake()
     {
-        AllTrees.Add(this);
-        if (_stumpPrefab == null)
-            _stumpPrefab = Resources.Load<GameObject>("PT_Pine_Tree_03_green_cut");
-        if (_logsPrefab == null)
-            _logsPrefab = Resources.Load<GameObject>("PT_Pine_Tree_03_logs");
-        if (_stumpPrefab == null)
-            Debug.LogWarning("TreeController: stump prefab not found in Resources");
-        if (_logsPrefab == null)
-            Debug.LogWarning("TreeController: logs prefab not found in Resources");
+        AllNodes.Add(this);
     }
 
     void OnDestroy()
     {
-        AllTrees.Remove(this);
+        AllNodes.Remove(this);
     }
 
-    public void Chop(PlayerController3D hero)
+    public bool CanHarvest(float dist)
     {
-        if (chopped) return;
-        chopped = true;
-        StartCoroutine(ChopSequence(hero));
+        return !harvested && dist < 4f;
     }
 
-    IEnumerator ChopSequence(PlayerController3D hero)
+    public void Harvest(PlayerController3D hero)
     {
-        // 3 swings with delay
+        if (harvested) return;
+        harvested = true;
+        StartCoroutine(HarvestSequence(hero));
+    }
+
+    IEnumerator HarvestSequence(PlayerController3D hero)
+    {
         for (int i = 0; i < 3; i++)
         {
             hero.ForceAttack();
@@ -51,34 +47,44 @@ public class TreeController : MonoBehaviour
 
         SmokePuff(pos);
 
-        var mr = GetComponent<MeshRenderer>();
-        if (mr != null) mr.enabled = false;
+        GetComponent<MeshRenderer>().enabled = false;
 
-        if (_stumpPrefab != null)
+        if (altPrefab != null)
         {
-            var stump = Instantiate(_stumpPrefab, pos, transform.rotation);
-            stump.transform.localScale = Vector3.one * scale;
+            var alt = Instantiate(altPrefab, pos, transform.rotation);
+            alt.transform.localScale = Vector3.one * scale;
         }
 
-        if (_logsPrefab != null)
-        {
-            StartCoroutine(SpawnPickup(pos, scale));
-        }
+        SpawnPickup(pos, scale);
     }
 
-    IEnumerator SpawnPickup(Vector3 pos, float scale)
+    void SpawnPickup(Vector3 pos, float scale)
     {
-        yield return new WaitForSeconds(0.6f);
-        Vector3 offset = new Vector3(Random.Range(-2f, 2f), 0.3f, Random.Range(-2f, 2f));
-        var logs = Instantiate(_logsPrefab, pos + offset, Quaternion.identity);
-        logs.transform.localScale = Vector3.one * scale * 0.8f;
-        logs.transform.rotation = Quaternion.Euler(0, Random.Range(0, 360), 0);
-        var pickup = logs.AddComponent<ResourcePickup>();
-        pickup.resourceType = "wood";
-        pickup.amount = woodAmount;
-        var col = logs.AddComponent<SphereCollider>();
+        Vector3 offset = new Vector3(Random.Range(-1.5f, 1.5f), 0.3f, Random.Range(-1.5f, 1.5f));
+        var go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        go.name = resourceType + "_pickup";
+        Destroy(go.GetComponent<SphereCollider>());
+        go.transform.position = pos + offset;
+        go.transform.localScale = Vector3.one * scale * 0.5f;
+        var rend = go.GetComponent<Renderer>();
+        if (resourceType == "stone")
+            rend.material.color = new Color(0.5f, 0.5f, 0.5f);
+        else
+            rend.material.color = new Color(0.8f, 0.8f, 0.2f);
+
+        var colGo = new GameObject("PickupTrigger");
+        colGo.transform.position = pos + offset;
+        var col = colGo.AddComponent<SphereCollider>();
         col.isTrigger = true;
         col.radius = 2f;
+        var pickup = colGo.AddComponent<ResourcePickup>();
+        pickup.resourceType = resourceType;
+        pickup.amount = amount;
+
+        // Make the sphere visual follow the collider
+        go.transform.SetParent(colGo.transform, true);
+
+        Destroy(colGo, 30f);
     }
 
     void SmokePuff(Vector3 pos)
@@ -98,7 +104,7 @@ public class TreeController : MonoBehaviour
         for (int i = 0; i < 20; i++)
         {
             var puff = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            puff.name = "TreeSmoke";
+            puff.name = "NodeSmoke";
             Destroy(puff.GetComponent<SphereCollider>());
             float angle = Random.Range(0f, Mathf.PI * 2f);
             float rad = Random.Range(0.3f, 2.5f);
@@ -128,19 +134,5 @@ public class TreeController : MonoBehaviour
             yield return null;
         }
         Destroy(t.gameObject);
-    }
-
-    public static void InitializeAllTrees()
-    {
-        var all = Resources.FindObjectsOfTypeAll<GameObject>();
-        foreach (var go in all)
-        {
-            if (go.scene.name == null) continue;
-            if (go.name == "ForestTree" || go.name == "NorthTree")
-            {
-                if (go.GetComponent<TreeController>() == null)
-                    go.AddComponent<TreeController>();
-            }
-        }
     }
 }

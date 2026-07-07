@@ -95,32 +95,34 @@ public class Enemy : MonoBehaviour
         dir.y = 0f;
         float dist = dir.magnitude;
 
-        if (dist > 0.01f)
-        {
-            Quaternion targetRot = Quaternion.LookRotation(dir);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, rotateSpeed * Time.fixedDeltaTime);
-        }
-
         if (dist > attackRange)
         {
             Vector3 targetVel = dir.normalized * moveSpeed;
-            currentVelocity = Vector3.Lerp(currentVelocity, targetVel, acceleration * Time.fixedDeltaTime);
+            currentVelocity = Vector3.MoveTowards(currentVelocity, targetVel, acceleration * Time.fixedDeltaTime);
             rb.linearVelocity = new Vector3(currentVelocity.x, 0, currentVelocity.z);
             if (anim != null && anim.runtimeAnimatorController != null) anim.SetFloat("Speed", 1f);
+
+            if (dist > 0.01f)
+            {
+                Quaternion targetRot = Quaternion.LookRotation(dir);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, rotateSpeed * Time.fixedDeltaTime);
+            }
         }
         else
         {
-            currentVelocity = Vector3.Lerp(currentVelocity, Vector3.zero, acceleration * 2f * Time.fixedDeltaTime);
-            rb.linearVelocity = new Vector3(currentVelocity.x, 0, currentVelocity.z);
-            if (rb.linearVelocity.sqrMagnitude < 0.01f)
+            currentVelocity = Vector3.zero;
+            rb.linearVelocity = Vector3.zero;
+            if (anim != null && anim.runtimeAnimatorController != null)
             {
-                rb.linearVelocity = Vector3.zero;
-                if (anim != null && anim.runtimeAnimatorController != null)
-                {
-                    anim.SetFloat("Speed", 0f);
-                    if (hasAttackParam) anim.SetTrigger("Attack");
-                }
-                TryDamageHero();
+                anim.SetFloat("Speed", 0f);
+                if (hasAttackParam) anim.SetTrigger("Attack");
+            }
+            TryDamageHero();
+
+            if (dist > 0.01f)
+            {
+                Quaternion targetRot = Quaternion.LookRotation(dir);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, rotateSpeed * Time.fixedDeltaTime);
             }
         }
     }

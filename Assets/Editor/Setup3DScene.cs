@@ -45,6 +45,7 @@ public class Setup3DScene
         PlaceVillage();
         PlaceNatureFeatures();
         PlaceForest();
+        PlaceStoneResources();
         PlaceDecorations();
         SetupEnemySpawner();
         SetupVillageWalls();
@@ -707,6 +708,34 @@ public class Setup3DScene
             go.transform.rotation = Quaternion.Euler(0, Random.Range(0, 360), 0);
             go.name = "NorthTree";
             go.AddComponent<TreeController>();
+        }
+    }
+
+    static void PlaceStoneResources()
+    {
+        var ore = AssetDatabase.LoadAssetAtPath<GameObject>(NaturePrefabs + "/Rocks/PT_Ore_Rock_01.prefab");
+        var split = AssetDatabase.LoadAssetAtPath<GameObject>(NaturePrefabs + "/Rocks/PT_Ore_Rock_01_split.prefab");
+        if (ore == null) return;
+
+        // Scatter stone resource nodes around map edges
+        for (int i = 0; i < 12; i++)
+        {
+            float angle = Random.Range(0f, Mathf.PI * 2f);
+            float radius = Random.Range(90f, 150f);
+            float x = Mathf.Cos(angle) * radius;
+            float z = Mathf.Sin(angle) * radius;
+            // Avoid overlap with village centre
+            if (Mathf.Abs(x) < 70f && Mathf.Abs(z) < 70f) continue;
+
+            var go = (GameObject)Object.Instantiate(ore);
+            go.transform.position = new Vector3(x, 0, z);
+            go.transform.localScale = Vector3.one * Random.Range(1.5f, 3f);
+            go.transform.rotation = Quaternion.Euler(0, Random.Range(0, 360), 0);
+            go.name = "StoneResource";
+            var node = go.AddComponent<ResourceNode>();
+            node.resourceType = "stone";
+            node.amount = Random.Range(3, 8);
+            if (split != null) node.altPrefab = split;
         }
     }
 

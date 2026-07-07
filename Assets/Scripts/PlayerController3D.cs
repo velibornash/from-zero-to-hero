@@ -91,7 +91,6 @@ public class PlayerController3D : MonoBehaviour
         float h = Input.GetAxisRaw("Horizontal");
         float v = Input.GetAxisRaw("Vertical");
 
-        // Add joystick input for mobile
         Vector2 joy = Joystick.Direction;
         h += joy.x;
         v += joy.y;
@@ -107,17 +106,24 @@ public class PlayerController3D : MonoBehaviour
         Vector3 desiredDir = (forward * v + right * h);
         bool wantsToMove = desiredDir.sqrMagnitude > 0.01f;
 
-        Vector3 targetVel = wantsToMove ? desiredDir.normalized * speed : Vector3.zero;
-        currentVelocity = Vector3.MoveTowards(currentVelocity, targetVel, acceleration * Time.deltaTime);
+        float currentSpeed = speed;
+        if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+            currentSpeed = speed * 1.5f;
 
         if (wantsToMove)
-            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(currentVelocity), 0.15f);
+        {
+            Vector3 targetVel = desiredDir.normalized * currentSpeed;
+            currentVelocity = Vector3.MoveTowards(currentVelocity, targetVel, acceleration * Time.deltaTime);
+            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(targetVel), 0.15f);
+        }
+        else
+        {
+            currentVelocity = Vector3.zero;
+        }
 
-        var displacement = currentVelocity * Time.deltaTime;
-        displacement.y = -1f * Time.deltaTime;
-        controller.Move(displacement);
+        controller.Move(currentVelocity * Time.deltaTime + Vector3.down * Time.deltaTime);
 
-        bool moving = currentVelocity.sqrMagnitude > 0.1f;
+        bool moving = currentVelocity.sqrMagnitude > 0.01f;
         if (anim != null)
             anim.SetFloat("Speed", moving ? 1f : 0f);
 
@@ -168,19 +174,31 @@ public class PlayerController3D : MonoBehaviour
     {
         if (!Input.GetKeyDown(KeyCode.E)) return;
 
-        TreeController nearest = null;
-        float bestDist = attackRadius + 1f;
+        TreeController nearestTree = null;
+        ResourceNode nearestNode = null;
+        float bestTree = attackRadius + 1f;
+        float bestNode = 4f + 1f;
         foreach (var tree in TreeController.AllTrees)
         {
             if (tree.chopped) continue;
             float d = Vector3.Distance(transform.position, tree.transform.position);
-            if (d < attackRadius && d < bestDist)
+            if (d < attackRadius && d < bestTree)
             {
-                bestDist = d;
-                nearest = tree;
+                bestTree = d;
+                nearestTree = tree;
             }
         }
-        if (nearest != null) nearest.Chop(this);
+        foreach (var node in ResourceNode.AllNodes)
+        {
+            float d = Vector3.Distance(transform.position, node.transform.position);
+            if (d < 4f && d < bestNode)
+            {
+                bestNode = d;
+                nearestNode = node;
+            }
+        }
+        if (nearestTree != null) nearestTree.Chop(this);
+        else if (nearestNode != null) nearestNode.Harvest(this);
     }
 
     public void ForceAttack()
