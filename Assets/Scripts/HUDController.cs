@@ -104,8 +104,8 @@ public class HUDController : MonoBehaviour
         barImg.raycastTarget = true;
 
         float x = 300f;
-        const float iconSize = 60f;
-        const float labelY = -32f;
+        const float iconSize = 64f;
+        const float labelY = -40f;
 
         goldText = BuildResourceSlot(topBar.transform, ref x, goldSprite, "10", iconSize, labelY,
             new Color(1f, 0.95f, 0.40f));
@@ -123,7 +123,7 @@ public class HUDController : MonoBehaviour
         MakeVerticalSeparator(topBar.transform, x);
         x += 16f;
 
-        dayText = MakeText(topBar.transform, "Chapter", new Vector2(x, labelY), new Vector2(380, 44),
+        dayText = MakeText(topBar.transform, "Chapter", new Vector2(x, labelY), new Vector2(400, 40),
             ChapterName, 26, FontStyle.Bold,
             new Color(1f, 0.95f, 0.55f), TextAnchor.MiddleLeft);
 
@@ -160,7 +160,7 @@ public class HUDController : MonoBehaviour
         hRt.anchorMax = new Vector2(1, 0.5f);
         hRt.pivot = new Vector2(1, 0.5f);
         hRt.anchoredPosition = new Vector2(-400, 0);
-        hRt.sizeDelta = new Vector2(120, 44);
+        hRt.sizeDelta = new Vector2(128, 40);
 
         // Simple background
         var bg = new GameObject("BG");
@@ -191,8 +191,8 @@ public class HUDController : MonoBehaviour
         healthBarFill.fillAmount = 1f;
 
         // HP text centered
-        healthText = MakeText(hb.transform, "HPText", new Vector2(0, 0), new Vector2(120, 44),
-            "HP 100/100", 16, FontStyle.Bold,
+        healthText = MakeText(hb.transform, "HPText", new Vector2(0, 0), new Vector2(128, 40),
+            "HP 100/100", 15, FontStyle.Bold,
             new Color(1f, 0.95f, 0.55f), TextAnchor.MiddleCenter);
     }
 
@@ -213,9 +213,9 @@ public class HUDController : MonoBehaviour
         iconImg.raycastTarget = false;
         x += iconSize;
 
-        var text = MakeText(parent, "Value_" + initialValue, new Vector2(x, labelY), new Vector2(80, 50),
+        var text = MakeText(parent, "Value_" + initialValue, new Vector2(x, labelY), new Vector2(85, 46),
             initialValue, 34, FontStyle.Bold, valueColor, TextAnchor.MiddleLeft);
-        x += 80;
+        x += 85;
         return text;
     }
 
@@ -227,8 +227,8 @@ public class HUDController : MonoBehaviour
         rt.anchorMin = new Vector2(0, 1);
         rt.anchorMax = new Vector2(0, 1);
         rt.pivot = new Vector2(0, 1);
-        rt.anchoredPosition = new Vector2(x, -32);
-        rt.sizeDelta = new Vector2(2, 80);
+        rt.anchoredPosition = new Vector2(x, -40);
+        rt.sizeDelta = new Vector2(2, 75);
         var img = sep.AddComponent<Image>();
         img.color = new Color(0.55f, 0.40f, 0.18f, 0.7f);
         img.raycastTarget = false;
