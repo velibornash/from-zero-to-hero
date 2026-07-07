@@ -24,7 +24,7 @@ public class PlayerController3D : MonoBehaviour
     float baseModelY;
     float regenAccumulator;
     Vector3 currentVelocity;
-    public float acceleration = 12f;
+    public float acceleration = 25f;
 
     void Start()
     {
@@ -54,6 +54,8 @@ public class PlayerController3D : MonoBehaviour
         // Remove the ugly square self-shadow under the hero; buildings still cast shadows.
         foreach (var rend in GetComponentsInChildren<Renderer>())
             rend.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+
+        TreeController.InitializeAllTrees();
     }
 
     IEnumerator LogAnimState()
@@ -80,6 +82,7 @@ public class PlayerController3D : MonoBehaviour
         if (IsDead) return;
         HandleMovement();
         HandleAttack();
+        HandleInteraction();
         HandleHealthRegen();
     }
 
@@ -102,31 +105,23 @@ public class PlayerController3D : MonoBehaviour
         Vector3 right = Vector3.ProjectOnPlane(cam.transform.right, Vector3.up).normalized;
 
         Vector3 desiredDir = (forward * v + right * h);
-        bool moving = desiredDir.sqrMagnitude > 0.01f;
+        bool wantsToMove = desiredDir.sqrMagnitude > 0.01f;
 
-        if (moving)
-        {
-            desiredDir.Normalize();
-            Vector3 targetVel = desiredDir * speed;
-            currentVelocity = Vector3.Lerp(currentVelocity, targetVel, acceleration * Time.deltaTime);
+        Vector3 targetVel = wantsToMove ? desiredDir.normalized * speed : Vector3.zero;
+        currentVelocity = Vector3.MoveTowards(currentVelocity, targetVel, acceleration * Time.deltaTime);
+
+        if (wantsToMove)
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(currentVelocity), 0.15f);
-        }
-        else
-        {
-            currentVelocity = Vector3.Lerp(currentVelocity, Vector3.zero, acceleration * 2f * Time.deltaTime);
-            if (currentVelocity.sqrMagnitude < 0.01f) currentVelocity = Vector3.zero;
-        }
 
         var displacement = currentVelocity * Time.deltaTime;
         displacement.y = -1f * Time.deltaTime;
         controller.Move(displacement);
 
-        bool effectivelyMoving = currentVelocity.sqrMagnitude > 0.01f;
+        bool moving = currentVelocity.sqrMagnitude > 0.1f;
         if (anim != null)
-            anim.SetFloat("Speed", effectivelyMoving ? 1f : 0f);
+            anim.SetFloat("Speed", moving ? 1f : 0f);
 
-        // Procedural walk bob
-        if (modelRoot != null && effectivelyMoving)
+        if (modelRoot != null && moving)
         {
             float t = Time.time * 12f;
             float bob = Mathf.Sin(t) * 0.25f;
@@ -167,6 +162,31 @@ public class PlayerController3D : MonoBehaviour
             if (anim != null) anim.SetTrigger("Attack");
             GetComponent<SimpleWeapon>()?.Swing();
         }
+    }
+
+    void HandleInteraction()
+    {
+        if (!Input.GetKeyDown(KeyCode.E)) return;
+
+        TreeController nearest = null;
+        float bestDist = attackRadius + 1f;
+        foreach (var tree in TreeController.AllTrees)
+        {
+            if (tree.chopped) continue;
+            float d = Vector3.Distance(transform.position, tree.transform.position);
+            if (d < attackRadius && d < bestDist)
+            {
+                bestDist = d;
+                nearest = tree;
+            }
+        }
+        if (nearest != null) nearest.Chop(this);
+    }
+
+    public void ForceAttack()
+    {
+        if (anim != null) anim.SetTrigger("Attack");
+        GetComponent<SimpleWeapon>()?.Swing();
     }
 
     void HandleHealthRegen()

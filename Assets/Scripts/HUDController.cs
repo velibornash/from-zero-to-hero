@@ -9,6 +9,17 @@ public class HUDController : MonoBehaviour
     public static int Wood = 0;
     public static int Food = 0;
     public static int Stone = 0;
+
+    public static void AddResource(string type, int amount)
+    {
+        switch (type)
+        {
+            case "gold": Gold += amount; break;
+            case "wood": Wood += amount; break;
+            case "food": Food += amount; break;
+            case "stone": Stone += amount; break;
+        }
+    }
     public static int Day = 1;
     public const string ChapterName = "Chapter I: The Awakening";
     static bool hasWon;

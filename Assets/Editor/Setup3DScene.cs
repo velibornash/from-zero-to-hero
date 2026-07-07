@@ -54,6 +54,7 @@ public class Setup3DScene
         SetupUI();
         SetupCamera();
         SetupLights();
+        SetupTreeResources();
         SetupPlayerSettings();
 
         // Save ALL newly created assets (slot data, materials, textures, prefabs)
@@ -692,6 +693,7 @@ public class Setup3DScene
             go.transform.localScale = Vector3.one * Random.Range(2.5f, 5f);
             go.transform.rotation = Quaternion.Euler(0, Random.Range(0, 360), 0);
             go.name = "ForestTree";
+            go.AddComponent<TreeController>();
         }
 
         // A smaller grove to the north for visual framing.
@@ -704,6 +706,7 @@ public class Setup3DScene
             go.transform.localScale = Vector3.one * Random.Range(2.5f, 4.5f);
             go.transform.rotation = Quaternion.Euler(0, Random.Range(0, 360), 0);
             go.name = "NorthTree";
+            go.AddComponent<TreeController>();
         }
     }
 
@@ -2484,6 +2487,22 @@ public class Setup3DScene
         light.transform.rotation = Quaternion.Euler(50, -30, 0);
         light.intensity = 1.3f;
         light.shadows = LightShadows.None;
+    }
+
+    static void SetupTreeResources()
+    {
+        string[] prefabs = {
+            "Assets/Polytope Studio/Lowpoly_Environments/Prefabs/Trees/PT_Pine_Tree_03_green_cut.prefab",
+            "Assets/Polytope Studio/Lowpoly_Environments/Prefabs/Trees/PT_Pine_Tree_03_logs.prefab"
+        };
+        foreach (string src in prefabs)
+        {
+            string name = Path.GetFileNameWithoutExtension(src);
+            string dst = "Assets/Resources/" + name + ".prefab";
+            if (!File.Exists(dst))
+                AssetDatabase.CopyAsset(src, dst);
+        }
+        AssetDatabase.Refresh();
     }
 
     static void SetupPlayerSettings()
