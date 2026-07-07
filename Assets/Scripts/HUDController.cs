@@ -205,7 +205,7 @@ public class HUDController : MonoBehaviour
         iconRt.anchorMin = new Vector2(0, 1);
         iconRt.anchorMax = new Vector2(0, 1);
         iconRt.pivot = new Vector2(0, 1);
-        iconRt.anchoredPosition = new Vector2(x, labelY);
+        iconRt.anchoredPosition = new Vector2(x, labelY + 2f);
         iconRt.sizeDelta = new Vector2(iconSize, iconSize);
         var iconImg = iconObj.AddComponent<Image>();
         iconImg.sprite = sprite;
@@ -213,7 +213,7 @@ public class HUDController : MonoBehaviour
         iconImg.raycastTarget = false;
         x += iconSize;
 
-        var text = MakeText(parent, "Value_" + initialValue, new Vector2(x, labelY), new Vector2(85, 46),
+        var text = MakeText(parent, "Value_" + initialValue, new Vector2(x, labelY - 2f), new Vector2(85, 46),
             initialValue, 34, FontStyle.Bold, valueColor, TextAnchor.MiddleLeft);
         x += 85;
         return text;

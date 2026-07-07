@@ -23,6 +23,8 @@ public class PlayerController3D : MonoBehaviour
     Transform modelRoot;
     float baseModelY;
     float regenAccumulator;
+    Vector3 currentVelocity;
+    public float acceleration = 12f;
 
     void Start()
     {
@@ -99,23 +101,32 @@ public class PlayerController3D : MonoBehaviour
         Vector3 forward = Vector3.ProjectOnPlane(cam.transform.forward, Vector3.up).normalized;
         Vector3 right = Vector3.ProjectOnPlane(cam.transform.right, Vector3.up).normalized;
 
-        Vector3 move = (forward * v + right * h);
-        bool moving = move.sqrMagnitude > 0.01f;
+        Vector3 desiredDir = (forward * v + right * h);
+        bool moving = desiredDir.sqrMagnitude > 0.01f;
+
         if (moving)
         {
-            move.Normalize();
-            var displacement = move * speed * Time.deltaTime;
-            displacement.y = -1f * Time.deltaTime;
-            controller.Move(displacement);
-            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(move), 0.15f);
+            desiredDir.Normalize();
+            Vector3 targetVel = desiredDir * speed;
+            currentVelocity = Vector3.Lerp(currentVelocity, targetVel, acceleration * Time.deltaTime);
+            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(currentVelocity), 0.15f);
+        }
+        else
+        {
+            currentVelocity = Vector3.Lerp(currentVelocity, Vector3.zero, acceleration * 2f * Time.deltaTime);
+            if (currentVelocity.sqrMagnitude < 0.01f) currentVelocity = Vector3.zero;
         }
 
-        if (anim != null)
-            anim.SetFloat("Speed", moving ? 1f : 0f);
+        var displacement = currentVelocity * Time.deltaTime;
+        displacement.y = -1f * Time.deltaTime;
+        controller.Move(displacement);
 
-        // Procedural walk bob — makes movement look like walking even when
-        // animation clips are missing or the avatar rig doesn't match.
-        if (modelRoot != null && moving)
+        bool effectivelyMoving = currentVelocity.sqrMagnitude > 0.01f;
+        if (anim != null)
+            anim.SetFloat("Speed", effectivelyMoving ? 1f : 0f);
+
+        // Procedural walk bob
+        if (modelRoot != null && effectivelyMoving)
         {
             float t = Time.time * 12f;
             float bob = Mathf.Sin(t) * 0.25f;

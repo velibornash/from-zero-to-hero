@@ -10,7 +10,7 @@ public class Enemy : MonoBehaviour
     public float knockbackForce = 3f;
     public int heroDamage = 12;
     public float attackInterval = 0.7f;
-    public float attackRange = 3f;
+    public float attackRange = 5f;
     public string enemyName = "Enemy";
 
     int currentHealth;
@@ -31,6 +31,8 @@ public class Enemy : MonoBehaviour
     // Stuck detection for going around obstacles (fences, etc)
     Vector3 lastStuckPos;
     float stuckTimer;
+    Vector3 currentVelocity;
+    public float acceleration = 8f;
 
     void Start()
     {
@@ -55,6 +57,14 @@ public class Enemy : MonoBehaviour
         rb.constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionY;
         rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
+
+        // Don't collide with the hero — allows enemies to get within attack range
+        if (target != null)
+        {
+            var heroCol = target.GetComponent<Collider>();
+            if (heroCol != null && col != null)
+                Physics.IgnoreCollision(col, heroCol);
+        }
 
         // Cache animator parameter existence to avoid spammy warnings
         if (anim != null && anim.runtimeAnimatorController != null)
@@ -93,20 +103,25 @@ public class Enemy : MonoBehaviour
 
         if (dist > attackRange)
         {
-            Vector3 moveDir = dir.normalized;
-            rb.linearVelocity = new Vector3(moveDir.x * moveSpeed, 0, moveDir.z * moveSpeed);
+            Vector3 targetVel = dir.normalized * moveSpeed;
+            currentVelocity = Vector3.Lerp(currentVelocity, targetVel, acceleration * Time.fixedDeltaTime);
+            rb.linearVelocity = new Vector3(currentVelocity.x, 0, currentVelocity.z);
             if (anim != null && anim.runtimeAnimatorController != null) anim.SetFloat("Speed", 1f);
         }
         else
         {
-            rb.linearVelocity = Vector3.zero;
-            if (anim != null && anim.runtimeAnimatorController != null)
+            currentVelocity = Vector3.Lerp(currentVelocity, Vector3.zero, acceleration * 2f * Time.fixedDeltaTime);
+            rb.linearVelocity = new Vector3(currentVelocity.x, 0, currentVelocity.z);
+            if (rb.linearVelocity.sqrMagnitude < 0.01f)
             {
-                anim.SetFloat("Speed", 0f);
-                if (hasAttackParam) anim.SetTrigger("Attack");
+                rb.linearVelocity = Vector3.zero;
+                if (anim != null && anim.runtimeAnimatorController != null)
+                {
+                    anim.SetFloat("Speed", 0f);
+                    if (hasAttackParam) anim.SetTrigger("Attack");
+                }
+                TryDamageHero();
             }
-            // Damage the hero when in attack range (with cooldown)
-            TryDamageHero();
         }
     }
 

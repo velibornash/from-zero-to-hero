@@ -412,18 +412,19 @@ public class BuildSlot : MonoBehaviour
         bool hasProgress = spentGold > 0;
         costLabel.text = (building || ready || hasProgress ? Mathf.Max(0, data.cost - spentGold) : data.cost).ToString();
 
-        if (building)
+        if (building || hasProgress)
         {
-            progressFill.fillAmount = spentGold / (float)data.cost;
+            float pct = spentGold / (float)data.cost;
+            progressFill.fillAmount = pct;
+            progressFill.color = pct >= 1f
+                ? new Color(0.25f, 0.9f, 0.3f, 0.95f)
+                : new Color(0.9f, 0.85f, 0.15f, 0.95f);
         }
         else if (ready)
         {
             progressFill.fillAmount = 1f;
+            progressFill.color = new Color(0.25f, 0.9f, 0.3f, 0.95f);
             costLabel.text = "0";
-        }
-        else if (hasProgress)
-        {
-            progressFill.fillAmount = spentGold / (float)data.cost;
         }
         else
         {
