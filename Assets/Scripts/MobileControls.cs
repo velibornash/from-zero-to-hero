@@ -13,11 +13,6 @@ public class MobileControls : MonoBehaviour
         TryBuildControls();
     }
 
-    void Update()
-    {
-        TryBuildControls();
-    }
-
     void TryBuildControls()
     {
         if (controlsBuilt == PopupBase.IsMobile) return;
@@ -195,7 +190,10 @@ public class MobileControls : MonoBehaviour
 
     void Update()
     {
-        if (!isMobile) return;
+        if (!PopupBase.IsMobile) return;
+
+        // Rebuild controls if needed (e.g., F1 toggle)
+        TryBuildControls();
 
         // Tap-to-move: on touch end, raycast to ground on left half
         if (Input.touchCount == 1)
