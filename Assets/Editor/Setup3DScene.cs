@@ -694,6 +694,7 @@ public class Setup3DScene
             go.transform.localScale = Vector3.one * Random.Range(2.5f, 5f);
             go.transform.rotation = Quaternion.Euler(0, Random.Range(0, 360), 0);
             go.name = "ForestTree";
+            go.tag = "Untagged";
             go.AddComponent<TreeController>();
         }
 
@@ -707,6 +708,7 @@ public class Setup3DScene
             go.transform.localScale = Vector3.one * Random.Range(2.5f, 4.5f);
             go.transform.rotation = Quaternion.Euler(0, Random.Range(0, 360), 0);
             go.name = "NorthTree";
+            go.tag = "Untagged";
             go.AddComponent<TreeController>();
         }
     }

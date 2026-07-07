@@ -42,7 +42,7 @@ public class Enemy : MonoBehaviour
         if (player != null) target = player.transform;
 
         anim = GetComponentInChildren<Animator>();
-        Debug.Log($"Enemy '{enemyName}' Start: anim={(anim != null)}, controller={(anim != null ? anim.runtimeAnimatorController?.name : "null")}, avatar={(anim != null ? (anim.avatar != null ? anim.avatar.name : "null") : "null")}");
+        if (anim != null) anim.applyRootMotion = false;
         col = GetComponentInChildren<Collider>();
 
         foreach (Transform child in transform)
@@ -102,22 +102,27 @@ public class Enemy : MonoBehaviour
             rb.linearVelocity = new Vector3(currentVelocity.x, 0, currentVelocity.z);
             if (anim != null && anim.runtimeAnimatorController != null) anim.SetFloat("Speed", 1f);
 
-            if (dist > 0.01f)
-            {
-                Quaternion targetRot = Quaternion.LookRotation(dir);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, rotateSpeed * Time.fixedDeltaTime);
-            }
+            Quaternion targetRot = Quaternion.LookRotation(dir);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, rotateSpeed * Time.fixedDeltaTime);
         }
         else
         {
-            currentVelocity = Vector3.zero;
-            rb.linearVelocity = Vector3.zero;
-            if (anim != null && anim.runtimeAnimatorController != null)
+            currentVelocity = Vector3.MoveTowards(currentVelocity, Vector3.zero, acceleration * 3f * Time.fixedDeltaTime);
+            if (currentVelocity.sqrMagnitude < 0.01f)
             {
-                anim.SetFloat("Speed", 0f);
-                if (hasAttackParam) anim.SetTrigger("Attack");
+                currentVelocity = Vector3.zero;
+                rb.linearVelocity = Vector3.zero;
+                if (anim != null && anim.runtimeAnimatorController != null)
+                {
+                    anim.SetFloat("Speed", 0f);
+                    if (hasAttackParam) anim.SetTrigger("Attack");
+                }
+                TryDamageHero();
             }
-            TryDamageHero();
+            else
+            {
+                rb.linearVelocity = new Vector3(currentVelocity.x, 0, currentVelocity.z);
+            }
 
             if (dist > 0.01f)
             {
@@ -129,8 +134,7 @@ public class Enemy : MonoBehaviour
 
     void Update()
     {
-        float moveSpeedNow = rb != null ? new Vector2(rb.linearVelocity.x, rb.linearVelocity.z).magnitude : 0f;
-        bool moving = moveSpeedNow > 0.1f;
+        bool moving = currentVelocity.sqrMagnitude > 0.1f;
         if (modelRoot != null && moving)
         {
             float t = Time.time * walkBobSpeed;

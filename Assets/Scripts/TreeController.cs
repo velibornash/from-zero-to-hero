@@ -132,15 +132,25 @@ public class TreeController : MonoBehaviour
 
     public static void InitializeAllTrees()
     {
-        var all = Resources.FindObjectsOfTypeAll<GameObject>();
-        foreach (var go in all)
+        int count = 0;
+        // First pass: find trees already with TreeController (from Setup3DScene)
+        var existing = Object.FindObjectsByType<TreeController>(FindObjectsInactive.Include);
+        count = existing.Length;
+
+        // Second pass: find scene objects by name that don't have it yet
+        var all = Object.FindObjectsByType<Transform>(FindObjectsInactive.Include);
+        foreach (var t in all)
         {
-            if (go.scene.name == null) continue;
-            if (go.name == "ForestTree" || go.name == "NorthTree")
+            if (t == null || t.gameObject == null) continue;
+            if (t.name == "ForestTree" || t.name == "NorthTree")
             {
-                if (go.GetComponent<TreeController>() == null)
-                    go.AddComponent<TreeController>();
+                if (t.GetComponent<TreeController>() == null)
+                {
+                    t.gameObject.AddComponent<TreeController>();
+                    count++;
+                }
             }
         }
+        Debug.Log($"TreeController: initialized {count} trees");
     }
 }

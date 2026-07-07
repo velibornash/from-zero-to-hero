@@ -3,17 +3,19 @@ using System.Collections;
 
 public class PlayerController3D : MonoBehaviour
 {
-    public float speed = 5f;
+    public float speed = 6f;
+    public float runMultiplier = 1.5f;
+    public float acceleration = 30f;
+    public float deceleration = 60f;
     public float attackRadius = 4f;
     public int attackDamage = 1;
     public float attackRate = 0.35f;
 
-    // Health system
     public static int maxHealth = 100;
     public static int Health = 100;
-    public float regenRate = 5f;       // HP per second when in village + out of combat
-    public float regenDelay = 1f;      // seconds after last hit before regen starts
-    public float villageRadius = 80f;  // distance from center (0,0,0) considered "village"
+    public float regenRate = 5f;
+    public float regenDelay = 1f;
+    public float villageRadius = 80f;
     public static bool IsDead = false;
 
     CharacterController controller;
@@ -24,7 +26,7 @@ public class PlayerController3D : MonoBehaviour
     float baseModelY;
     float regenAccumulator;
     Vector3 currentVelocity;
-    public float acceleration = 25f;
+    float walkBobTimer;
 
     void Start()
     {
@@ -43,15 +45,12 @@ public class PlayerController3D : MonoBehaviour
         lastHitTime = -999f;
 
         anim = GetComponentInChildren<Animator>();
-        Debug.Log($"Hero Start: anim={(anim != null)}, controller={(anim != null ? anim.runtimeAnimatorController?.name : "null")}");
-        if (anim != null) StartCoroutine(LogAnimState());
-        // Find the visual model root (first child with a renderer)
+        if (anim != null) anim.applyRootMotion = false;
         foreach (Transform child in transform)
             if (child.GetComponentInChildren<SkinnedMeshRenderer>() != null)
                 { modelRoot = child; break; }
         if (modelRoot != null) baseModelY = modelRoot.localPosition.y;
 
-        // Remove the ugly square self-shadow under the hero; buildings still cast shadows.
         foreach (var rend in GetComponentsInChildren<Renderer>())
             rend.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
 
@@ -107,29 +106,36 @@ public class PlayerController3D : MonoBehaviour
         bool wantsToMove = desiredDir.sqrMagnitude > 0.01f;
 
         float currentSpeed = speed;
-        if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
-            currentSpeed = speed * 1.5f;
+        bool running = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+        if (running) currentSpeed = speed * runMultiplier;
 
         if (wantsToMove)
         {
             Vector3 targetVel = desiredDir.normalized * currentSpeed;
             currentVelocity = Vector3.MoveTowards(currentVelocity, targetVel, acceleration * Time.deltaTime);
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(targetVel), 0.15f);
+            walkBobTimer += Time.deltaTime;
         }
         else
         {
-            currentVelocity = Vector3.zero;
+            currentVelocity = Vector3.MoveTowards(currentVelocity, Vector3.zero, deceleration * Time.deltaTime);
+            if (currentVelocity.sqrMagnitude < 0.001f)
+            {
+                currentVelocity = Vector3.zero;
+                walkBobTimer = 0f;
+            }
         }
 
         controller.Move(currentVelocity * Time.deltaTime + Vector3.down * Time.deltaTime);
 
-        bool moving = currentVelocity.sqrMagnitude > 0.01f;
+        float speedMag = currentVelocity.magnitude;
+        bool moving = speedMag > 0.1f;
         if (anim != null)
-            anim.SetFloat("Speed", moving ? 1f : 0f);
+            anim.SetFloat("Speed", moving ? Mathf.Clamp01(speedMag / speed) : 0f);
 
         if (modelRoot != null && moving)
         {
-            float t = Time.time * 12f;
+            float t = walkBobTimer * 12f;
             float bob = Mathf.Sin(t) * 0.25f;
             float sway = Mathf.Sin(t * 0.5f) * 4f;
             var lp = modelRoot.localPosition;
