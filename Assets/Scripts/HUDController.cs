@@ -146,8 +146,7 @@ public class HUDController : MonoBehaviour
         dayText.resizeTextMinSize = 10;
         dayText.resizeTextMaxSize = mob ? 14 : 26;
 
-        // Health bar in the top ribbon (right side)
-        BuildRibbonHealthBar(topBar.transform, mob);
+
 
         // Reports panel (top right) — smaller on mobile
         float rw = mob ? 220f : 360f;
@@ -170,53 +169,7 @@ public class HUDController : MonoBehaviour
             new Color(1f, 0.90f, 0.60f), TextAnchor.UpperLeft);
     }
 
-    Image healthBarFill;
-    Text healthText;
 
-    void BuildRibbonHealthBar(Transform ribbon, bool mob = false)
-    {
-        var hb = new GameObject("HealthBar");
-        hb.transform.SetParent(ribbon, false);
-        var hRt = hb.AddComponent<RectTransform>();
-        hRt.anchorMin = new Vector2(1, 0.5f);
-        hRt.anchorMax = new Vector2(1, 0.5f);
-        hRt.pivot = new Vector2(1, 0.5f);
-        hRt.anchoredPosition = new Vector2(mob ? -200 : -400, 0);
-        hRt.sizeDelta = new Vector2(mob ? 90 : 128, mob ? 30 : 40);
-
-        // Simple background
-        var bg = new GameObject("BG");
-        bg.transform.SetParent(hb.transform, false);
-        var bgRt = bg.AddComponent<RectTransform>();
-        bgRt.anchorMin = Vector2.zero;
-        bgRt.anchorMax = Vector2.one;
-        bgRt.offsetMin = Vector2.zero;
-        bgRt.offsetMax = Vector2.zero;
-        var bgImg = bg.AddComponent<Image>();
-        bgImg.color = new Color(0.15f, 0.05f, 0.05f, 1f);
-        bgImg.raycastTarget = false;
-
-        // Green fill bar (left-aligned)
-        var fill = new GameObject("Fill");
-        fill.transform.SetParent(hb.transform, false);
-        var fillRt = fill.AddComponent<RectTransform>();
-        fillRt.anchorMin = new Vector2(0, 0);
-        fillRt.anchorMax = new Vector2(1, 1);
-        fillRt.offsetMin = Vector2.zero;
-        fillRt.offsetMax = Vector2.zero;
-        healthBarFill = fill.AddComponent<Image>();
-        healthBarFill.color = new Color(0.3f, 0.85f, 0.3f, 1f);
-        healthBarFill.raycastTarget = false;
-        healthBarFill.type = Image.Type.Filled;
-        healthBarFill.fillMethod = Image.FillMethod.Horizontal;
-        healthBarFill.fillOrigin = (int)Image.OriginHorizontal.Left;
-        healthBarFill.fillAmount = 1f;
-
-        // HP text centered
-        healthText = MakeText(hb.transform, "HPText", new Vector2(0, 0), new Vector2(mob ? 90 : 128, mob ? 30 : 40),
-            "HP 100/100", mob ? 12 : 15, FontStyle.Bold,
-            new Color(1f, 0.95f, 0.55f), TextAnchor.MiddleCenter);
-    }
 
     Text BuildResourceSlot(Transform parent, ref float x, Sprite sprite, string initialValue,
         float iconSize, float labelY, Color valueColor)
@@ -271,19 +224,7 @@ public class HUDController : MonoBehaviour
         if (foodText != null) foodText.text = $"{Food}";
         if (dayText != null) dayText.text = ChapterName;
 
-        // Health bar
-        if (healthBarFill != null && healthText != null)
-        {
-            int hp = PlayerController3D.Health;
-            int maxHp = PlayerController3D.maxHealth;
-            float pct = (float)hp / Mathf.Max(1, maxHp);
-            healthBarFill.fillAmount = pct;
-            // Color shifts from green to red as health drops
-            if (pct > 0.6f) healthBarFill.color = new Color(0.3f, 0.85f, 0.3f, 1f);
-            else if (pct > 0.3f) healthBarFill.color = new Color(0.95f, 0.7f, 0.2f, 1f);
-            else healthBarFill.color = new Color(0.9f, 0.25f, 0.2f, 1f);
-            healthText.text = $"HP {hp}/{maxHp}";
-        }
+
 
         // Win condition check
         if (!hasWon && Gold >= 300)

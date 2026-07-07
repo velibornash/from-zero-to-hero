@@ -371,15 +371,15 @@ public class PlayerController3D : MonoBehaviour
         lRt.sizeDelta = new Vector2(2f, 0.35f);
         hpBarText = label.AddComponent<Text>();
         hpBarText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        hpBarText.fontSize = 20;
+        hpBarText.fontSize = 140;
         hpBarText.fontStyle = FontStyle.Bold;
         hpBarText.color = new Color(1f, 0.95f, 0.55f);
         hpBarText.alignment = TextAnchor.MiddleCenter;
         hpBarText.text = "";
         hpBarText.raycastTarget = false;
         hpBarText.resizeTextForBestFit = true;
-        hpBarText.resizeTextMinSize = 8;
-        hpBarText.resizeTextMaxSize = 20;
+        hpBarText.resizeTextMinSize = 60;
+        hpBarText.resizeTextMaxSize = 200;
 
         go.AddComponent<Billboard>();
     }
