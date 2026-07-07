@@ -26,11 +26,6 @@ public class MobileControls : MonoBehaviour
         }
     }
 
-    bool IsMobile()
-    {
-        return isMobile;
-    }
-
     void BuildJoystick()
     {
         var canvas = GetComponent<Canvas>();
