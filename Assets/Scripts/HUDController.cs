@@ -136,7 +136,7 @@ public class HUDController : MonoBehaviour
         evRt.anchorMin = new Vector2(1, 1);
         evRt.anchorMax = new Vector2(1, 1);
         evRt.pivot = new Vector2(1, 1);
-        evRt.anchoredPosition = new Vector2(-18, -116);
+        evRt.anchoredPosition = new Vector2(-18, -152);
         evRt.sizeDelta = new Vector2(360, 320);
 
         MakeText(evPanel.transform, "Header", new Vector2(40, -22), new Vector2(320, 50),
