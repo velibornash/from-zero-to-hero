@@ -9,20 +9,9 @@ public class TreeController : MonoBehaviour
     public int woodAmount = 5;
     public bool chopped { get; private set; }
 
-    static GameObject _stumpPrefab;
-    static GameObject _logsPrefab;
-
     void Awake()
     {
         AllTrees.Add(this);
-        if (_stumpPrefab == null)
-            _stumpPrefab = Resources.Load<GameObject>("PT_Pine_Tree_03_green_cut");
-        if (_logsPrefab == null)
-            _logsPrefab = Resources.Load<GameObject>("PT_Pine_Tree_03_logs");
-        if (_stumpPrefab == null)
-            Debug.LogWarning("TreeController: stump prefab not found in Resources");
-        if (_logsPrefab == null)
-            Debug.LogWarning("TreeController: logs prefab not found in Resources");
     }
 
     void OnDestroy()
@@ -51,34 +40,45 @@ public class TreeController : MonoBehaviour
 
         SmokePuff(pos);
 
-        var mr = GetComponent<MeshRenderer>();
-        if (mr != null) mr.enabled = false;
+        var mrs = GetComponentsInChildren<MeshRenderer>();
+        foreach (var mr in mrs) mr.enabled = false;
+        var cols = GetComponentsInChildren<Collider>();
+        foreach (var col in cols) col.enabled = false;
 
-        if (_stumpPrefab != null)
-        {
-            var stump = Instantiate(_stumpPrefab, pos, transform.rotation);
-            stump.transform.localScale = Vector3.one * scale;
-        }
-
-        if (_logsPrefab != null)
-        {
-            StartCoroutine(SpawnPickup(pos, scale));
-        }
+        StartCoroutine(SpawnPickup(pos, scale));
     }
 
     IEnumerator SpawnPickup(Vector3 pos, float scale)
     {
         yield return new WaitForSeconds(0.6f);
         Vector3 offset = new Vector3(Random.Range(-2f, 2f), 0.3f, Random.Range(-2f, 2f));
-        var logs = Instantiate(_logsPrefab, pos + offset, Quaternion.identity);
-        logs.transform.localScale = Vector3.one * scale * 0.8f;
-        logs.transform.rotation = Quaternion.Euler(0, Random.Range(0, 360), 0);
-        var pickup = logs.AddComponent<ResourcePickup>();
-        pickup.resourceType = "wood";
-        pickup.amount = woodAmount;
-        var col = logs.AddComponent<SphereCollider>();
+
+        var go = GameObject.CreatePrimitive(PrimitiveType.Quad);
+        go.name = "WoodPickup";
+        Destroy(go.GetComponent<MeshCollider>());
+        go.transform.position = pos + offset;
+        go.transform.localScale = Vector3.one * scale * 3f;
+
+        var tex = Resources.Load<Texture2D>("HUDIcons/wood_pile_collectable");
+        if (tex != null)
+        {
+            tex = TextureHelper.ChromaKey(tex);
+            var mat = new Material(Shader.Find("Unlit/Transparent"));
+            mat.mainTexture = tex;
+            go.GetComponent<Renderer>().material = mat;
+        }
+        go.AddComponent<Billboard>();
+
+        var colGo = new GameObject("WoodPickupTrigger");
+        colGo.transform.position = pos + offset;
+        var col = colGo.AddComponent<SphereCollider>();
         col.isTrigger = true;
         col.radius = 2f;
+        var pickup = colGo.AddComponent<ResourcePickup>();
+        pickup.resourceType = "wood";
+        pickup.amount = woodAmount;
+
+        go.transform.SetParent(colGo.transform, true);
     }
 
     void SmokePuff(Vector3 pos)
@@ -148,6 +148,17 @@ public class TreeController : MonoBehaviour
                 {
                     t.gameObject.AddComponent<TreeController>();
                     count++;
+                }
+                // Ensure collider exists for blocking hero movement
+                if (t.GetComponent<Collider>() == null)
+                {
+                    var filters = t.GetComponentsInChildren<MeshFilter>();
+                    foreach (var f in filters)
+                    {
+                        if (f.sharedMesh == null) continue;
+                        var mc = f.gameObject.AddComponent<MeshCollider>();
+                        mc.sharedMesh = f.sharedMesh;
+                    }
                 }
             }
         }

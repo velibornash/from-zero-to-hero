@@ -41,6 +41,7 @@ public class Setup3DScene
         EnsureWoodIcon();
         EnsureWheatIcon();
         EnsureStoneIcon();
+        EnsureCollectableTextures();
         CreateGround();
         PlaceVillage();
         PlaceNatureFeatures();
@@ -696,6 +697,7 @@ public class Setup3DScene
             go.name = "ForestTree";
             go.tag = "Untagged";
             go.AddComponent<TreeController>();
+            AddColliders(go);
         }
 
         // A smaller grove to the north for visual framing.
@@ -710,6 +712,7 @@ public class Setup3DScene
             go.name = "NorthTree";
             go.tag = "Untagged";
             go.AddComponent<TreeController>();
+            AddColliders(go);
         }
     }
 
@@ -719,25 +722,21 @@ public class Setup3DScene
         var split = AssetDatabase.LoadAssetAtPath<GameObject>(NaturePrefabs + "/Rocks/PT_Ore_Rock_01_split.prefab");
         if (ore == null) return;
 
-        // Scatter stone resource nodes around map edges
-        for (int i = 0; i < 12; i++)
+        // Place stone resources in the NE corner (upper-right, +X +Z) with large rocks
+        for (int i = 0; i < 8; i++)
         {
-            float angle = Random.Range(0f, Mathf.PI * 2f);
-            float radius = Random.Range(90f, 150f);
-            float x = Mathf.Cos(angle) * radius;
-            float z = Mathf.Sin(angle) * radius;
-            // Avoid overlap with village centre
-            if (Mathf.Abs(x) < 70f && Mathf.Abs(z) < 70f) continue;
+            float x = Random.Range(80f, 160f);
+            float z = Random.Range(80f, 150f);
 
             var go = (GameObject)Object.Instantiate(ore);
             go.transform.position = new Vector3(x, 0, z);
-            go.transform.localScale = Vector3.one * Random.Range(1.5f, 3f);
+            go.transform.localScale = Vector3.one * Random.Range(3f, 6f);
             go.transform.rotation = Quaternion.Euler(0, Random.Range(0, 360), 0);
             go.name = "StoneResource";
             var node = go.AddComponent<ResourceNode>();
             node.resourceType = "stone";
             node.amount = Random.Range(3, 8);
-            if (split != null) node.altPrefab = split;
+            AddColliders(go);
         }
     }
 
@@ -2581,5 +2580,25 @@ public class Setup3DScene
         // iOS/Android common quality of life
         PlayerSettings.SetApplicationIdentifier(UnityEditor.Build.NamedBuildTarget.iOS, "com.yourname.fromzerotohero");
         PlayerSettings.SetApplicationIdentifier(UnityEditor.Build.NamedBuildTarget.Android, "com.yourname.fromzerotohero");
+    }
+
+    static void EnsureCollectableTextures()
+    {
+        string[] paths = {
+            "Assets/Resources/HUDIcons/wood_pile_collectable.jpg",
+            "Assets/Resources/HUDIcons/stone_pile_collectable.jpg",
+            "Assets/Resources/HUDIcons/wheat_pile_collectable.jpg",
+        };
+        foreach (string path in paths)
+        {
+            if (!File.Exists(path)) continue;
+            var importer = AssetImporter.GetAtPath(path) as TextureImporter;
+            if (importer != null)
+            {
+                bool changed = false;
+                if (!importer.isReadable) { importer.isReadable = true; changed = true; }
+                if (changed) importer.SaveAndReimport();
+            }
+        }
     }
 }

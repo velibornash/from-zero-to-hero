@@ -47,13 +47,10 @@ public class ResourceNode : MonoBehaviour
 
         SmokePuff(pos);
 
-        GetComponent<MeshRenderer>().enabled = false;
-
-        if (altPrefab != null)
-        {
-            var alt = Instantiate(altPrefab, pos, transform.rotation);
-            alt.transform.localScale = Vector3.one * scale;
-        }
+        var mrs = GetComponentsInChildren<MeshRenderer>();
+        foreach (var mr in mrs) mr.enabled = false;
+        var cols = GetComponentsInChildren<Collider>();
+        foreach (var col in cols) col.enabled = false;
 
         SpawnPickup(pos, scale);
     }
@@ -61,16 +58,25 @@ public class ResourceNode : MonoBehaviour
     void SpawnPickup(Vector3 pos, float scale)
     {
         Vector3 offset = new Vector3(Random.Range(-1.5f, 1.5f), 0.3f, Random.Range(-1.5f, 1.5f));
-        var go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+
+        var go = GameObject.CreatePrimitive(PrimitiveType.Quad);
         go.name = resourceType + "_pickup";
-        Destroy(go.GetComponent<SphereCollider>());
+        Destroy(go.GetComponent<MeshCollider>());
         go.transform.position = pos + offset;
-        go.transform.localScale = Vector3.one * scale * 0.5f;
-        var rend = go.GetComponent<Renderer>();
-        if (resourceType == "stone")
-            rend.material.color = new Color(0.5f, 0.5f, 0.5f);
-        else
-            rend.material.color = new Color(0.8f, 0.8f, 0.2f);
+        go.transform.localScale = Vector3.one * scale * 3f;
+
+        string texName = resourceType == "stone" ? "stone_pile_collectable"
+                       : resourceType == "wood" ? "wood_pile_collectable"
+                       : "wheat_pile_collectable";
+        var tex = Resources.Load<Texture2D>("HUDIcons/" + texName);
+        if (tex != null)
+        {
+            tex = TextureHelper.ChromaKey(tex);
+            var mat = new Material(Shader.Find("Unlit/Transparent"));
+            mat.mainTexture = tex;
+            go.GetComponent<Renderer>().material = mat;
+        }
+        go.AddComponent<Billboard>();
 
         var colGo = new GameObject("PickupTrigger");
         colGo.transform.position = pos + offset;
@@ -81,10 +87,7 @@ public class ResourceNode : MonoBehaviour
         pickup.resourceType = resourceType;
         pickup.amount = amount;
 
-        // Make the sphere visual follow the collider
         go.transform.SetParent(colGo.transform, true);
-
-        Destroy(colGo, 30f);
     }
 
     void SmokePuff(Vector3 pos)

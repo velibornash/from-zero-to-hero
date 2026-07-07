@@ -43,7 +43,7 @@ public class FloatingText : MonoBehaviour
         textRt.sizeDelta = new Vector2(3, 1);
 
         var text = textGo.AddComponent<Text>();
-        text.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+        text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         text.fontSize = 100;
         text.fontStyle = FontStyle.Bold;
         text.color = color;

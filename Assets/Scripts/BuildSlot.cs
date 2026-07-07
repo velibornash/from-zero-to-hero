@@ -441,7 +441,6 @@ public class BuildSlot : MonoBehaviour
             // Mage tiles (6-9) have no building prefab — skip SpawnBuilding for them
             if (slotIndex < 6 || slotIndex > 9)
                 SpawnBuilding();
-            SpawnWorker();
             SmokePuff(transform.position);
             if (data != null)
             {

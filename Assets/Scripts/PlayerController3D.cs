@@ -115,7 +115,6 @@ public class PlayerController3D : MonoBehaviour
             currentVelocity = Vector3.MoveTowards(currentVelocity, targetVel, acceleration * Time.deltaTime);
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(targetVel), 0.15f);
             walkBobTimer += Time.deltaTime;
-            if (anim != null) anim.SetFloat("Speed", 1f);
         }
         else
         {
@@ -125,12 +124,19 @@ public class PlayerController3D : MonoBehaviour
                 currentVelocity = Vector3.zero;
                 walkBobTimer = 0f;
             }
-            if (anim != null) anim.SetFloat("Speed", 0f);
         }
 
         controller.Move(currentVelocity * Time.deltaTime + Vector3.down * Time.deltaTime);
 
-        bool moving = wantsToMove || currentVelocity.sqrMagnitude > 0.1f;
+        // Idle ONLY when no keyboard/touch input AND velocity ≈ 0
+        bool hasInput = Mathf.Abs(h) > 0.01f || Mathf.Abs(v) > 0.01f
+                     || Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)
+                     || Input.GetKey(KeyCode.E)
+                     || Input.GetKey(KeyCode.Mouse0) || Input.GetKey(KeyCode.Mouse1);
+        if (anim != null)
+            anim.SetFloat("Speed", (hasInput || currentVelocity.sqrMagnitude > 0.1f) ? 1f : 0f);
+
+        bool moving = hasInput || currentVelocity.sqrMagnitude > 0.1f;
         if (modelRoot != null && moving)
         {
             float t = walkBobTimer * 12f;

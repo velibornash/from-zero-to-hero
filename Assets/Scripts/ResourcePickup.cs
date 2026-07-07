@@ -34,10 +34,17 @@ public class ResourcePickup : MonoBehaviour
 
         HUDController.AddResource(resourceType, amount);
 
-        Color c = resourceType == "wood" ? new Color(0.6f, 0.4f, 0.1f)
-               : resourceType == "stone" ? new Color(0.5f, 0.5f, 0.5f)
-               : new Color(0.8f, 0.8f, 0.2f);
-        FloatingText.Show(transform.position + Vector3.up * 1f, amount, c);
+        try
+        {
+            Color c = resourceType == "wood" ? new Color(0.6f, 0.4f, 0.1f)
+                   : resourceType == "stone" ? new Color(0.5f, 0.5f, 0.5f)
+                   : new Color(0.8f, 0.8f, 0.2f);
+            FloatingText.Show(transform.position + Vector3.up * 1f, amount, c);
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogWarning($"ResourcePickup: FloatingText failed: {e.Message}");
+        }
 
         Destroy(gameObject);
     }
