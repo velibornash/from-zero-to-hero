@@ -10,6 +10,7 @@ public class PatrolNPC : MonoBehaviour
     Animator anim;
     Transform target;
     float pauseTimer;
+    Vector3 currentVelocity;
 
     void Start()
     {
@@ -29,21 +30,27 @@ public class PatrolNPC : MonoBehaviour
         if (pauseTimer > 0f)
         {
             pauseTimer -= Time.deltaTime;
-            if (anim != null) anim.SetFloat("Speed", 0f);
+            currentVelocity = Vector3.MoveTowards(currentVelocity, Vector3.zero, 20f * Time.deltaTime);
+            transform.position += currentVelocity * Time.deltaTime;
+            if (anim != null) anim.SetFloat("Speed", currentVelocity.magnitude / moveSpeed);
             return;
         }
 
         if (dist > 1.5f)
         {
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dir), 5f * Time.deltaTime);
-            transform.Translate(Vector3.forward * moveSpeed * Time.deltaTime);
-            if (anim != null) anim.SetFloat("Speed", 1f);
+            Vector3 targetVel = dir.normalized * moveSpeed;
+            currentVelocity = Vector3.MoveTowards(currentVelocity, targetVel, 20f * Time.deltaTime);
+            transform.position += currentVelocity * Time.deltaTime;
+            if (anim != null) anim.SetFloat("Speed", Mathf.Clamp01(currentVelocity.magnitude / moveSpeed));
         }
         else
         {
             target = target == waypointA ? waypointB : waypointA;
             pauseTimer = pauseTime;
-            if (anim != null) anim.SetFloat("Speed", 0f);
+            currentVelocity = Vector3.MoveTowards(currentVelocity, Vector3.zero, 20f * Time.deltaTime);
+            transform.position += currentVelocity * Time.deltaTime;
+            if (anim != null) anim.SetFloat("Speed", currentVelocity.magnitude / moveSpeed);
         }
     }
 }

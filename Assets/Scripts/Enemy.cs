@@ -100,7 +100,8 @@ public class Enemy : MonoBehaviour
             Vector3 targetVel = dir.normalized * moveSpeed;
             currentVelocity = Vector3.MoveTowards(currentVelocity, targetVel, acceleration * Time.fixedDeltaTime);
             rb.linearVelocity = new Vector3(currentVelocity.x, 0, currentVelocity.z);
-            if (anim != null && anim.runtimeAnimatorController != null) anim.SetFloat("Speed", 1f);
+            if (anim != null && anim.runtimeAnimatorController != null)
+                anim.SetFloat("Speed", Mathf.Clamp01(currentVelocity.magnitude / moveSpeed));
 
             Quaternion targetRot = Quaternion.LookRotation(dir);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, rotateSpeed * Time.fixedDeltaTime);

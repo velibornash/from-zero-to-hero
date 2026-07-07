@@ -46,11 +46,12 @@ public class CameraFollow3D : MonoBehaviour
             pitch = Mathf.Clamp(pitch - Input.GetAxis("Mouse Y") * 2f, 15f, 80f);
         }
 
-        // Mobile touch controls
+        // Mobile touch controls — only on the RIGHT half of the screen
         if (Input.touchCount == 1)
         {
             Touch t = Input.GetTouch(0);
-            if (t.phase == TouchPhase.Moved)
+            // Ignore touches on the left half (joystick area) and UI
+            if (t.position.x > Screen.width * 0.5f && t.phase == TouchPhase.Moved)
             {
                 yaw += t.deltaPosition.x * 0.3f;
                 pitch = Mathf.Clamp(pitch - t.deltaPosition.y * 0.2f, 15f, 80f);
@@ -60,13 +61,18 @@ public class CameraFollow3D : MonoBehaviour
         {
             Touch t1 = Input.GetTouch(0);
             Touch t2 = Input.GetTouch(1);
-            Vector2 prevDelta = (t1.position - t1.deltaPosition) - (t2.position - t2.deltaPosition);
-            Vector2 currDelta = t1.position - t2.position;
-            float prevMag = prevDelta.magnitude;
-            float currMag = currDelta.magnitude;
-            if (Mathf.Abs(currMag - prevMag) > 0.5f)
+            // Only respond if at least one touch is on the right half
+            bool rightSide = t1.position.x > Screen.width * 0.5f || t2.position.x > Screen.width * 0.5f;
+            if (rightSide)
             {
-                currentDist = Mathf.Clamp(currentDist - (currMag - prevMag) * 0.1f, minDist, maxDist);
+                Vector2 prevDelta = (t1.position - t1.deltaPosition) - (t2.position - t2.deltaPosition);
+                Vector2 currDelta = t1.position - t2.position;
+                float prevMag = prevDelta.magnitude;
+                float currMag = currDelta.magnitude;
+                if (Mathf.Abs(currMag - prevMag) > 0.5f)
+                {
+                    currentDist = Mathf.Clamp(currentDist - (currMag - prevMag) * 0.1f, minDist, maxDist);
+                }
             }
         }
 

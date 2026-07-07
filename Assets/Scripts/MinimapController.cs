@@ -4,10 +4,11 @@ using System.Collections.Generic;
 
 public class MinimapController : MonoBehaviour
 {
+    static bool IsMobile => Application.isMobilePlatform || Input.touchSupported;
     public Transform target;
     public float height = 140f;
     public float mapSize = 200f;
-    public int texSize = 384;
+    public int texSize => IsMobile ? 192 : 384;
 
     Camera minimapCam;
     RenderTexture rt;

@@ -27,6 +27,12 @@ public class PlayerController3D : MonoBehaviour
     float regenAccumulator;
     Vector3 currentVelocity;
     float walkBobTimer;
+    static Vector3? s_moveTarget;
+    public static Vector3? MoveTarget { get => s_moveTarget; set => s_moveTarget = value; }
+    static bool s_mobileRun;
+    public static bool MobileRun { get => s_mobileRun; set => s_mobileRun = value; }
+    static bool s_mobileInteract;
+    public static bool MobileInteract { get => s_mobileInteract; set => s_mobileInteract = value; }
 
     void Start()
     {
@@ -96,6 +102,8 @@ public class PlayerController3D : MonoBehaviour
         h = Mathf.Clamp(h, -1f, 1f);
         v = Mathf.Clamp(v, -1f, 1f);
 
+        bool directInput = Mathf.Abs(h) > 0.01f || Mathf.Abs(v) > 0.01f;
+
         var cam = Camera.main;
         if (cam == null) return;
 
@@ -105,8 +113,12 @@ public class PlayerController3D : MonoBehaviour
         Vector3 desiredDir = (forward * v + right * h);
         bool wantsToMove = desiredDir.sqrMagnitude > 0.01f;
 
+        // If there's direct input, use it and clear any move target
+        if (directInput)
+            s_moveTarget = null;
+
         float currentSpeed = speed;
-        bool running = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+        bool running = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift) || s_mobileRun;
         if (running) currentSpeed = speed * runMultiplier;
 
         if (wantsToMove)
@@ -115,6 +127,28 @@ public class PlayerController3D : MonoBehaviour
             currentVelocity = Vector3.MoveTowards(currentVelocity, targetVel, acceleration * Time.deltaTime);
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(targetVel), 0.15f);
             walkBobTimer += Time.deltaTime;
+        }
+        else if (s_moveTarget.HasValue)
+        {
+            Vector3 toTarget = s_moveTarget.Value - transform.position;
+            toTarget.y = 0f;
+            if (toTarget.sqrMagnitude > 0.5f)
+            {
+                Vector3 targetVel = toTarget.normalized * currentSpeed;
+                currentVelocity = Vector3.MoveTowards(currentVelocity, targetVel, acceleration * Time.deltaTime);
+                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(toTarget), 0.15f);
+                walkBobTimer += Time.deltaTime;
+            }
+            else
+            {
+                s_moveTarget = null;
+                currentVelocity = Vector3.MoveTowards(currentVelocity, Vector3.zero, deceleration * Time.deltaTime);
+                if (currentVelocity.sqrMagnitude < 0.001f)
+                {
+                    currentVelocity = Vector3.zero;
+                    walkBobTimer = 0f;
+                }
+            }
         }
         else
         {
@@ -128,15 +162,12 @@ public class PlayerController3D : MonoBehaviour
 
         controller.Move(currentVelocity * Time.deltaTime + Vector3.down * Time.deltaTime);
 
-        // Idle ONLY when no keyboard/touch input AND velocity ≈ 0
-        bool hasInput = Mathf.Abs(h) > 0.01f || Mathf.Abs(v) > 0.01f
-                     || Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)
-                     || Input.GetKey(KeyCode.E)
-                     || Input.GetKey(KeyCode.Mouse0) || Input.GetKey(KeyCode.Mouse1);
+        // Speed proportional to actual velocity => animation matches body movement, no sliding
+        float speedNorm = currentVelocity.magnitude / speed;
         if (anim != null)
-            anim.SetFloat("Speed", (hasInput || currentVelocity.sqrMagnitude > 0.1f) ? 1f : 0f);
+            anim.SetFloat("Speed", Mathf.Clamp01(speedNorm));
 
-        bool moving = hasInput || currentVelocity.sqrMagnitude > 0.1f;
+        bool moving = currentVelocity.sqrMagnitude > 0.1f;
         if (modelRoot != null && moving)
         {
             float t = walkBobTimer * 12f;
@@ -182,7 +213,9 @@ public class PlayerController3D : MonoBehaviour
 
     void HandleInteraction()
     {
-        if (!Input.GetKeyDown(KeyCode.E)) return;
+        bool ePressed = Input.GetKeyDown(KeyCode.E) || s_mobileInteract;
+        s_mobileInteract = false;
+        if (!ePressed) return;
 
         TreeController nearestTree = null;
         ResourceNode nearestNode = null;

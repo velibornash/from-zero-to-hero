@@ -16,8 +16,9 @@ public class PopupBase : MonoBehaviour
     protected Text bodyText;
 
     // Standard dimensions
-    public const float PANEL_WIDTH = 560f;
-    public const float PANEL_HEIGHT = 500f;
+    public static bool IsMobile => Application.isMobilePlatform || Input.touchSupported;
+    public float PanelWidth => IsMobile ? Screen.width * 0.85f : 560f;
+    public float PanelHeight => IsMobile ? Screen.height * 0.65f : 500f;
     public const float TITLE_BAR_HEIGHT = 70f;
     public const float BORDER_INSET = 10f;
 
@@ -62,7 +63,7 @@ public class PopupBase : MonoBehaviour
         pRt.anchorMax = new Vector2(0.5f, 0.5f);
         pRt.pivot = new Vector2(0.5f, 0.5f);
         pRt.anchoredPosition = Vector2.zero;
-        pRt.sizeDelta = new Vector2(PANEL_WIDTH, PANEL_HEIGHT);
+        pRt.sizeDelta = new Vector2(PanelWidth, PanelHeight);
         var pImg = panel.AddComponent<Image>();
         pImg.sprite = UIStyleHelper.MakeParchmentSprite(256, 256);
         pImg.type = Image.Type.Sliced;
@@ -111,15 +112,15 @@ public class PopupBase : MonoBehaviour
         titleRt.sizeDelta = new Vector2(-40, TITLE_BAR_HEIGHT);
         titleText = titleGo.AddComponent<Text>();
         titleText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        titleText.fontSize = 26;
+        titleText.fontSize = IsMobile ? 34 : 26;
         titleText.fontStyle = FontStyle.Bold;
         titleText.color = new Color(1f, 0.95f, 0.55f);
         titleText.alignment = TextAnchor.MiddleCenter;
         titleText.text = defaultTitle;
         titleText.raycastTarget = false;
         titleText.resizeTextForBestFit = true;
-        titleText.resizeTextMinSize = 12;
-        titleText.resizeTextMaxSize = 26;
+        titleText.resizeTextMinSize = IsMobile ? 18 : 12;
+        titleText.resizeTextMaxSize = IsMobile ? 36 : 26;
         var outline = titleGo.AddComponent<Outline>();
         outline.effectColor = new Color(0.05f, 0.02f, 0.01f);
         outline.effectDistance = new Vector2(2, -2);
@@ -147,15 +148,15 @@ public class PopupBase : MonoBehaviour
         bodyTextRt.offsetMax = new Vector2(-10, -10);
         bodyText = bodyTextGo.AddComponent<Text>();
         bodyText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        bodyText.fontSize = 20;
+        bodyText.fontSize = IsMobile ? 26 : 20;
         bodyText.fontStyle = FontStyle.Bold;
         bodyText.color = new Color(1f, 0.90f, 0.50f);
         bodyText.alignment = TextAnchor.UpperCenter;
         bodyText.text = defaultBody;
         bodyText.raycastTarget = false;
         bodyText.resizeTextForBestFit = true;
-        bodyText.resizeTextMinSize = 16;
-        bodyText.resizeTextMaxSize = 26;
+        bodyText.resizeTextMinSize = IsMobile ? 20 : 16;
+        bodyText.resizeTextMaxSize = IsMobile ? 36 : 26;
 
         // Close button (centered at bottom)
         var closeGo = new GameObject("CloseButton");
