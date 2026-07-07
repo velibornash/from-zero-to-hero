@@ -100,12 +100,12 @@ public class HUDController : MonoBehaviour
     void BuildHUD()
     {
         bool mob = PopupBase.IsMobile;
-        float iconSize = mob ? 60f : 80f;
-        float labelY = mob ? -30f : -50f;
-        float valW = mob ? 60f : 90f;
-        int valFont = mob ? 28 : 40;
-        int fontSize = mob ? 20 : 32;
-        int reportsFont = mob ? 18 : 24;
+        float iconSize = mob ? 57f : 76f;
+        float labelY = mob ? -85f : -100f;
+        float valW = mob ? 58f : 86f;
+        int valFont = mob ? 27 : 38;
+        int fontSize = mob ? 19 : 30;
+        int reportsFont = mob ? 17 : 23;
 
         // Ribbon
         float ribbonH = mob ? 140f : 200f;
@@ -136,11 +136,11 @@ public class HUDController : MonoBehaviour
         barImg.raycastTarget = true;
 
         // Calculate total content width for centering
-        float gap = mob ? 8f : 16f;
+        float gap = mob ? 8f : 14f;
         float sepW = 2f;
-        float chapterW = mob ? 300f : 420f;
+        float chapterW = mob ? 290f : 400f;
         float totalW = (iconSize + valW + gap) * 4f + gap + sepW + gap + chapterW;
-        float startX = (1920f - totalW) * 0.5f - (mob ? 60f : 100f);
+        float startX = (1920f - totalW) * 0.5f - (mob ? 90f : 150f);
         float x = startX;
 
         goldText = BuildResourceSlot(topBar.transform, ref x, goldSprite, "10", iconSize, labelY,
