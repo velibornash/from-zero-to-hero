@@ -191,20 +191,26 @@ public class HUDController : MonoBehaviour
         healthBarFill.fillAmount = 1f;
 
         // HP text centered
-        healthText = MakeText(hb.transform, "HPText", new Vector2(0, 0), new Vector2(280, 44),
-            "HP 100/100", 18, FontStyle.Bold,
+        healthText = MakeText(hb.transform, "HPText", new Vector2(0, 0), new Vector2(120, 44),
+            "HP 100/100", 16, FontStyle.Bold,
             new Color(1f, 0.95f, 0.55f), TextAnchor.MiddleCenter);
     }
 
     Text BuildResourceSlot(Transform parent, ref float x, Sprite sprite, string initialValue,
         float iconSize, float labelY, Color valueColor)
     {
-        UIStyleHelper.MakeOrnateIcon(parent, sprite, (int)iconSize);
-        var iconRt = parent.GetChild(parent.childCount - 1).GetComponent<RectTransform>();
+        var iconObj = new GameObject("Icon");
+        iconObj.transform.SetParent(parent, false);
+        var iconRt = iconObj.AddComponent<RectTransform>();
         iconRt.anchorMin = new Vector2(0, 1);
         iconRt.anchorMax = new Vector2(0, 1);
         iconRt.pivot = new Vector2(0, 1);
-        iconRt.anchoredPosition = new Vector2(x, -18);
+        iconRt.anchoredPosition = new Vector2(x, labelY);
+        iconRt.sizeDelta = new Vector2(iconSize, iconSize);
+        var iconImg = iconObj.AddComponent<Image>();
+        iconImg.sprite = sprite;
+        iconImg.color = Color.white;
+        iconImg.raycastTarget = false;
         x += iconSize;
 
         var text = MakeText(parent, "Value_" + initialValue, new Vector2(x, labelY), new Vector2(80, 50),
