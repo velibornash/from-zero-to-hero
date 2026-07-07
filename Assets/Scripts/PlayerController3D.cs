@@ -370,19 +370,16 @@ public class PlayerController3D : MonoBehaviour
         var lRt = label.AddComponent<RectTransform>();
         lRt.anchorMin = Vector2.zero;
         lRt.anchorMax = Vector2.one;
-        lRt.offsetMin = Vector2.zero;
-        lRt.offsetMax = Vector2.zero;
+        lRt.offsetMin = new Vector2(2, 0);
+        lRt.offsetMax = new Vector2(-2, 0);
         hpBarText = label.AddComponent<Text>();
-        hpBarText.font = PopupBase.GetFont();
-        hpBarText.fontSize = 200;
+        hpBarText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        hpBarText.fontSize = 30;
         hpBarText.fontStyle = FontStyle.Bold;
         hpBarText.color = Color.white;
         hpBarText.alignment = TextAnchor.MiddleCenter;
         hpBarText.text = "";
         hpBarText.raycastTarget = false;
-        hpBarText.resizeTextForBestFit = true;
-        hpBarText.resizeTextMinSize = 1;
-        hpBarText.resizeTextMaxSize = 200;
 
         hpBarGo.AddComponent<Billboard>();
         Debug.Log("[HPBar] Created — go=" + (hpBarGo != null) + " fill=" + (hpBarFill != null) + " text=" + (hpBarText != null));

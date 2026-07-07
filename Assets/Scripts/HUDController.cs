@@ -100,12 +100,12 @@ public class HUDController : MonoBehaviour
     void BuildHUD()
     {
         bool mob = PopupBase.IsMobile;
-        float iconSize = mob ? 50f : 66f;
-        float labelY = mob ? -50f : -80f;
-        float valW = mob ? 55f : 85f;
-        int valFont = mob ? 24 : 34;
-        int fontSize = mob ? 16 : 26;
-        int reportsFont = mob ? 16 : 22;
+        float iconSize = mob ? 60f : 80f;
+        float labelY = mob ? -30f : -50f;
+        float valW = mob ? 60f : 90f;
+        int valFont = mob ? 28 : 40;
+        int fontSize = mob ? 20 : 32;
+        int reportsFont = mob ? 18 : 24;
 
         // Ribbon
         float ribbonH = mob ? 140f : 200f;
@@ -136,11 +136,11 @@ public class HUDController : MonoBehaviour
         barImg.raycastTarget = true;
 
         // Calculate total content width for centering
-        float gap = mob ? 6f : 12f;
+        float gap = mob ? 8f : 16f;
         float sepW = 2f;
-        float chapterW = mob ? 280f : 380f;
+        float chapterW = mob ? 300f : 420f;
         float totalW = (iconSize + valW + gap) * 4f + gap + sepW + gap + chapterW;
-        float startX = (1920f - totalW) * 0.5f - 30f; // Canvas ref width = 1920, slight left shift
+        float startX = (1920f - totalW) * 0.5f - (mob ? 60f : 100f);
         float x = startX;
 
         goldText = BuildResourceSlot(topBar.transform, ref x, goldSprite, "10", iconSize, labelY,
@@ -224,8 +224,8 @@ public class HUDController : MonoBehaviour
         rt.anchorMin = new Vector2(0, 1);
         rt.anchorMax = new Vector2(0, 1);
         rt.pivot = new Vector2(0, 1);
-        rt.anchoredPosition = new Vector2(x, mob ? -35 : -65);
-        rt.sizeDelta = new Vector2(2, mob ? 65 : 90);
+        rt.anchoredPosition = new Vector2(x, mob ? -22 : -38);
+        rt.sizeDelta = new Vector2(2, mob ? 75 : 100);
         var img = sep.AddComponent<Image>();
         img.color = new Color(0.55f, 0.40f, 0.18f, 0.7f);
         img.raycastTarget = false;
