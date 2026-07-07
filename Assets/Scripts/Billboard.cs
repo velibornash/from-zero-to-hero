@@ -6,6 +6,7 @@ public class Billboard : MonoBehaviour
     {
         var cam = Camera.main;
         if (cam == null) return;
-        transform.forward = cam.transform.forward;
+        transform.LookAt(transform.position + cam.transform.rotation * Vector3.forward,
+                         cam.transform.rotation * Vector3.up);
     }
 }

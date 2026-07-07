@@ -87,7 +87,7 @@ public class HUDController : MonoBehaviour
 
     void BuildHUD()
     {
-        bool mob = Application.isMobilePlatform;
+        bool mob = PopupBase.IsMobile;
         float ribbonH = mob ? 100f : 140f;
         float iconSize = mob ? 48f : 64f;
         float labelY = mob ? -28f : -40f;
@@ -139,9 +139,12 @@ public class HUDController : MonoBehaviour
         MakeVerticalSeparator(topBar.transform, x);
         x += mob ? 8f : 16f;
 
-        dayText = MakeText(topBar.transform, "Chapter", new Vector2(x, labelY), new Vector2(mob ? 200f : 400f, 40),
-            ChapterName, fontSize, FontStyle.Bold,
+        dayText = MakeText(topBar.transform, "Chapter", new Vector2(x, labelY), new Vector2(mob ? 300f : 400f, 40),
+            ChapterName, mob ? 14 : 26, FontStyle.Bold,
             new Color(1f, 0.95f, 0.55f), TextAnchor.MiddleLeft);
+        dayText.resizeTextForBestFit = true;
+        dayText.resizeTextMinSize = 10;
+        dayText.resizeTextMaxSize = mob ? 14 : 26;
 
         // Health bar in the top ribbon (right side)
         BuildRibbonHealthBar(topBar.transform, mob);
@@ -157,11 +160,12 @@ public class HUDController : MonoBehaviour
         evRt.anchoredPosition = new Vector2(-18, -(ribbonH + 12));
         evRt.sizeDelta = new Vector2(rw, rh);
 
-        MakeText(evPanel.transform, "Header", new Vector2(20, -14), new Vector2(rw - 40, 30),
+        float leftMargin = mob ? 16f : 32f;
+        MakeText(evPanel.transform, "Header", new Vector2(leftMargin, -14), new Vector2(rw - leftMargin * 2, 30),
             "REPORTS", mob ? 22 : 32, FontStyle.Bold,
             new Color(0.95f, 0.75f, 0.20f), TextAnchor.MiddleLeft);
 
-        eventText = MakeText(evPanel.transform, "Events", new Vector2(20, -50), new Vector2(rw - 40, rh - 70),
+        eventText = MakeText(evPanel.transform, "Events", new Vector2(leftMargin, -50), new Vector2(rw - leftMargin * 2, rh - 70),
             "", reportsFont, FontStyle.Bold,
             new Color(1f, 0.90f, 0.60f), TextAnchor.UpperLeft);
     }
@@ -217,7 +221,7 @@ public class HUDController : MonoBehaviour
     Text BuildResourceSlot(Transform parent, ref float x, Sprite sprite, string initialValue,
         float iconSize, float labelY, Color valueColor)
     {
-        bool mob = Application.isMobilePlatform;
+        bool mob = PopupBase.IsMobile;
         var iconObj = new GameObject("Icon");
         iconObj.transform.SetParent(parent, false);
         var iconRt = iconObj.AddComponent<RectTransform>();
@@ -242,7 +246,7 @@ public class HUDController : MonoBehaviour
 
     void MakeVerticalSeparator(Transform parent, float x)
     {
-        bool mob = Application.isMobilePlatform;
+        bool mob = PopupBase.IsMobile;
         var sep = new GameObject("Sep");
         sep.transform.SetParent(parent, false);
         var rt = sep.AddComponent<RectTransform>();
@@ -259,6 +263,7 @@ public class HUDController : MonoBehaviour
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Tab)) ActionMenu.Toggle();
+        if (Input.GetKeyDown(KeyCode.F1)) PopupBase.ToggleMobile();
 
         if (goldText != null) goldText.text = $"{Gold}";
         if (woodText != null) woodText.text = $"{Wood}";

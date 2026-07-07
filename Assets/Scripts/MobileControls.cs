@@ -6,18 +6,29 @@ public class MobileControls : MonoBehaviour
 {
     GameObject runButton;
     GameObject interactButton;
-    bool isMobile;
+    bool controlsBuilt;
 
     void Start()
     {
-        isMobile = Application.isMobilePlatform;
-        if (!isMobile) return;
+        TryBuildControls();
+    }
 
-        var canvas = GetComponent<Canvas>();
-        if (canvas == null) return;
+    void Update()
+    {
+        TryBuildControls();
+    }
 
-        BuildJoystick();
-        BuildActionButtons();
+    void TryBuildControls()
+    {
+        if (controlsBuilt == PopupBase.IsMobile) return;
+        controlsBuilt = PopupBase.IsMobile;
+        if (controlsBuilt)
+        {
+            var canvas = GetComponent<Canvas>();
+            if (canvas == null) return;
+            BuildJoystick();
+            BuildActionButtons();
+        }
     }
 
     bool IsMobile()

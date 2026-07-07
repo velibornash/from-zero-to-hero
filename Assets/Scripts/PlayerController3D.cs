@@ -34,6 +34,9 @@ public class PlayerController3D : MonoBehaviour
     static bool s_mobileInteract;
     public static bool MobileInteract { get => s_mobileInteract; set => s_mobileInteract = value; }
 
+    UnityEngine.UI.Image hpBarFill;
+    Text hpBarText;
+
     void Start()
     {
         controller = GetComponent<CharacterController>();
@@ -49,6 +52,8 @@ public class PlayerController3D : MonoBehaviour
         Health = maxHealth;
         IsDead = false;
         lastHitTime = -999f;
+
+        CreateWorldHealthBar();
 
         anim = GetComponentInChildren<Animator>();
         if (anim != null) anim.applyRootMotion = false;
@@ -89,6 +94,7 @@ public class PlayerController3D : MonoBehaviour
         HandleAttack();
         HandleInteraction();
         HandleHealthRegen();
+        UpdateWorldHealthBar();
     }
 
     void HandleMovement()
@@ -318,5 +324,73 @@ public class PlayerController3D : MonoBehaviour
     {
         Gizmos.color = new Color(1, 0, 0, 0.3f);
         Gizmos.DrawWireSphere(transform.position, attackRadius);
+    }
+
+    void CreateWorldHealthBar()
+    {
+        var go = new GameObject("HeroHPBar");
+        go.transform.SetParent(transform, false);
+        go.transform.localPosition = new Vector3(0f, 3.2f, 0f);
+
+        var canvas = go.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.WorldSpace;
+        canvas.sortingOrder = 10;
+        var rt = go.GetComponent<RectTransform>();
+        rt.sizeDelta = new Vector2(2f, 0.3f);
+
+        var bg = new GameObject("BG");
+        bg.transform.SetParent(go.transform, false);
+        var bgRt = bg.AddComponent<RectTransform>();
+        bgRt.anchorMin = Vector2.zero;
+        bgRt.anchorMax = Vector2.one;
+        bgRt.offsetMin = Vector2.zero;
+        bgRt.offsetMax = Vector2.zero;
+        var bgImg = bg.AddComponent<UnityEngine.UI.Image>();
+        bgImg.color = new Color(0.1f, 0.05f, 0.05f, 0.8f);
+
+        var fill = new GameObject("Fill");
+        fill.transform.SetParent(go.transform, false);
+        var fillRt = fill.AddComponent<RectTransform>();
+        fillRt.anchorMin = Vector2.zero;
+        fillRt.anchorMax = Vector2.one;
+        fillRt.offsetMin = Vector2.zero;
+        fillRt.offsetMax = Vector2.zero;
+        hpBarFill = fill.AddComponent<UnityEngine.UI.Image>();
+        hpBarFill.color = new Color(0.3f, 0.85f, 0.3f);
+        hpBarFill.type = UnityEngine.UI.Image.Type.Filled;
+        hpBarFill.fillMethod = UnityEngine.UI.Image.FillMethod.Horizontal;
+
+        var label = new GameObject("Label");
+        label.transform.SetParent(go.transform, false);
+        var lRt = label.AddComponent<RectTransform>();
+        lRt.anchorMin = new Vector2(0.5f, 0f);
+        lRt.anchorMax = new Vector2(0.5f, 0f);
+        lRt.pivot = new Vector2(0.5f, 0f);
+        lRt.anchoredPosition = new Vector2(0f, -0.05f);
+        lRt.sizeDelta = new Vector2(2f, 0.35f);
+        hpBarText = label.AddComponent<Text>();
+        hpBarText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        hpBarText.fontSize = 20;
+        hpBarText.fontStyle = FontStyle.Bold;
+        hpBarText.color = new Color(1f, 0.95f, 0.55f);
+        hpBarText.alignment = TextAnchor.MiddleCenter;
+        hpBarText.text = "";
+        hpBarText.raycastTarget = false;
+        hpBarText.resizeTextForBestFit = true;
+        hpBarText.resizeTextMinSize = 8;
+        hpBarText.resizeTextMaxSize = 20;
+
+        go.AddComponent<Billboard>();
+    }
+
+    void UpdateWorldHealthBar()
+    {
+        if (hpBarFill == null || hpBarText == null) return;
+        float pct = (float)Health / Mathf.Max(1, maxHealth);
+        hpBarFill.fillAmount = pct;
+        if (pct > 0.6f) hpBarFill.color = new Color(0.3f, 0.85f, 0.3f);
+        else if (pct > 0.3f) hpBarFill.color = new Color(0.95f, 0.7f, 0.2f);
+        else hpBarFill.color = new Color(0.9f, 0.25f, 0.2f);
+        hpBarText.text = $"{Health}/{maxHealth}";
     }
 }
