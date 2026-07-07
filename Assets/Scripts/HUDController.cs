@@ -159,7 +159,7 @@ public class HUDController : MonoBehaviour
         MakeVerticalSeparator(topBar.transform, x);
         x += gap;
 
-        dayText = MakeText(topBar.transform, "Chapter", new Vector2(x, labelY), new Vector2(chapterW, 36),
+        dayText = MakeText(topBar.transform, "Chapter", new Vector2(x, labelY - 2f), new Vector2(chapterW, 36),
             ChapterName, fontSize, FontStyle.Bold,
             new Color(1f, 0.95f, 0.55f), TextAnchor.MiddleLeft);
         dayText.resizeTextForBestFit = true;
@@ -209,7 +209,7 @@ public class HUDController : MonoBehaviour
         iconImg.raycastTarget = false;
         x += iconSize;
 
-        var text = MakeText(parent, "Value_" + initialValue, new Vector2(x, labelY - 2f), new Vector2(valW, 36),
+        var text = MakeText(parent, "Value_" + initialValue, new Vector2(x, labelY - 4f), new Vector2(valW, 36),
             initialValue, valFont, FontStyle.Bold, valueColor, TextAnchor.MiddleLeft);
         x += valW;
         return text;

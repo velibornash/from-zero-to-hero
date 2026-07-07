@@ -412,7 +412,7 @@ public class PlayerController3D : MonoBehaviour
 
         var cam = Camera.main;
         if (cam == null) return;
-        Vector3 headPos = transform.position + Vector3.up * 5.8f;
+        Vector3 headPos = transform.position + Vector3.up * 6.5f;
         Vector3 screenPos = cam.WorldToScreenPoint(headPos);
 
         hpBarGo.SetActive(screenPos.z > 0);
