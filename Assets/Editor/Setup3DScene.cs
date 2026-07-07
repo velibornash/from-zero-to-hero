@@ -2533,6 +2533,33 @@ public class Setup3DScene
             if (!File.Exists(dst))
                 AssetDatabase.CopyAsset(src, dst);
         }
+
+        // Mage prefab for runtime (standalone) builds
+        string mageSrc = "Assets/3D/KayKit/KayKit_Adventurers_2.0_FREE/Characters/fbx/Mage.fbx";
+        string mageDst = "Assets/Resources/Mage.prefab";
+        if (!File.Exists(mageDst))
+        {
+            var mageGo = AssetDatabase.LoadAssetAtPath<GameObject>(mageSrc);
+            if (mageGo != null)
+            {
+                var prefab = PrefabUtility.SaveAsPrefabAsset(mageGo, mageDst);
+                Debug.Log($"Created Mage prefab at {mageDst}");
+            }
+        }
+
+        // Staff prefab for runtime
+        string staffSrc = "Assets/3D/KayKit/KayKit_Adventurers_2.0_FREE/Weapons/staff.fbx";
+        string staffDst = "Assets/Resources/MageStaff.prefab";
+        if (!File.Exists(staffDst))
+        {
+            var staffGo = AssetDatabase.LoadAssetAtPath<GameObject>(staffSrc);
+            if (staffGo != null)
+            {
+                var prefab = PrefabUtility.SaveAsPrefabAsset(staffGo, staffDst);
+                Debug.Log($"Created Staff prefab at {staffDst}");
+            }
+        }
+
         AssetDatabase.Refresh();
     }
 

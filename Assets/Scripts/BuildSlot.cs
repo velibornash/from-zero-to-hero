@@ -720,11 +720,9 @@ public class BuildSlot : MonoBehaviour
         rune.GetComponent<Renderer>().sharedMaterial = runeMat;
         Object.Destroy(rune.GetComponent<CapsuleCollider>());
 
-        // Create the mage GameObject (try FBX, fallback to empty with stand-in visual)
+        // Create the mage GameObject (try Resources prefab, fallback to stand-in)
         GameObject mage;
-        string magePath = "Assets/3D/KayKit/KayKit_Adventurers_2.0_FREE/Characters/fbx/Mage.fbx";
-#if UNITY_EDITOR
-        var magePrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(magePath);
+        var magePrefab = Resources.Load<GameObject>("Mage");
         if (magePrefab != null)
         {
             mage = (GameObject)Object.Instantiate(magePrefab, transform.position, Quaternion.identity);
@@ -732,13 +730,11 @@ public class BuildSlot : MonoBehaviour
             mage.transform.localScale = Vector3.one * 2.0f;
 
             // Attach a magical staff to the right hand
-            string staffPath = "Assets/3D/KayKit/KayKit_Adventurers_2.0_FREE/Weapons/staff.fbx";
-            var staffPrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(staffPath);
+            var staffPrefab = Resources.Load<GameObject>("MageStaff");
             if (staffPrefab != null)
             {
                 var staff = (GameObject)Object.Instantiate(staffPrefab);
                 staff.name = "MageStaff";
-                // Fix white FBX materials: replace embedded materials with Standard shader + color
                 foreach (var rend in staff.GetComponentsInChildren<Renderer>())
                 {
                     var mats = rend.sharedMaterials;
@@ -747,9 +743,9 @@ public class BuildSlot : MonoBehaviour
                         var newMat = new Material(Shader.Find("Standard"));
                         newMat.name = "StaffMat_" + rend.name + "_" + mi;
                         if (mi == 0)
-                            newMat.color = new Color(0.45f, 0.3f, 0.1f); // brown shaft
+                            newMat.color = new Color(0.45f, 0.3f, 0.1f);
                         else
-                            newMat.color = new Color(0.5f, 0.2f, 0.8f); // purple crystal
+                            newMat.color = new Color(0.5f, 0.2f, 0.8f);
                         mats[mi] = newMat;
                     }
                     rend.sharedMaterials = mats;
@@ -769,7 +765,6 @@ public class BuildSlot : MonoBehaviour
                     staff.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
                     staff.transform.localScale = Vector3.one * 0.6f;
                 }
-                // firePoint at the staff tip
                 var fp = new GameObject("FirePoint");
                 fp.transform.SetParent(staff.transform);
                 fp.transform.localPosition = new Vector3(0, 0, 0.7f);
@@ -778,12 +773,9 @@ public class BuildSlot : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("KayKit Mage.fbx not found at " + magePath + " — using fallback sphere.");
+            Debug.LogWarning("Mage prefab not found in Resources — using fallback.");
             mage = CreateMageFallback();
         }
-#else
-        mage = CreateMageFallback();
-#endif
 
         // Add a shooter component to the mage — shoots purple fireballs from hand height
         var shooter = mage.AddComponent<TowerShooter>();
