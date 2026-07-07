@@ -115,6 +115,7 @@ public class PlayerController3D : MonoBehaviour
             currentVelocity = Vector3.MoveTowards(currentVelocity, targetVel, acceleration * Time.deltaTime);
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(targetVel), 0.15f);
             walkBobTimer += Time.deltaTime;
+            if (anim != null) anim.SetFloat("Speed", 1f);
         }
         else
         {
@@ -124,15 +125,12 @@ public class PlayerController3D : MonoBehaviour
                 currentVelocity = Vector3.zero;
                 walkBobTimer = 0f;
             }
+            if (anim != null) anim.SetFloat("Speed", 0f);
         }
 
         controller.Move(currentVelocity * Time.deltaTime + Vector3.down * Time.deltaTime);
 
-        float speedMag = currentVelocity.magnitude;
-        bool moving = speedMag > 0.1f;
-        if (anim != null)
-            anim.SetFloat("Speed", moving ? Mathf.Clamp01(speedMag / speed) : 0f);
-
+        bool moving = wantsToMove || currentVelocity.sqrMagnitude > 0.1f;
         if (modelRoot != null && moving)
         {
             float t = walkBobTimer * 12f;
