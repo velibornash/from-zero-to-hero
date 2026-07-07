@@ -87,7 +87,7 @@ public class HUDController : MonoBehaviour
 
     void BuildHUD()
     {
-        bool mob = Application.isMobilePlatform || Input.touchSupported;
+        bool mob = Application.isMobilePlatform;
         float ribbonH = mob ? 100f : 140f;
         float iconSize = mob ? 48f : 64f;
         float labelY = mob ? -28f : -40f;
@@ -149,7 +149,7 @@ public class HUDController : MonoBehaviour
         // Reports panel (top right) — smaller on mobile
         float rw = mob ? 220f : 360f;
         float rh = mob ? 200f : 320f;
-        var evPanel = UIStyleHelper.MakeOrnatePanel(transform, rw, rh);
+        var evPanel = UIStyleHelper.MakeOrnatePanel(transform, (int)rw, (int)rh);
         var evRt = evPanel.GetComponent<RectTransform>();
         evRt.anchorMin = new Vector2(1, 1);
         evRt.anchorMax = new Vector2(1, 1);
@@ -217,7 +217,7 @@ public class HUDController : MonoBehaviour
     Text BuildResourceSlot(Transform parent, ref float x, Sprite sprite, string initialValue,
         float iconSize, float labelY, Color valueColor)
     {
-        bool mob = Application.isMobilePlatform || Input.touchSupported;
+        bool mob = Application.isMobilePlatform;
         var iconObj = new GameObject("Icon");
         iconObj.transform.SetParent(parent, false);
         var iconRt = iconObj.AddComponent<RectTransform>();
@@ -242,7 +242,7 @@ public class HUDController : MonoBehaviour
 
     void MakeVerticalSeparator(Transform parent, float x)
     {
-        bool mob = Application.isMobilePlatform || Input.touchSupported;
+        bool mob = Application.isMobilePlatform;
         var sep = new GameObject("Sep");
         sep.transform.SetParent(parent, false);
         var rt = sep.AddComponent<RectTransform>();

@@ -236,7 +236,7 @@ public class ActionMenu : PopupBase
         if (instance.panel != null)
         {
             var pRt = instance.panel.GetComponent<RectTransform>();
-            pRt.sizeDelta = new Vector2(PANEL_WIDTH, PANEL_HEIGHT + 80);
+            pRt.sizeDelta = new Vector2(instance.PanelWidth, instance.PanelHeight + 80);
         }
 
         instance.ShowPopup("GAME ACTIONS", instance.bodyText.text);
@@ -266,7 +266,7 @@ public class ActionMenu : PopupBase
     void Update()
     {
         if (overlay == null || !overlay.activeSelf) return;
-        if (Input.GetKeyDown(KeyCode.Tab) || Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.X))
+        if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.X))
         {
             lastCloseTime = Time.time;
             HidePopup();

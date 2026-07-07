@@ -16,7 +16,7 @@ public class PopupBase : MonoBehaviour
     protected Text bodyText;
 
     // Standard dimensions
-    public static bool IsMobile => Application.isMobilePlatform || Input.touchSupported;
+    public static bool IsMobile => Application.isMobilePlatform;
     public float PanelWidth => IsMobile ? Screen.width * 0.85f : 560f;
     public float PanelHeight => IsMobile ? Screen.height * 0.65f : 500f;
     public const float TITLE_BAR_HEIGHT = 70f;

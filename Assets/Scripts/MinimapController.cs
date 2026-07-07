@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class MinimapController : MonoBehaviour
 {
-    static bool IsMobile => Application.isMobilePlatform || Input.touchSupported;
+    static bool IsMobile => Application.isMobilePlatform;
     public Transform target;
     public float height = 140f;
     public float mapSize = 200f;

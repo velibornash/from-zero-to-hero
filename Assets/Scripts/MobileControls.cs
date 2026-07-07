@@ -10,7 +10,7 @@ public class MobileControls : MonoBehaviour
 
     void Start()
     {
-        isMobile = Application.isMobilePlatform || Input.touchSupported;
+        isMobile = Application.isMobilePlatform;
         if (!isMobile) return;
 
         var canvas = GetComponent<Canvas>();
