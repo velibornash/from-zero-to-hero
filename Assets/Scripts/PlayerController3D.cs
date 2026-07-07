@@ -335,7 +335,7 @@ public class PlayerController3D : MonoBehaviour
     void CreateWorldHealthBar()
     {
         Canvas mainCanvas = null;
-        foreach (var c in FindObjectsByType<Canvas>(FindObjectsSortMode.None))
+        foreach (var c in FindObjectsByType<Canvas>(FindObjectsInactive.Exclude))
         {
             if (c.renderMode == RenderMode.ScreenSpaceOverlay)
             {
@@ -412,7 +412,7 @@ public class PlayerController3D : MonoBehaviour
 
         var cam = Camera.main;
         if (cam == null) return;
-        Vector3 headPos = transform.position + Vector3.up * 4.8f;
+        Vector3 headPos = transform.position + Vector3.up * 5.8f;
         Vector3 screenPos = cam.WorldToScreenPoint(headPos);
 
         hpBarGo.SetActive(screenPos.z > 0);

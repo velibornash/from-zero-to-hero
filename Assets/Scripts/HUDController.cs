@@ -101,7 +101,7 @@ public class HUDController : MonoBehaviour
     {
         bool mob = PopupBase.IsMobile;
         float iconSize = mob ? 57f : 76f;
-        float labelY = mob ? -85f : -100f;
+        float labelY = mob ? -45f : -60f;
         float valW = mob ? 58f : 86f;
         int valFont = mob ? 27 : 38;
         int fontSize = mob ? 19 : 30;
