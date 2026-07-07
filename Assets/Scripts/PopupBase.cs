@@ -20,12 +20,26 @@ public class PopupBase : MonoBehaviour
     public static void ToggleMobile() { s_forceMobile = !s_forceMobile; }
     public static bool IsMobile => s_forceMobile || Application.isMobilePlatform
         || Screen.width < 800
-        || Screen.dpi > 250f
-        || Screen.height > Screen.width * 1.85f;
-    public float PanelWidth => IsMobile ? Screen.width * 0.85f : 560f;
-    public float PanelHeight => IsMobile ? Screen.height * 0.65f : 500f;
+        || (Screen.dpi > 300f && !Application.isEditor)
+        || (Screen.height > Screen.width * 1.85f && !Application.isEditor);
+    public float PanelWidth => IsMobile ? Mathf.Min(1920f * 0.88f, 1700f) : 560f;
+    public float PanelHeight => IsMobile ? Mathf.Min(1080f * 0.72f, 780f) : 500f;
     public const float TITLE_BAR_HEIGHT = 70f;
     public const float BORDER_INSET = 10f;
+
+    public static Font GetFont()
+    {
+        // System fonts first — most reliable in builds
+        foreach (var n in new[] { "Arial", "Helvetica", "Liberation Sans", "Segoe UI", "Ubuntu" })
+        {
+            var f = Font.CreateDynamicFontFromOSFont(n, 16);
+            if (f != null) return f;
+        }
+        // Fallback to Unity built-in
+        var ff = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        if (ff == null) ff = Resources.GetBuiltinResource<Font>("Arial.ttf");
+        return ff;
+    }
 
     public void BuildUI(string defaultTitle, string defaultBody, Canvas targetCanvas = null)
     {
@@ -116,7 +130,7 @@ public class PopupBase : MonoBehaviour
         titleRt.anchoredPosition = new Vector2(0, -35);
         titleRt.sizeDelta = new Vector2(-40, TITLE_BAR_HEIGHT);
         titleText = titleGo.AddComponent<Text>();
-        titleText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        titleText.font = GetFont();
         titleText.fontSize = IsMobile ? 34 : 26;
         titleText.fontStyle = FontStyle.Bold;
         titleText.color = new Color(1f, 0.95f, 0.55f);
@@ -138,6 +152,7 @@ public class PopupBase : MonoBehaviour
         bodyRt.anchorMax = new Vector2(1, 1);
         bodyRt.offsetMin = new Vector2(28, 90);    // bottom inset: above close button
         bodyRt.offsetMax = new Vector2(-28, -TITLE_BAR_HEIGHT - 20);  // top inset: below title bar
+        bodyGo.AddComponent<RectMask2D>();
         var bodyBgImg = bodyGo.AddComponent<Image>();
         bodyBgImg.sprite = UIStyleHelper.MakeParchmentSprite(128, 128);
         bodyBgImg.type = Image.Type.Sliced;
@@ -152,7 +167,7 @@ public class PopupBase : MonoBehaviour
         bodyTextRt.offsetMin = new Vector2(10, 10);
         bodyTextRt.offsetMax = new Vector2(-10, -10);
         bodyText = bodyTextGo.AddComponent<Text>();
-        bodyText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        bodyText.font = GetFont();
         bodyText.fontSize = IsMobile ? 26 : 20;
         bodyText.fontStyle = FontStyle.Bold;
         bodyText.color = new Color(1f, 0.90f, 0.50f);
@@ -186,7 +201,7 @@ public class PopupBase : MonoBehaviour
         closeTextRt.offsetMin = Vector2.zero;
         closeTextRt.offsetMax = Vector2.zero;
         var closeText = closeTextGo.AddComponent<Text>();
-        closeText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        closeText.font = GetFont();
         closeText.fontSize = 20;
         closeText.fontStyle = FontStyle.Bold;
         closeText.color = new Color(1f, 0.95f, 0.65f);
@@ -204,7 +219,7 @@ public class PopupBase : MonoBehaviour
         hintRt.anchoredPosition = new Vector2(0, 74);
         hintRt.sizeDelta = new Vector2(440, 18);
         var hintText = hintGo.AddComponent<Text>();
-        hintText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        hintText.font = GetFont();
         hintText.fontSize = 16;
         hintText.fontStyle = FontStyle.Bold;
         hintText.color = new Color(0.80f, 0.70f, 0.30f);

@@ -35,6 +35,7 @@ public class PlayerController3D : MonoBehaviour
     static bool s_mobileInteract;
     public static bool MobileInteract { get => s_mobileInteract; set => s_mobileInteract = value; }
 
+    GameObject hpBarGo;
     UnityEngine.UI.Image hpBarFill;
     Text hpBarText;
 
@@ -172,7 +173,10 @@ public class PlayerController3D : MonoBehaviour
         // Speed proportional to actual velocity => animation matches body movement, no sliding
         float speedNorm = currentVelocity.magnitude / speed;
         if (anim != null)
+        {
             anim.SetFloat("Speed", Mathf.Clamp01(speedNorm));
+            anim.speed = Mathf.Max(0.3f, speedNorm);
+        }
 
         bool moving = currentVelocity.sqrMagnitude > 0.1f;
         if (modelRoot != null && moving)
@@ -329,18 +333,18 @@ public class PlayerController3D : MonoBehaviour
 
     void CreateWorldHealthBar()
     {
-        var go = new GameObject("HeroHPBar");
-        go.transform.SetParent(transform, false);
-        go.transform.localPosition = new Vector3(0f, 3.2f, 0f);
+        hpBarGo = new GameObject("HeroHPBar");
+        hpBarGo.transform.SetParent(transform, false);
+        hpBarGo.transform.localPosition = new Vector3(0f, 3.2f, 0f);
 
-        var canvas = go.AddComponent<Canvas>();
+        var canvas = hpBarGo.AddComponent<Canvas>();
         canvas.renderMode = RenderMode.WorldSpace;
         canvas.sortingOrder = 10;
-        var rt = go.GetComponent<RectTransform>();
+        var rt = hpBarGo.GetComponent<RectTransform>();
         rt.sizeDelta = new Vector2(2f, 0.3f);
 
         var bg = new GameObject("BG");
-        bg.transform.SetParent(go.transform, false);
+        bg.transform.SetParent(hpBarGo.transform, false);
         var bgRt = bg.AddComponent<RectTransform>();
         bgRt.anchorMin = Vector2.zero;
         bgRt.anchorMax = Vector2.one;
@@ -350,7 +354,7 @@ public class PlayerController3D : MonoBehaviour
         bgImg.color = new Color(0.1f, 0.05f, 0.05f, 0.8f);
 
         var fill = new GameObject("Fill");
-        fill.transform.SetParent(go.transform, false);
+        fill.transform.SetParent(hpBarGo.transform, false);
         var fillRt = fill.AddComponent<RectTransform>();
         fillRt.anchorMin = Vector2.zero;
         fillRt.anchorMax = Vector2.one;
@@ -362,36 +366,37 @@ public class PlayerController3D : MonoBehaviour
         hpBarFill.fillMethod = UnityEngine.UI.Image.FillMethod.Horizontal;
 
         var label = new GameObject("Label");
-        label.transform.SetParent(go.transform, false);
+        label.transform.SetParent(hpBarGo.transform, false);
         var lRt = label.AddComponent<RectTransform>();
-        lRt.anchorMin = new Vector2(0.5f, 0f);
-        lRt.anchorMax = new Vector2(0.5f, 0f);
-        lRt.pivot = new Vector2(0.5f, 0f);
-        lRt.anchoredPosition = new Vector2(0f, -0.05f);
-        lRt.sizeDelta = new Vector2(2f, 0.35f);
+        lRt.anchorMin = Vector2.zero;
+        lRt.anchorMax = Vector2.one;
+        lRt.offsetMin = Vector2.zero;
+        lRt.offsetMax = Vector2.zero;
         hpBarText = label.AddComponent<Text>();
-        hpBarText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        hpBarText.fontSize = 140;
+        hpBarText.font = PopupBase.GetFont();
+        hpBarText.fontSize = 12;
         hpBarText.fontStyle = FontStyle.Bold;
-        hpBarText.color = new Color(1f, 0.95f, 0.55f);
+        hpBarText.color = Color.white;
         hpBarText.alignment = TextAnchor.MiddleCenter;
         hpBarText.text = "";
         hpBarText.raycastTarget = false;
-        hpBarText.resizeTextForBestFit = true;
-        hpBarText.resizeTextMinSize = 60;
-        hpBarText.resizeTextMaxSize = 200;
 
-        go.AddComponent<Billboard>();
+        hpBarGo.AddComponent<Billboard>();
+        Debug.Log("[HPBar] Created — go=" + (hpBarGo != null) + " fill=" + (hpBarFill != null) + " text=" + (hpBarText != null));
     }
 
     void UpdateWorldHealthBar()
     {
-        if (hpBarFill == null || hpBarText == null) return;
+        if (hpBarFill == null || hpBarText == null)
+        {
+            Debug.LogWarning("[HPBar] Skipping update — null refs");
+            return;
+        }
         float pct = (float)Health / Mathf.Max(1, maxHealth);
         hpBarFill.fillAmount = pct;
-        if (pct > 0.6f) hpBarFill.color = new Color(0.3f, 0.85f, 0.3f);
-        else if (pct > 0.3f) hpBarFill.color = new Color(0.95f, 0.7f, 0.2f);
-        else hpBarFill.color = new Color(0.9f, 0.25f, 0.2f);
+        if (pct > 0.6f) hpBarFill.color = new Color(0.2f, 1f, 0.2f);
+        else if (pct > 0.3f) hpBarFill.color = new Color(1f, 0.7f, 0.2f);
+        else hpBarFill.color = new Color(1f, 0.2f, 0.2f);
         hpBarText.text = $"{Health}/{maxHealth}";
     }
 }

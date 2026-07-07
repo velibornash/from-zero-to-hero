@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Billboard : MonoBehaviour
 {
@@ -6,7 +7,11 @@ public class Billboard : MonoBehaviour
     {
         var cam = Camera.main;
         if (cam == null) return;
-        transform.LookAt(transform.position + cam.transform.rotation * Vector3.forward,
-                         cam.transform.rotation * Vector3.up);
+        var dir = cam.transform.position - transform.position;
+        if (dir.sqrMagnitude > 0.001f)
+            transform.rotation = Quaternion.LookRotation(dir.normalized, Vector3.up);
+        var c = GetComponent<Canvas>();
+        if (c != null && c.worldCamera == null)
+            c.worldCamera = cam;
     }
 }

@@ -63,6 +63,18 @@ public class HUDController : MonoBehaviour
         return null;
     }
 
+    static Font GetFont()
+    {
+        foreach (var n in new[] { "Arial", "Helvetica", "Liberation Sans", "Segoe UI", "Ubuntu" })
+        {
+            var f = Font.CreateDynamicFontFromOSFont(n, 16);
+            if (f != null) return f;
+        }
+        var ff = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        if (ff == null) ff = Resources.GetBuiltinResource<Font>("Arial.ttf");
+        return ff;
+    }
+
     Text MakeText(Transform parent, string name, Vector2 anchoredPos, Vector2 size,
         string content, int fontSize, FontStyle fontStyle, Color color, TextAnchor anchor)
     {
@@ -75,7 +87,7 @@ public class HUDController : MonoBehaviour
         rt.anchoredPosition = anchoredPos;
         rt.sizeDelta = size;
         var text = go.AddComponent<Text>();
-        text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        text.font = GetFont();
         text.fontSize = fontSize;
         text.fontStyle = fontStyle;
         text.color = color;
@@ -88,27 +100,30 @@ public class HUDController : MonoBehaviour
     void BuildHUD()
     {
         bool mob = PopupBase.IsMobile;
-        float ribbonH = mob ? 100f : 140f;
-        float iconSize = mob ? 48f : 64f;
-        float labelY = mob ? -28f : -40f;
-        int fontSize = mob ? 18 : 26;
-        int reportsFont = mob ? 14 : 18;
+        float iconSize = mob ? 50f : 66f;
+        float labelY = mob ? -50f : -80f;
+        float valW = mob ? 55f : 85f;
+        int valFont = mob ? 24 : 34;
+        int fontSize = mob ? 16 : 26;
+        int reportsFont = mob ? 16 : 22;
 
-        // Top ribbon — Travian-style red banner with gold trim
+        // Ribbon
+        float ribbonH = mob ? 140f : 200f;
+        float ribbonW = mob ? 0.88f : 0.78f;
+        float margin = (1f - ribbonW) * 0.5f;
+
         var topBar = new GameObject("TopBar");
         topBar.transform.SetParent(transform, false);
         var barRt = topBar.AddComponent<RectTransform>();
-        barRt.anchorMin = new Vector2(0, 1);
-        barRt.anchorMax = new Vector2(1, 1);
+        barRt.anchorMin = new Vector2(margin, 1);
+        barRt.anchorMax = new Vector2(1f - margin, 1);
         barRt.pivot = new Vector2(0.5f, 1);
         barRt.offsetMin = new Vector2(0, -ribbonH);
         barRt.offsetMax = new Vector2(0, 0);
 
-        // Ribbon — transparent parts show the 3D map behind
         var barImg = topBar.AddComponent<Image>();
         if (ribbonBgSprite != null)
         {
-            Debug.Log("HUDController: ribbon bg loaded OK, size=" + ribbonBgSprite.texture.width + "x" + ribbonBgSprite.texture.height);
             barImg.sprite = ribbonBgSprite;
             barImg.type = Image.Type.Simple;
             barImg.color = Color.white;
@@ -116,55 +131,61 @@ public class HUDController : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("HUDController: ribbon bg NOT loaded, using fallback red");
             barImg.color = new Color(0.38f, 0.06f, 0.04f);
         }
         barImg.raycastTarget = true;
 
-        float x = mob ? 120f : 300f;
+        // Calculate total content width for centering
+        float gap = mob ? 6f : 12f;
+        float sepW = 2f;
+        float chapterW = mob ? 280f : 380f;
+        float totalW = (iconSize + valW + gap) * 4f + gap + sepW + gap + chapterW;
+        float startX = (1920f - totalW) * 0.5f - 30f; // Canvas ref width = 1920, slight left shift
+        float x = startX;
 
         goldText = BuildResourceSlot(topBar.transform, ref x, goldSprite, "10", iconSize, labelY,
-            new Color(1f, 0.95f, 0.40f));
-        x += mob ? 4f : 8f;
+            valW, valFont, new Color(1f, 0.95f, 0.40f));
+        x += gap;
         woodText = BuildResourceSlot(topBar.transform, ref x, woodSprite, "0", iconSize, labelY,
-            new Color(0.95f, 0.82f, 0.50f));
-        x += mob ? 4f : 8f;
+            valW, valFont, new Color(0.95f, 0.82f, 0.50f));
+        x += gap;
         stoneText = BuildResourceSlot(topBar.transform, ref x, stoneSprite, "0", iconSize, labelY,
-            new Color(0.75f, 0.75f, 0.75f));
-        x += mob ? 4f : 8f;
+            valW, valFont, new Color(0.75f, 0.75f, 0.75f));
+        x += gap;
         foodText = BuildResourceSlot(topBar.transform, ref x, foodSprite, "0", iconSize, labelY,
-            new Color(1f, 0.90f, 0.35f));
-        x += mob ? 8f : 16f;
+            valW, valFont, new Color(1f, 0.90f, 0.35f));
+        x += gap;
 
         MakeVerticalSeparator(topBar.transform, x);
-        x += mob ? 8f : 16f;
+        x += gap;
 
-        dayText = MakeText(topBar.transform, "Chapter", new Vector2(x, labelY), new Vector2(mob ? 300f : 400f, 40),
-            ChapterName, mob ? 14 : 26, FontStyle.Bold,
+        dayText = MakeText(topBar.transform, "Chapter", new Vector2(x, labelY), new Vector2(chapterW, 36),
+            ChapterName, fontSize, FontStyle.Bold,
             new Color(1f, 0.95f, 0.55f), TextAnchor.MiddleLeft);
         dayText.resizeTextForBestFit = true;
         dayText.resizeTextMinSize = 10;
-        dayText.resizeTextMaxSize = mob ? 14 : 26;
+        dayText.resizeTextMaxSize = fontSize;
 
-
-
-        // Reports panel (top right) — smaller on mobile
-        float rw = mob ? 220f : 360f;
-        float rh = mob ? 200f : 320f;
+        // Reports panel (top right)
+        float rw = mob ? 220f : 350f;
+        float rh = mob ? 200f : 300f;
         var evPanel = UIStyleHelper.MakeOrnatePanel(transform, (int)rw, (int)rh);
         var evRt = evPanel.GetComponent<RectTransform>();
         evRt.anchorMin = new Vector2(1, 1);
         evRt.anchorMax = new Vector2(1, 1);
         evRt.pivot = new Vector2(1, 1);
-        evRt.anchoredPosition = new Vector2(-18, -(ribbonH + 12));
+        evRt.anchoredPosition = new Vector2(-18, -(ribbonH + 16));
         evRt.sizeDelta = new Vector2(rw, rh);
 
-        float leftMargin = mob ? 16f : 32f;
-        MakeText(evPanel.transform, "Header", new Vector2(leftMargin, -14), new Vector2(rw - leftMargin * 2, 30),
-            "REPORTS", mob ? 22 : 32, FontStyle.Bold,
+        float leftMargin = mob ? 32f : 50f;
+        var hdr = MakeText(evPanel.transform, "Header", new Vector2(leftMargin, -28), new Vector2(rw - leftMargin * 2, 30),
+            "REPORTS", mob ? 22 : 30, FontStyle.Bold,
             new Color(0.95f, 0.75f, 0.20f), TextAnchor.MiddleLeft);
+        hdr.resizeTextForBestFit = true;
+        hdr.resizeTextMinSize = 12;
+        hdr.resizeTextMaxSize = mob ? 28 : 36;
 
-        eventText = MakeText(evPanel.transform, "Events", new Vector2(leftMargin, -50), new Vector2(rw - leftMargin * 2, rh - 70),
+        eventText = MakeText(evPanel.transform, "Events", new Vector2(leftMargin, -66), new Vector2(rw - leftMargin * 2, rh - 88),
             "", reportsFont, FontStyle.Bold,
             new Color(1f, 0.90f, 0.60f), TextAnchor.UpperLeft);
     }
@@ -172,9 +193,8 @@ public class HUDController : MonoBehaviour
 
 
     Text BuildResourceSlot(Transform parent, ref float x, Sprite sprite, string initialValue,
-        float iconSize, float labelY, Color valueColor)
+        float iconSize, float labelY, float valW, int valFont, Color valueColor)
     {
-        bool mob = PopupBase.IsMobile;
         var iconObj = new GameObject("Icon");
         iconObj.transform.SetParent(parent, false);
         var iconRt = iconObj.AddComponent<RectTransform>();
@@ -189,9 +209,7 @@ public class HUDController : MonoBehaviour
         iconImg.raycastTarget = false;
         x += iconSize;
 
-        float valW = mob ? 60f : 85f;
-        int valFont = mob ? 24 : 34;
-        var text = MakeText(parent, "Value_" + initialValue, new Vector2(x, labelY - 2f), new Vector2(valW, 46),
+        var text = MakeText(parent, "Value_" + initialValue, new Vector2(x, labelY - 2f), new Vector2(valW, 36),
             initialValue, valFont, FontStyle.Bold, valueColor, TextAnchor.MiddleLeft);
         x += valW;
         return text;
@@ -206,8 +224,8 @@ public class HUDController : MonoBehaviour
         rt.anchorMin = new Vector2(0, 1);
         rt.anchorMax = new Vector2(0, 1);
         rt.pivot = new Vector2(0, 1);
-        rt.anchoredPosition = new Vector2(x, -40);
-        rt.sizeDelta = new Vector2(2, mob ? 55 : 75);
+        rt.anchoredPosition = new Vector2(x, mob ? -35 : -65);
+        rt.sizeDelta = new Vector2(2, mob ? 65 : 90);
         var img = sep.AddComponent<Image>();
         img.color = new Color(0.55f, 0.40f, 0.18f, 0.7f);
         img.raycastTarget = false;

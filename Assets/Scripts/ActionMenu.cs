@@ -47,7 +47,7 @@ public class ActionMenu : PopupBase
         rt.anchoredPosition = pos;
         rt.sizeDelta = size;
         var text = go.AddComponent<Text>();
-        text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        text.font = GetFont();
         text.fontSize = fontSize;
         text.fontStyle = FontStyle.Bold;
         text.color = color;
@@ -89,6 +89,9 @@ public class ActionMenu : PopupBase
         sRt.anchoredPosition = new Vector2(0, -TITLE_BAR_HEIGHT - 8);
         sRt.sizeDelta = new Vector2(-20, 100);
 
+        float statsW = PanelWidth - 20;
+        float hbW = Mathf.Min(statsW * 0.55f, 420f);
+
         // Health bar
         var hbGo = new GameObject("HPBar");
         hbGo.transform.SetParent(statsGo.transform, false);
@@ -97,10 +100,10 @@ public class ActionMenu : PopupBase
         hbRt.anchorMax = new Vector2(0.5f, 1);
         hbRt.pivot = new Vector2(0.5f, 1);
         hbRt.anchoredPosition = new Vector2(0, -8);
-        hbRt.sizeDelta = new Vector2(240, 24);
+        hbRt.sizeDelta = new Vector2(hbW, 26);
 
         var hbBg = hbGo.AddComponent<Image>();
-        hbBg.color = new Color(0.15f, 0.05f, 0.05f);
+        hbBg.color = new Color(0.08f, 0.03f, 0.03f);
         hbBg.raycastTarget = false;
 
         var hbFillGo = new GameObject("Fill");
@@ -111,7 +114,7 @@ public class ActionMenu : PopupBase
         hbFillRt.offsetMin = Vector2.zero;
         hbFillRt.offsetMax = Vector2.zero;
         healthFill = hbFillGo.AddComponent<Image>();
-        healthFill.color = new Color(0.3f, 0.85f, 0.3f);
+        healthFill.color = new Color(0.2f, 1f, 0.2f);
         healthFill.raycastTarget = false;
         healthFill.type = Image.Type.Filled;
         healthFill.fillMethod = Image.FillMethod.Horizontal;
@@ -119,38 +122,43 @@ public class ActionMenu : PopupBase
         healthFill.fillAmount = 1f;
 
         healthLabel = MakeStatText(hbGo.transform, "Label",
-            new Vector2(0, 0), new Vector2(240, 24),
-            14, new Color(1f, 0.95f, 0.55f), TextAnchor.MiddleCenter);
+            new Vector2(0, 0), new Vector2(hbW, 26),
+            16, Color.white, TextAnchor.MiddleCenter);
+        var healthOutline = healthLabel.gameObject.AddComponent<Outline>();
+        healthOutline.effectColor = Color.black;
+        healthOutline.effectDistance = new Vector2(1.5f, -1.5f);
 
-        // Resources row
-        float rx = 30f;
+        // Resources row — centered in stats bar
         const float iconS = 40f;
+        const float txtW = 80f;
+        float contentW = (iconS + 4 + txtW) * 4 + 8 * 3;
+        float rx = Mathf.Max(30f, (statsW - contentW) * 0.5f);
 
         MakeStatIcon(statsGo.transform, goldSprite, new Vector2(rx, -46), iconS);
         rx += iconS + 4;
         goldVal = MakeStatText(statsGo.transform, "GoldVal",
-            new Vector2(rx, -50), new Vector2(80, 32),
+            new Vector2(rx, -50), new Vector2(txtW, 32),
             22, new Color(1f, 0.95f, 0.40f), TextAnchor.MiddleLeft);
-        rx += 80 + 8;
+        rx += txtW + 8;
 
         MakeStatIcon(statsGo.transform, woodSprite, new Vector2(rx, -46), iconS);
         rx += iconS + 4;
         woodVal = MakeStatText(statsGo.transform, "WoodVal",
-            new Vector2(rx, -50), new Vector2(80, 32),
+            new Vector2(rx, -50), new Vector2(txtW, 32),
             22, new Color(0.95f, 0.82f, 0.50f), TextAnchor.MiddleLeft);
-        rx += 80 + 8;
+        rx += txtW + 8;
 
         MakeStatIcon(statsGo.transform, stoneSprite, new Vector2(rx, -46), iconS);
         rx += iconS + 4;
         stoneVal = MakeStatText(statsGo.transform, "StoneVal",
-            new Vector2(rx, -50), new Vector2(80, 32),
+            new Vector2(rx, -50), new Vector2(txtW, 32),
             22, new Color(0.75f, 0.75f, 0.75f), TextAnchor.MiddleLeft);
-        rx += 80 + 8;
+        rx += txtW + 8;
 
         MakeStatIcon(statsGo.transform, foodSprite, new Vector2(rx, -46), iconS);
         rx += iconS + 4;
         foodVal = MakeStatText(statsGo.transform, "FoodVal",
-            new Vector2(rx, -50), new Vector2(80, 32),
+            new Vector2(rx, -50), new Vector2(txtW, 32),
             22, new Color(1f, 0.90f, 0.35f), TextAnchor.MiddleLeft);
 
         // Move body text down to make room
