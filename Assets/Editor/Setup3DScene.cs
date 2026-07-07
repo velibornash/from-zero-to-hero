@@ -140,10 +140,18 @@ public class Setup3DScene
         // Delete stale generated materials that may have been replaced by FBX-native textures
         string[] staleMats = {
             "Assets/Materials/BarbarianEnemy.mat",
+            "Assets/Prefabs/Wolf_Materials",
         };
         foreach (var mp in staleMats)
         {
-            if (File.Exists(mp))
+            if (Directory.Exists(mp))
+            {
+                Directory.Delete(mp, true);
+                var metaPath = mp + ".meta";
+                if (File.Exists(metaPath)) File.Delete(metaPath);
+                Debug.Log($"Deleted stale material dir {mp}");
+            }
+            else if (File.Exists(mp))
             {
                 File.Delete(mp);
                 File.Delete(mp + ".meta");
@@ -752,9 +760,8 @@ public class Setup3DScene
     static GameObject EnsureBarbarianPrefab()
     {
         string path = "Assets/Prefabs/BarbarianEnemy.prefab";
-        var existing = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-        if (existing != null) return existing;
-
+        // Always rebuild (SaveAsPrefabAsset overwrites), so Enemy field changes
+        // (heroDamage, attackInterval, etc.) take effect without Clean Cache.
         Directory.CreateDirectory("Assets/Prefabs");
         Directory.CreateDirectory("Assets/Materials");
 
@@ -833,8 +840,10 @@ public class Setup3DScene
         var enemy = go.AddComponent<Enemy>();
         enemy.maxHealth = 4;
         enemy.goldReward = 8;
-        enemy.moveSpeed = 5.5f;
+            enemy.moveSpeed = 4.5f;
         enemy.attackRange = 4f;
+        enemy.heroDamage = 20;
+        enemy.attackInterval = 0.6f;
         enemy.enemyName = "Barbarian";
 
         PrefabUtility.SaveAsPrefabAsset(go, path);
@@ -844,38 +853,59 @@ public class Setup3DScene
         return result;
     }
 
+    static Material CreateFixMaterial(Color color, string name)
+    {
+        string dir = "Assets/Prefabs/Wolf_Materials";
+        Directory.CreateDirectory(dir);
+        string path = dir + "/" + name + ".mat";
+        // Reuse existing fix material if it already exists (from a prior build).
+        var existing = AssetDatabase.LoadAssetAtPath<Material>(path);
+        if (existing != null)
+        {
+            existing.color = color;
+            existing.shader = Shader.Find("Standard");
+            EditorUtility.SetDirty(existing);
+            return existing;
+        }
+        var mat = new Material(Shader.Find("Standard"));
+        mat.color = color;
+        mat.name = name;
+        AssetDatabase.CreateAsset(mat, path);
+        return mat;
+    }
+
     static void FixWolfMaterials(GameObject wolf)
     {
-        // Replace ALL materials with Standard shader — the Wolf pack uses a custom ShaderGraph
-        // (AnimalFurShader_URP_HDRP) that requires URP/HDRP, and the prefab incorrectly
-        // references URP materials on the fur mesh. Without URP/HDRP installed, every material
-        // that isn't Standard shows up as pink.
+        // Unconditionally replace EVERY material on EVERY renderer with Standard shader.
+        // The Wolf pack uses a custom ShaderGraph (AnimalFurShader_URP_HDRP) that requires
+        // URP/HDRP. Without URP/HDRP every non-Standard material shows as pink. Even materials
+        // that already reference Standard can show pink if they reference missing textures.
+        // Our replacement materials use only flat colors — no textures — so they always work.
+        // We create actual .mat assets on disk so they serialize into the prefab correctly.
+        int fixedCount = 0;
         foreach (var rend in wolf.GetComponentsInChildren<Renderer>())
         {
             var mats = rend.sharedMaterials;
-            bool needFix = false;
+            Debug.Log($"WolfFix: renderer '{rend.name}' has {mats.Length} material(s)");
             for (int mi = 0; mi < mats.Length; mi++)
             {
-                if (mats[mi] == null || mats[mi].shader == null || mats[mi].shader.name != "Standard")
-                    { needFix = true; break; }
-            }
-            if (!needFix) continue;
-
-            for (int mi = 0; mi < mats.Length; mi++)
-            {
-                var mat = new Material(Shader.Find("Standard"));
+                var oldShader = mats[mi] != null && mats[mi].shader != null ? mats[mi].shader.name : "null";
                 string rn = rend.name.ToLower();
+                Color col;
                 if (rn.Contains("glass") || rn.Contains("eye"))
-                    mat.color = new Color(0.6f, 0.7f, 0.8f, 0.5f);
+                    col = new Color(0.6f, 0.7f, 0.8f, 0.5f);
                 else if (rn.Contains("fur") || rn.Contains("hair"))
-                    mat.color = new Color(0.15f, 0.1f, 0.08f);
+                    col = new Color(0.15f, 0.1f, 0.08f);
                 else
-                    mat.color = new Color(0.2f, 0.15f, 0.1f);
-                mat.name = "Wolf_Fix_" + rend.name + "_" + mi;
-                mats[mi] = mat;
+                    col = new Color(0.2f, 0.15f, 0.1f);
+                string matName = "Wolf_Fix_" + rend.name + "_" + mi;
+                mats[mi] = CreateFixMaterial(col, matName);
+                fixedCount++;
+                Debug.Log($"WolfFix: replaced slot {mi} (was '{oldShader}') with {matName}");
             }
             rend.sharedMaterials = mats;
         }
+        Debug.Log($"WolfFix: total {fixedCount} materials replaced on {wolf.name}");
     }
 
     static GameObject EnsureWolfPrefab()
@@ -922,12 +952,16 @@ public class Setup3DScene
             var enemy = wolf.AddComponent<Enemy>();
             enemy.maxHealth = 2;
             enemy.goldReward = 5;
-            enemy.moveSpeed = 6.5f;
+            enemy.moveSpeed = 5f;
             enemy.attackRange = 3.5f;
+            enemy.heroDamage = 15;
+            enemy.attackInterval = 0.5f;
             enemy.enemyName = "Wolf";
 
+            Debug.Log($"EnsureWolfPrefab: saving to {path} with {wolf.GetComponentsInChildren<Renderer>().Length} renderers");
             PrefabUtility.SaveAsPrefabAsset(wolf, path);
             Object.DestroyImmediate(wolf);
+            Debug.Log("EnsureWolfPrefab: prefab saved successfully");
             return AssetDatabase.LoadAssetAtPath<GameObject>(path);
         }
 
@@ -1973,7 +2007,7 @@ public class Setup3DScene
     static void EnsureGoldIcon()
     {
         string path = "Assets/Resources/HUDIcons/gold_icon.png";
-        bool existed = File.Exists(path);
+        if (File.Exists(path)) return;
 
         int size = 128;
         var tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
@@ -2029,6 +2063,65 @@ public class Setup3DScene
         Debug.Log($"Generated gold coin icon at {path}");
     }
 
+    static void ApplyOutline(Texture2D tex, Color outlineColor, int thickness)
+    {
+        int w = tex.width, h = tex.height;
+        var pixels = tex.GetPixels();
+        var copy = tex.GetPixels();
+
+        bool IsOpaque(int x, int y)
+        {
+            if (x < 0 || x >= w || y < 0 || y >= h) return false;
+            return copy[y * w + x].a > 0.01f;
+        }
+
+        for (int x = 0; x < w; x++)
+        {
+            for (int y = 0; y < h; y++)
+            {
+                if (IsOpaque(x, y)) continue;
+                for (int ox = -thickness; ox <= thickness; ox++)
+                {
+                    for (int oy = -thickness; oy <= thickness; oy++)
+                    {
+                        if (ox * ox + oy * oy > thickness * thickness) continue;
+                        if (IsOpaque(x + ox, y + oy))
+                        {
+                            float a = outlineColor.a;
+                            pixels[y * w + x] = Color.Lerp(pixels[y * w + x], outlineColor, a);
+                            goto nextPixel;
+                        }
+                    }
+                }
+                nextPixel:;
+            }
+        }
+        tex.SetPixels(pixels);
+    }
+
+    static void DrawRoundedRect(Texture2D tex, int cx, int cy, int w, int h, int r, Color color)
+    {
+        int hw = w / 2, hh = h / 2;
+        for (int x = cx - hw; x <= cx + hw; x++)
+        {
+            for (int y = cy - hh; y <= cy + hh; y++)
+            {
+                int dx = x - cx, dy = y - cy;
+                bool inRect = true;
+                if (dx < -hw + r && dy < -hh + r)
+                    inRect = (dx + hw - r) * (dx + hw - r) + (dy + hh - r) * (dy + hh - r) <= r * r;
+                else if (dx > hw - r && dy < -hh + r)
+                    inRect = (dx - hw + r) * (dx - hw + r) + (dy + hh - r) * (dy + hh - r) <= r * r;
+                else if (dx < -hw + r && dy > hh - r)
+                    inRect = (dx + hw - r) * (dx + hw - r) + (dy - hh + r) * (dy - hh + r) <= r * r;
+                else if (dx > hw - r && dy > hh - r)
+                    inRect = (dx - hw + r) * (dx - hw + r) + (dy - hh + r) * (dy - hh + r) <= r * r;
+                if (inRect)
+                    tex.SetPixel(x, y, color);
+            }
+        }
+    }
+
     static void DrawFilledCircle(Texture2D tex, int cx, int cy, int r, Color color)
     {
         for (int x = cx - r; x <= cx + r; x++)
@@ -2040,58 +2133,67 @@ public class Setup3DScene
     static void EnsureWoodIcon()
     {
         string path = "Assets/Resources/HUDIcons/wood_icon.png";
+        if (File.Exists(path)) return;
         int size = 128;
         var tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
         Color clear = new Color(0, 0, 0, 0);
-        Color[] woodClr = {
-            new Color(0.50f, 0.28f, 0.10f),
-            new Color(0.65f, 0.38f, 0.14f),
-            new Color(0.42f, 0.22f, 0.08f),
-            new Color(0.72f, 0.45f, 0.18f)
-        };
+
+        Color woodBase = new Color(0.62f, 0.38f, 0.14f);
+        Color woodLight = new Color(0.75f, 0.50f, 0.22f);
+        Color woodDark = new Color(0.40f, 0.22f, 0.07f);
+        Color woodShadow = new Color(0.30f, 0.15f, 0.04f);
+        Color woodRing = new Color(0.50f, 0.28f, 0.10f);
 
         int cx = size / 2, cy = size / 2;
+
         for (int x = 0; x < size; x++)
             for (int y = 0; y < size; y++)
                 tex.SetPixel(x, y, clear);
 
-        // Stacked logs: 3 logs in a triangle shape
-        // Bottom log (horizontal)
-        int lw = 56, lh = 18;
-        int bx = cx, by = cy + 14;
-        for (int x = bx - lw / 2; x <= bx + lw / 2; x++)
-            for (int y = by - lh / 2; y <= by + lh / 2; y++)
-                tex.SetPixel(x, y, woodClr[x % 2]);
+        // Three logs stacked in a pyramid: each with rounded ends
+        // Bottom log
+        DrawRoundedRect(tex, cx, cy + 18, 56, 22, 4, woodBase);
+        // Middle log (offset left)
+        DrawRoundedRect(tex, cx - 6, cy, 56, 22, 4, woodDark);
+        // Top log (offset right)
+        DrawRoundedRect(tex, cx + 6, cy - 18, 56, 22, 4, woodBase);
 
-        // Middle log (horizontal, offset left)
-        int mx = cx - 4, my = cy;
-        for (int x = mx - lw / 2; x <= mx + lw / 2; x++)
-            for (int y = my - lh / 2; y <= my + lh / 2; y++)
-                tex.SetPixel(x, y, woodClr[(x + 1) % 2]);
-
-        // Top log (horizontal, offset right)
-        int tx = cx + 4, ty = cy - 14;
-        for (int x = tx - lw / 2; x <= tx + lw / 2; x++)
-            for (int y = ty - lh / 2; y <= ty + lh / 2; y++)
-                tex.SetPixel(x, y, woodClr[x % 2]);
-
-        // Ring lines on each log
-        void DrawRings(int rx, int ry, int spacing)
+        // Shadows between logs
+        for (int x = cx - 30; x <= cx + 30; x++)
         {
-            for (int r = -12; r <= 12; r += spacing)
-                for (int yy = ry - lh / 2 + 3; yy <= ry + lh / 2 - 3; yy++)
-                    tex.SetPixel(rx + r, yy, woodClr[3]);
-            for (int rr = -lh / 2 + 4; rr <= lh / 2 - 4; rr += 5)
-                for (int xx = rx - lw / 2 + 3; xx <= rx + lw / 2 - 3; xx++)
-                    tex.SetPixel(xx, ry + rr, woodClr[2]);
+            tex.SetPixel(x, cy + 8, woodShadow);
+            tex.SetPixel(x, cy - 10, woodShadow);
         }
-        DrawRings(bx, by, 10);
-        DrawRings(mx, my, 10);
-        DrawRings(tx, ty, 10);
 
-        // Highlight top edges
-        for (int xx = bx - lw / 2 + 2; xx <= bx + lw / 2 - 2; xx++)
-            tex.SetPixel(xx, by - lh / 2, woodClr[3]);
+        // Wood ring lines on each log (tree rings on the cut ends)
+        void DrawEndRings(int lcx, int lcy, int side)
+        {
+            int rx = lcx + side * 24;
+            int ry = lcy;
+            for (int rr = 4; rr <= 9; rr += 3)
+                DrawFilledCircle(tex, rx, ry, rr, woodRing);
+            // Center dot
+            tex.SetPixel(rx, ry, woodDark);
+        }
+        DrawEndRings(cx, cy + 18, -1);
+        DrawEndRings(cx, cy + 18, 1);
+        DrawEndRings(cx - 6, cy, -1);
+        DrawEndRings(cx - 6, cy, 1);
+        DrawEndRings(cx + 6, cy - 18, -1);
+        DrawEndRings(cx + 6, cy - 18, 1);
+
+        // Highlight on top edges of logs
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                var c = tex.GetPixel(x, y);
+                if (c != clear && y > 0 && tex.GetPixel(x, y - 1) == clear)
+                    tex.SetPixel(x, y, woodLight);
+            }
+        }
+
+        ApplyOutline(tex, new Color(0.15f, 0.08f, 0.02f, 0.85f), 2);
 
         tex.Apply();
         Directory.CreateDirectory(Path.GetDirectoryName(path));
@@ -2111,67 +2213,89 @@ public class Setup3DScene
     static void EnsureWheatIcon()
     {
         string path = "Assets/Resources/HUDIcons/wheat_icon.png";
+        if (File.Exists(path)) return;
         int size = 128;
         var tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
         Color clear = new Color(0, 0, 0, 0);
-        Color wheat1 = new Color(0.95f, 0.82f, 0.15f);
-        Color wheat2 = new Color(0.85f, 0.70f, 0.10f);
-        Color wheat3 = new Color(0.70f, 0.55f, 0.08f);
-        Color stalkC = new Color(0.45f, 0.32f, 0.06f);
+
+        Color headLight = new Color(1f, 0.90f, 0.20f);
+        Color headMid = new Color(0.92f, 0.78f, 0.14f);
+        Color headDark = new Color(0.75f, 0.58f, 0.08f);
+        Color stalkGreen = new Color(0.50f, 0.40f, 0.10f);
+        Color leafGreen = new Color(0.45f, 0.55f, 0.10f);
 
         int cx = size / 2, cy = size / 2;
+
         for (int x = 0; x < size; x++)
             for (int y = 0; y < size; y++)
                 tex.SetPixel(x, y, clear);
 
-        // Stalk — curved slightly
-        for (int y = cy - 48; y <= cy + 20; y++)
+        // Main stalk — thicker, gentle curve
+        for (int y = cy - 50; y <= cy + 25; y++)
         {
-            int sx = cx + (cy - y) / 10;
-            tex.SetPixel(sx, y, stalkC);
-            tex.SetPixel(sx + 1, y, stalkC);
+            int sx = cx + (cy - y) / 12;
+            for (int w = -2; w <= 2; w++)
+                tex.SetPixel(sx + w, y, stalkGreen);
         }
 
-        // Wheat head — large oval with grain texture
-        int hcx = cx + 4, hcy = cy + 22;
-        for (int x = hcx - 20; x <= hcx + 12; x++)
+        // Leaves on left side
+        int lx = cx - 5;
+        for (int y = cy - 5; y <= cy + 15; y++)
+        {
+            int leafX = lx - (y - cy - 5) * (y - cy - 5) / 20;
+            tex.SetPixel(leafX, y, leafGreen);
+            tex.SetPixel(leafX - 1, y, leafGreen);
+        }
+        // Another leaf lower
+        for (int y = cy + 5; y <= cy + 20; y++)
+        {
+            int leafX = lx - 2 - (y - cy - 5) * (y - cy - 5) / 25;
+            tex.SetPixel(leafX, y, leafGreen);
+            tex.SetPixel(leafX - 1, y, leafGreen);
+        }
+
+        // Wheat head — larger, more detailed oval
+        int hcx = cx + 4, hcy = cy + 28;
+        for (int x = hcx - 22; x <= hcx + 16; x++)
         {
             int dx = x - hcx;
-            int halfH = 22 - dx * dx / 18;
+            int halfH = 26 - dx * dx / 16;
             if (halfH < 0) continue;
             for (int y = hcy - halfH; y <= hcy + halfH; y++)
             {
-                if ((y - hcy) * (y - hcy) + dx * dx * 2 < 420)
-                    tex.SetPixel(x, y, (x + y) % 4 < 2 ? wheat1 : wheat2);
+                if ((y - hcy) * (y - hcy) + dx * dx * 2 < 520)
+                {
+                    Color c = (x + y) % 5 < 2 ? headLight : (x + y) % 5 < 4 ? headMid : headDark;
+                    tex.SetPixel(x, y, c);
+                }
             }
         }
 
-        // Individual grain dots on the head
-        for (int i = 0; i < 18; i++)
+        // Grain bumps on the head (staggered)
+        int[] grainXOff = { -16, -10, -4, 2, 8, 14, -13, -7, -1, 5, 11, -10, -4, 2, 8, -7, -1, 5 };
+        int[] grainYOff = { -16, -16, -16, -16, -16, -16, -6, -6, -6, -6, -6, 4, 4, 4, 4, 14, 14, 14 };
+        for (int i = 0; i < grainXOff.Length; i++)
         {
-            int gx = hcx - 14 + (i % 6) * 5 + (i / 6) * 2;
-            int gy = hcy - 12 + (i / 6) * 10 + (i % 3);
-            tex.SetPixel(gx, gy, wheat3);
-            tex.SetPixel(gx + 1, gy, wheat3);
-            tex.SetPixel(gx, gy + 1, wheat3);
+            int gx = hcx + grainXOff[i];
+            int gy = hcy + grainYOff[i];
+            tex.SetPixel(gx, gy, headDark);
+            tex.SetPixel(gx + 1, gy, headDark);
+            tex.SetPixel(gx, gy + 1, headDark);
+            tex.SetPixel(gx + 1, gy + 1, headDark);
+            tex.SetPixel(gx, gy - 1, headLight);
         }
 
-        // Awn (spiky tips at top of head)
-        for (int a = -10; a <= 6; a += 4)
+        // Awns — spiky tips at the top
+        for (int a = -14; a <= 8; a += 4)
         {
-            for (int y = hcy - 22; y >= hcy - 32; y--)
+            for (int y = hcy - 26; y >= hcy - 40; y--)
             {
-                int ax = hcx + a + (hcy - 22 - y) / 3;
-                tex.SetPixel(ax, y, wheat1);
+                int ax = hcx + a + (hcy - 26 - y) / 4;
+                tex.SetPixel(ax, y, headMid);
             }
         }
 
-        // Leaf on left side of stalk
-        for (int y = cy - 10; y <= cy + 10; y++)
-        {
-            int lx = cx - 8 - (cy - y) * (cy - y) / 30;
-            tex.SetPixel(lx, y, stalkC);
-        }
+        ApplyOutline(tex, new Color(0.12f, 0.08f, 0.02f, 0.85f), 2);
 
         tex.Apply();
         Directory.CreateDirectory(Path.GetDirectoryName(path));
@@ -2191,41 +2315,94 @@ public class Setup3DScene
     static void EnsureStoneIcon()
     {
         string path = "Assets/Resources/HUDIcons/stone_icon.png";
+        if (File.Exists(path)) return;
         int size = 128;
         var tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
         Color clear = new Color(0, 0, 0, 0);
-        Color stone1 = new Color(0.55f, 0.52f, 0.48f);
-        Color stone2 = new Color(0.45f, 0.42f, 0.38f);
-        Color stone3 = new Color(0.35f, 0.32f, 0.28f);
-        Color light = new Color(0.70f, 0.67f, 0.62f);
+
+        Color stoneLight = new Color(0.65f, 0.62f, 0.57f);
+        Color stoneMid = new Color(0.52f, 0.49f, 0.44f);
+        Color stoneDark = new Color(0.38f, 0.35f, 0.30f);
+        Color stoneShadow = new Color(0.25f, 0.22f, 0.18f);
+        Color highlight = new Color(0.78f, 0.75f, 0.70f);
 
         int cx = size / 2, cy = size / 2;
+
         for (int x = 0; x < size; x++)
             for (int y = 0; y < size; y++)
                 tex.SetPixel(x, y, clear);
 
-        // Three rocks stacked
-        // Bottom rock (larger, rounded)
-        DrawFilledCircle(tex, cx - 4, cy + 12, 24, stone1);
-        // Middle rock
-        DrawFilledCircle(tex, cx + 6, cy - 4, 20, stone3);
-        // Top rock
-        DrawFilledCircle(tex, cx - 6, cy - 20, 16, stone2);
+        // Three rocks — each a different shape and shade
+        // Bottom rock — wide, flat-ish
+        for (int x = cx - 32; x <= cx + 28; x++)
+        {
+            int dx = x - cx + 2;
+            int dy = cy + 16;
+            int hw = 28 - dx * dx / 120;
+            if (hw < 0) continue;
+            for (int y = dy - hw; y <= dy + hw; y++)
+            {
+                int dy2 = y - dy;
+                if (dy2 * dy2 + dx * dx / 2 < 680)
+                    tex.SetPixel(x, y, stoneDark);
+            }
+        }
 
-        // Highlight/light on top edges
-        for (int x = cx - 28; x <= cx + 20; x++)
-            for (int y = cy - 12; y <= cy - 8; y++)
-                if (tex.GetPixel(x, y) != clear)
-                    tex.SetPixel(x, y, light);
+        // Middle rock — angled
+        for (int x = cx - 14; x <= cx + 30; x++)
+        {
+            int dx = x - cx - 8;
+            int dy = cy;
+            int hw = 22 - dx * dx / 90;
+            if (hw < 0) continue;
+            for (int y = dy - hw; y <= dy + hw; y++)
+            {
+                int dy2 = y - dy;
+                if (dy2 * dy2 + dx * dx / 2 < 420)
+                    tex.SetPixel(x, y, stoneMid);
+            }
+        }
+
+        // Top rock — triangular
+        for (int x = cx - 24; x <= cx + 16; x++)
+        {
+            int dx = x - cx + 4;
+            int dy = cy - 18;
+            int hw = 20 - dx * dx / 70;
+            if (hw < 0) continue;
+            for (int y = dy - hw; y <= dy + hw; y++)
+            {
+                int dy2 = y - dy;
+                if (dy2 * dy2 + dx * dx / 2 < 320)
+                    tex.SetPixel(x, y, stoneLight);
+            }
+        }
+
+        // Highlights on top edges of each rock
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                var c = tex.GetPixel(x, y);
+                if (c != clear && y > 0 && tex.GetPixel(x, y - 1) == clear)
+                    tex.SetPixel(x, y, highlight);
+            }
+        }
 
         // Crack lines
-        for (int i = 0; i < 6; i++)
+        Color crackColor = new Color(0.18f, 0.15f, 0.12f);
+        for (int i = 0; i < 8; i++)
         {
-            int sx = cx - 16 + i * 6;
-            int sy = cy - 8 + i * 3;
-            for (int j = 0; j < 5; j++)
-                tex.SetPixel(sx + j, sy + j * 2, stone3);
+            int sx = cx - 18 + i * 5;
+            int sy = cy - 6 + i * 2;
+            for (int j = 0; j < 4; j++)
+            {
+                if (tex.GetPixel(sx + j, sy + j) != clear)
+                    tex.SetPixel(sx + j, sy + j, crackColor);
+            }
         }
+
+        ApplyOutline(tex, new Color(0.10f, 0.10f, 0.10f, 0.85f), 2);
 
         tex.Apply();
         Directory.CreateDirectory(Path.GetDirectoryName(path));

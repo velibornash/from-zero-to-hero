@@ -66,7 +66,7 @@ public class PopupBase : MonoBehaviour
         var pImg = panel.AddComponent<Image>();
         pImg.sprite = UIStyleHelper.MakeParchmentSprite(256, 256);
         pImg.type = Image.Type.Sliced;
-        pImg.color = Color.white;
+        pImg.color = new Color(0.28f, 0.14f, 0.06f);
         pImg.raycastTarget = true;
 
         // Ornate gold border
@@ -93,7 +93,7 @@ public class PopupBase : MonoBehaviour
         tbRt.anchoredPosition = Vector2.zero;
         tbRt.sizeDelta = new Vector2(0, -TITLE_BAR_HEIGHT);
         var tbImg = titleBar.AddComponent<Image>();
-        tbImg.color = new Color(0.55f, 0.10f, 0.08f);
+        tbImg.color = new Color(0.22f, 0.10f, 0.04f);
         tbImg.raycastTarget = false;
 
         // Gold trim above and below title bar
@@ -121,7 +121,7 @@ public class PopupBase : MonoBehaviour
         titleText.resizeTextMinSize = 12;
         titleText.resizeTextMaxSize = 26;
         var outline = titleGo.AddComponent<Outline>();
-        outline.effectColor = new Color(0.3f, 0.05f, 0.02f);
+        outline.effectColor = new Color(0.05f, 0.02f, 0.01f);
         outline.effectDistance = new Vector2(2, -2);
 
         // Body area (centered between title bar and close button)
@@ -132,11 +132,10 @@ public class PopupBase : MonoBehaviour
         bodyRt.anchorMax = new Vector2(1, 1);
         bodyRt.offsetMin = new Vector2(28, 90);    // bottom inset: above close button
         bodyRt.offsetMax = new Vector2(-28, -TITLE_BAR_HEIGHT - 20);  // top inset: below title bar
-        // Body parchment (so text shows on light background, not dark overlay)
         var bodyBgImg = bodyGo.AddComponent<Image>();
         bodyBgImg.sprite = UIStyleHelper.MakeParchmentSprite(128, 128);
         bodyBgImg.type = Image.Type.Sliced;
-        bodyBgImg.color = Color.white;
+        bodyBgImg.color = new Color(0.22f, 0.10f, 0.04f);
         bodyBgImg.raycastTarget = false;
         // Body text (child of body so it auto-positions within parchment)
         var bodyTextGo = new GameObject("BodyText");
@@ -148,14 +147,15 @@ public class PopupBase : MonoBehaviour
         bodyTextRt.offsetMax = new Vector2(-10, -10);
         bodyText = bodyTextGo.AddComponent<Text>();
         bodyText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        bodyText.fontSize = 16;
-        bodyText.color = new Color(0.25f, 0.12f, 0.03f);
+        bodyText.fontSize = 20;
+        bodyText.fontStyle = FontStyle.Bold;
+        bodyText.color = new Color(1f, 0.90f, 0.50f);
         bodyText.alignment = TextAnchor.UpperCenter;
         bodyText.text = defaultBody;
         bodyText.raycastTarget = false;
         bodyText.resizeTextForBestFit = true;
-        bodyText.resizeTextMinSize = 12;
-        bodyText.resizeTextMaxSize = 20;
+        bodyText.resizeTextMinSize = 16;
+        bodyText.resizeTextMaxSize = 26;
 
         // Close button (centered at bottom)
         var closeGo = new GameObject("CloseButton");
@@ -167,7 +167,7 @@ public class PopupBase : MonoBehaviour
         closeRt.anchoredPosition = new Vector2(0, 24);
         closeRt.sizeDelta = new Vector2(220, 44);
         var closeImg = closeGo.AddComponent<Image>();
-        closeImg.color = new Color(0.55f, 0.10f, 0.08f);
+        closeImg.color = new Color(0.22f, 0.10f, 0.04f);
         closeImg.raycastTarget = true;
         var closeBtn = closeGo.AddComponent<Button>();
         closeBtn.onClick.AddListener(HidePopup);
@@ -199,15 +199,15 @@ public class PopupBase : MonoBehaviour
         hintRt.sizeDelta = new Vector2(440, 18);
         var hintText = hintGo.AddComponent<Text>();
         hintText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        hintText.fontSize = 13;
+        hintText.fontSize = 16;
         hintText.fontStyle = FontStyle.Bold;
         hintText.color = new Color(0.80f, 0.70f, 0.30f);
         hintText.alignment = TextAnchor.MiddleCenter;
         hintText.text = "[TAB]  [ESC]  [X]  —  Close";
         hintText.raycastTarget = false;
         hintText.resizeTextForBestFit = true;
-        hintText.resizeTextMinSize = 8;
-        hintText.resizeTextMaxSize = 13;
+        hintText.resizeTextMinSize = 12;
+        hintText.resizeTextMaxSize = 18;
     }
 
     void CreateTrim(Transform parent, float yOffset, bool top)

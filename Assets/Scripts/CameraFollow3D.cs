@@ -6,7 +6,7 @@ public class CameraFollow3D : MonoBehaviour
     public float smoothSpeed = 4f;
     public float baseDist = 45f;
     public float minDist = 15f;
-    public float maxDist = 60f;
+    public float maxDist = 55f;
 
     public float pitch = 55f;
     public float yaw = 0f;
@@ -20,6 +20,12 @@ public class CameraFollow3D : MonoBehaviour
             if (player != null) target = player.transform;
         }
         currentDist = baseDist;
+
+        RenderSettings.fog = true;
+        RenderSettings.fogMode = FogMode.Linear;
+        RenderSettings.fogStartDistance = 30f;
+        RenderSettings.fogEndDistance = 55f;
+        RenderSettings.fogColor = new Color(0.20f, 0.40f, 0.15f);
     }
 
     void LateUpdate()
@@ -38,6 +44,30 @@ public class CameraFollow3D : MonoBehaviour
         {
             yaw += Input.GetAxis("Mouse X") * 3f;
             pitch = Mathf.Clamp(pitch - Input.GetAxis("Mouse Y") * 2f, 15f, 80f);
+        }
+
+        // Mobile touch controls
+        if (Input.touchCount == 1)
+        {
+            Touch t = Input.GetTouch(0);
+            if (t.phase == TouchPhase.Moved)
+            {
+                yaw += t.deltaPosition.x * 0.3f;
+                pitch = Mathf.Clamp(pitch - t.deltaPosition.y * 0.2f, 15f, 80f);
+            }
+        }
+        else if (Input.touchCount == 2)
+        {
+            Touch t1 = Input.GetTouch(0);
+            Touch t2 = Input.GetTouch(1);
+            Vector2 prevDelta = (t1.position - t1.deltaPosition) - (t2.position - t2.deltaPosition);
+            Vector2 currDelta = t1.position - t2.position;
+            float prevMag = prevDelta.magnitude;
+            float currMag = currDelta.magnitude;
+            if (Mathf.Abs(currMag - prevMag) > 0.5f)
+            {
+                currentDist = Mathf.Clamp(currentDist - (currMag - prevMag) * 0.1f, minDist, maxDist);
+            }
         }
 
         Vector3 dir = Quaternion.Euler(pitch, yaw, 0) * new Vector3(0, 0, -currentDist);

@@ -3,7 +3,7 @@ using System.Collections;
 
 public class PlayerController3D : MonoBehaviour
 {
-    public float speed = 10f;
+    public float speed = 5f;
     public float attackRadius = 4f;
     public int attackDamage = 1;
     public float attackRate = 0.35f;
@@ -185,11 +185,22 @@ public class PlayerController3D : MonoBehaviour
         if (IsDead) return;
         if (damage > 0) lastHitTime = Time.time;
         Health -= damage;
+        Debug.Log($"Hero takes {damage} damage! Health: {Health}/{maxHealth}");
+        // Flash hero model red for visual feedback
+        if (modelRoot != null) StartCoroutine(DamageFlash());
         if (Health <= 0)
         {
             Health = 0;
             Die();
         }
+    }
+
+    System.Collections.IEnumerator DamageFlash()
+    {
+        var rends = modelRoot.GetComponentsInChildren<Renderer>();
+        foreach (var r in rends) r.material.color = Color.red;
+        yield return new WaitForSeconds(0.12f);
+        foreach (var r in rends) r.material.color = Color.white;
     }
 
     // Reset regen timer (for restart)

@@ -20,9 +20,7 @@ public class BuildSlot : MonoBehaviour
     [SerializeField] GameObject tileQuad;
     [SerializeField] Canvas slotCanvas;
     [SerializeField] Image iconImage;
-    [SerializeField] Text nameLabel;
     [SerializeField] Text arrowLabel;
-    [SerializeField] Image coinImage;
     [SerializeField] Text costLabel;
     [SerializeField] Image progressFill;
 
@@ -41,11 +39,8 @@ public class BuildSlot : MonoBehaviour
 
     void Start()
     {
-        // Runtime failsafe: re-create dynamic sprites if they were lost during scene save.
         if (iconImage != null && iconImage.sprite == null)
             iconImage.sprite = GetBuildingIconSprite();
-        if (coinImage != null && coinImage.sprite == null)
-            coinImage.sprite = LoadGoldSprite();
         UpdateVisuals();
     }
 
@@ -124,23 +119,19 @@ public class BuildSlot : MonoBehaviour
         progressFill.fillAmount = 0f;
         progressFill.GetComponent<RectTransform>().pivot = new Vector2(0f, 0.5f);
 
-        // Building name + down arrow (above tile)
-        nameLabel = MakeUiText(canvasObj.transform, "NameLabel",
-            new Vector2(0f, 130f), new Vector2(300f, 80f), 52, new Color(1f, 0.97f, 0.85f), "CHURCH");
-        AddOutline(nameLabel, new Color(0.2f, 0.1f, 0.03f), new Vector2(4f, 4f));
+        // Building icon (replaces name label)
+        iconImage = MakeUiImage(canvasObj.transform, "IconImage",
+            new Vector2(0f, 130f), new Vector2(104f, 104f), Color.white);
+        iconImage.sprite = GetBuildingIconSprite();
+        iconImage.raycastTarget = false;
+        iconImage.preserveAspect = true;
 
         arrowLabel = MakeUiText(canvasObj.transform, "ArrowLabel",
             new Vector2(0f, 70f), new Vector2(90f, 60f), 56, new Color(1f, 0.95f, 0.4f), "\u25BC");
         AddOutline(arrowLabel, new Color(0.2f, 0.1f, 0.03f), new Vector2(4f, 4f));
 
-        // Gold coin + cost (bottom of canvas = near the tile)
-        coinImage = MakeUiImage(canvasObj.transform, "CoinIcon",
-            new Vector2(-70f, -60f), new Vector2(60f, 60f), Color.white);
-        coinImage.sprite = LoadGoldSprite();
-        coinImage.raycastTarget = false;
-
         costLabel = MakeUiText(canvasObj.transform, "CostLabel",
-            new Vector2(30f, -60f), new Vector2(140f, 70f), 54, new Color(1f, 0.95f, 0.35f), "0");
+            new Vector2(0f, -40f), new Vector2(120f, 60f), 54, new Color(1f, 0.95f, 0.35f), "0");
         AddOutline(costLabel, new Color(0.2f, 0.1f, 0.03f), new Vector2(4f, 4f));
     }
 
@@ -188,181 +179,49 @@ public class BuildSlot : MonoBehaviour
         outline.useGraphicAlpha = true;
     }
 
-    Sprite LoadGoldSprite()
-    {
-        var sprite = Resources.Load<Sprite>("HUDIcons/gold_icon");
-        if (sprite != null) return sprite;
-
-        var tex = CreateCoinTexture(64);
-        return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
-    }
-
-    Texture2D CreateCoinTexture(int size)
-    {
-        var tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
-        Color clear = new Color(0, 0, 0, 0);
-        Color gold = new Color(1f, 0.85f, 0.15f);
-        Color goldDark = new Color(0.75f, 0.55f, 0.05f);
-        Color shine = new Color(1f, 0.95f, 0.55f);
-
-        int r = size / 2;
-        int cx = r, cy = r;
-        for (int x = 0; x < size; x++)
-        {
-            for (int y = 0; y < size; y++)
-            {
-                int dx = x - cx, dy = y - cy;
-                int d2 = dx * dx + dy * dy;
-                if (d2 > r * r) { tex.SetPixel(x, y, clear); continue; }
-
-                if (d2 > (r - 3) * (r - 3)) tex.SetPixel(x, y, goldDark);
-                else if (dy > size / 5 && dx < 0) tex.SetPixel(x, y, shine);
-                else tex.SetPixel(x, y, gold);
-            }
-        }
-        tex.Apply();
-        return tex;
-    }
-
     Sprite GetBuildingIconSprite()
     {
         if (data == null) return null;
         string key = data.slotName.ToLowerInvariant();
-        Texture2D tex;
-        if (key.Contains("church")) tex = CreateChurchIcon();
-        else if (key.Contains("flag")) tex = CreateFlagIcon();
-        else if (key.Contains("tower")) tex = CreateTowerIcon();
-        else tex = CreateGenericIcon();
-        return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
-    }
+        string iconName = null;
+        if (key.Contains("church")) iconName = "church_icon";
+        else if (key.Contains("flag")) iconName = "flag_icon";
+        else if (key.Contains("tower")) iconName = "tower_icon";
+        else if (key.Contains("mage")) iconName = "mage_character_icon";
+        else if (key.Contains("ranger") || key.Contains("archer")) iconName = "ranger_archer_icon";
+        else if (key.Contains("house")) iconName = "house_icon";
+        else if (key.Contains("market")) iconName = "market_icon";
+        else if (key.Contains("barracks")) iconName = "barracks_icon";
+        else if (key.Contains("sawmill")) iconName = "sawmill_icon";
+        else if (key.Contains("windmill")) iconName = "windmill_icon";
+        else if (key.Contains("smithy")) iconName = "smithy_icon";
+        else if (key.Contains("warehouse")) iconName = "warehouse_icon";
+        else if (key.Contains("granary")) iconName = "granary_icon";
+        else if (key.Contains("armory")) iconName = "armory_icon";
+        else if (key.Contains("stonemason")) iconName = "stonemason_icon";
+        else if (key.Contains("townhall")) iconName = "townhall_icon";
+        else if (key.Contains("bakery")) iconName = "bakery_icon";
 
-    Texture2D CreateGenericIcon()
-    {
-        int s = 64;
-        var tex = new Texture2D(s, s, TextureFormat.RGBA32, false);
-        Color clear = new Color(0, 0, 0, 0);
-        for (int x = 0; x < s; x++)
-            for (int y = 0; y < s; y++)
-                tex.SetPixel(x, y, clear);
-        return tex;
-    }
-
-    Texture2D CreateChurchIcon()
-    {
-        int s = 64;
-        var tex = CreateGenericIcon();
-        Color roof = new Color(0.75f, 0.2f, 0.12f);
-        Color wall = new Color(0.55f, 0.35f, 0.18f);
-        Color door = new Color(0.2f, 0.1f, 0.04f);
-        Color cross = new Color(1f, 0.9f, 0.35f);
-
-        int baseY = 10, height = 34, width = 30, roofH = 16;
-        int cx = s / 2, left = cx - width / 2, right = cx + width / 2;
-
-        // Walls
-        for (int x = left; x <= right; x++)
-            for (int y = baseY; y < baseY + height; y++)
-                tex.SetPixel(x, y, wall);
-
-        // Roof triangle
-        for (int y = 0; y < roofH; y++)
+        if (!string.IsNullOrEmpty(iconName))
         {
-            int w = (int)((width / 2f + 2) * (1f - y / (float)roofH));
-            for (int x = cx - w; x <= cx + w; x++)
-                tex.SetPixel(x, baseY + height + y, roof);
+            var tex = Resources.Load<Texture2D>("BuildingIcons/" + iconName);
+            if (tex != null)
+                return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
         }
 
-        // Door
-        for (int x = cx - 5; x <= cx + 5; x++)
-            for (int y = baseY; y < baseY + 14; y++)
-                tex.SetPixel(x, y, door);
-
-        // Cross
-        for (int x = cx - 1; x <= cx + 1; x++)
-            for (int y = baseY + height + roofH + 2; y < baseY + height + roofH + 12; y++)
-                tex.SetPixel(x, y, cross);
-        for (int x = cx - 5; x <= cx + 5; x++)
-            tex.SetPixel(x, baseY + height + roofH + 7, cross);
-
-        tex.Apply();
-        return tex;
-    }
-
-    Texture2D CreateFlagIcon()
-    {
-        var tex = CreateGenericIcon();
-        Color pole = new Color(0.55f, 0.55f, 0.55f);
-        Color red = new Color(0.9f, 0.08f, 0.08f);
-        Color blue = new Color(0.05f, 0.18f, 0.55f);
-        Color white = Color.white;
-
-        int poleX = 18, baseY = 8, poleH = 50;
-        for (int y = baseY; y < baseY + poleH; y++)
-            for (int x = poleX - 2; x <= poleX + 2; x++)
-                tex.SetPixel(x, y, pole);
-
-        // Flag waving
-        for (int y = baseY + poleH - 8; y < baseY + poleH - 2; y++)
-        {
-            int wave = (y % 4 < 2) ? 2 : 0;
-            for (int x = poleX + 3; x <= poleX + 36 + wave; x++)
-                tex.SetPixel(x, y, red);
-        }
-        for (int y = baseY + poleH - 16; y < baseY + poleH - 8; y++)
-        {
-            int wave = (y % 4 < 2) ? 2 : 0;
-            for (int x = poleX + 3; x <= poleX + 34 + wave; x++)
-                tex.SetPixel(x, y, blue);
-        }
-        for (int y = baseY + poleH - 24; y < baseY + poleH - 16; y++)
-        {
-            int wave = (y % 4 < 2) ? 2 : 0;
-            for (int x = poleX + 3; x <= poleX + 30 + wave; x++)
-                tex.SetPixel(x, y, white);
-        }
-
-        tex.Apply();
-        return tex;
-    }
-
-    Texture2D CreateTowerIcon()
-    {
-        int s = 64;
-        var tex = CreateGenericIcon();
-        Color stone = new Color(0.55f, 0.55f, 0.52f);
-        Color dark = new Color(0.35f, 0.35f, 0.33f);
-
-        int baseY = 8, height = 42, width = 26, cx = s / 2;
-        int left = cx - width / 2, right = cx + width / 2;
-
-        // Tower body
-        for (int x = left; x <= right; x++)
-            for (int y = baseY; y < baseY + height; y++)
-                tex.SetPixel(x, y, stone);
-
-        // Crenellations
-        int crenW = 5, crenH = 5;
-        for (int i = 0; i < 4; i++)
-        {
-            int cl = left + i * (width / 3) - 1;
-            for (int x = cl; x < cl + crenW; x++)
-                for (int y = baseY + height; y < baseY + height + crenH; y++)
-                    tex.SetPixel(x, y, stone);
-        }
-
-        // Door
-        for (int x = cx - 5; x <= cx + 5; x++)
-            for (int y = baseY; y < baseY + 12; y++)
-                tex.SetPixel(x, y, dark);
-
-        tex.Apply();
-        return tex;
+        var fallback = Resources.Load<Texture2D>("HUDIcons/stone_icon");
+        if (fallback != null)
+            return Sprite.Create(fallback, new Rect(0, 0, fallback.width, fallback.height), new Vector2(0.5f, 0.5f));
+        return null;
     }
 
     Texture2D CreateTileTexture()
     {
+        var tex = Resources.Load<Texture2D>("Tiles/tile");
+        if (tex != null) return tex;
+
         int w = 256, h = 256;
-        var tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
+        tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
         Color clear = new Color(0, 0, 0, 0);
 
         for (int x = 0; x < w; x++)
@@ -372,7 +231,6 @@ public class BuildSlot : MonoBehaviour
         int pad = 10;
         int radius = 36;
 
-        // Rounded brown fill
         for (int x = 0; x < w; x++)
         {
             for (int y = 0; y < h; y++)
@@ -400,7 +258,6 @@ public class BuildSlot : MonoBehaviour
             }
         }
 
-        // White rounded corner brackets
         int bracketLen = 58;
         int bracketThick = 10;
         int inset = pad + radius / 2;
@@ -415,19 +272,16 @@ public class BuildSlot : MonoBehaviour
 
     void DrawCornerBracket(Texture2D tex, int cx, int cy, int sx, int sy, int len, int thick, Color color)
     {
-        // Horizontal arm
         for (int x = cx; x != cx + sx * len; x += sx)
             for (int y = cy; y != cy + sy * thick; y += sy)
                 if (x >= 0 && x < tex.width && y >= 0 && y < tex.height)
                     tex.SetPixel(x, y, color);
 
-        // Vertical arm
         for (int y = cy; y != cy + sy * len; y += sy)
             for (int x = cx; x != cx + sx * thick; x += sx)
                 if (x >= 0 && x < tex.width && y >= 0 && y < tex.height)
                     tex.SetPixel(x, y, color);
 
-        // Rounded end cap on horizontal arm
         int hx = cx + sx * (len - thick / 2);
         int hy = cy + sy * (thick / 2);
         for (int x = hx - thick; x <= hx + thick; x++)
@@ -436,7 +290,6 @@ public class BuildSlot : MonoBehaviour
                     if (x >= 0 && x < tex.width && y >= 0 && y < tex.height)
                         tex.SetPixel(x, y, color);
 
-        // Rounded end cap on vertical arm
         int vx = cx + sx * (thick / 2);
         int vy = cy + sy * (len - thick / 2);
         for (int x = vx - thick; x <= vx + thick; x++)
@@ -554,32 +407,27 @@ public class BuildSlot : MonoBehaviour
 
         if (locked || built) return;
 
-        nameLabel.text = data.slotName.ToUpperInvariant();
+        iconImage.sprite = GetBuildingIconSprite();
 
-        // When paused (Available but partial progress was made), keep showing the remaining cost.
         bool hasProgress = spentGold > 0;
         costLabel.text = (building || ready || hasProgress ? Mathf.Max(0, data.cost - spentGold) : data.cost).ToString();
 
         if (building)
         {
             progressFill.fillAmount = spentGold / (float)data.cost;
-            nameLabel.color = new Color(0.8f, 1f, 0.8f);
         }
         else if (ready)
         {
             progressFill.fillAmount = 1f;
-            nameLabel.color = new Color(0.4f, 1f, 0.4f);
             costLabel.text = "0";
         }
         else if (hasProgress)
         {
             progressFill.fillAmount = spentGold / (float)data.cost;
-            nameLabel.color = new Color(1f, 0.92f, 0.6f);
         }
         else
         {
             progressFill.fillAmount = 0f;
-            nameLabel.color = new Color(1f, 0.97f, 0.85f);
         }
     }
 
@@ -759,7 +607,8 @@ public class BuildSlot : MonoBehaviour
                 break;
         }
         Debug.Log($"BuildSlot '{name}': Calling BuildingPopup.Show with title='{title}'");
-        BuildingPopup.Show(title, body, "default", transform.position);
+        string iconKey = data != null ? data.slotName.ToLowerInvariant() : "default";
+        BuildingPopup.Show(title, body, iconKey, transform.position);
     }
 
     void SpawnBuilding()
@@ -888,6 +737,22 @@ public class BuildSlot : MonoBehaviour
             {
                 var staff = (GameObject)Object.Instantiate(staffPrefab);
                 staff.name = "MageStaff";
+                // Fix white FBX materials: replace embedded materials with Standard shader + color
+                foreach (var rend in staff.GetComponentsInChildren<Renderer>())
+                {
+                    var mats = rend.sharedMaterials;
+                    for (int mi = 0; mi < mats.Length; mi++)
+                    {
+                        var newMat = new Material(Shader.Find("Standard"));
+                        newMat.name = "StaffMat_" + rend.name + "_" + mi;
+                        if (mi == 0)
+                            newMat.color = new Color(0.45f, 0.3f, 0.1f); // brown shaft
+                        else
+                            newMat.color = new Color(0.5f, 0.2f, 0.8f); // purple crystal
+                        mats[mi] = newMat;
+                    }
+                    rend.sharedMaterials = mats;
+                }
                 var handSlot = FindHandSlot(mage.transform);
                 if (handSlot != null)
                 {

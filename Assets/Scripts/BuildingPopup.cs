@@ -24,21 +24,25 @@ public class BuildingPopup : PopupBase
             var go = new GameObject("BuildingPopup");
             instance = go.AddComponent<BuildingPopup>();
             instance.BuildUI(title, body, targetCanvas: canvas);
-            // Wire close button to custom callback if provided
-            var closeBtn = instance.panel?.transform.Find("CloseButton");
-            if (closeBtn != null)
-            {
-                var btn = closeBtn.GetComponent<UnityEngine.UI.Button>();
-                btn.onClick.RemoveAllListeners();
-                btn.onClick.AddListener(() => {
-                    if (closeCallback != null) closeCallback();
-                    else instance.HidePopup();
-                });
-            }
         }
 
         closeCallback = onClose;
+        WireCloseButton();
         instance.ShowPopup(title, body);
+    }
+
+    static void WireCloseButton()
+    {
+        if (instance == null || instance.panel == null) return;
+        var closeBtn = instance.panel.transform.Find("CloseButton");
+        if (closeBtn == null) return;
+        var btn = closeBtn.GetComponent<UnityEngine.UI.Button>();
+        if (btn == null) return;
+        btn.onClick.RemoveAllListeners();
+        btn.onClick.AddListener(() => {
+            if (closeCallback != null) closeCallback();
+            else instance.HidePopup();
+        });
     }
 
     public static void Hide()

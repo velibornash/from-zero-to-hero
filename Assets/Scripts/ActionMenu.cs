@@ -63,7 +63,7 @@ public class ActionMenu : PopupBase
             instance.bodyText.resizeTextForBestFit = false;
             instance.bodyText.resizeTextMinSize = 12;
             instance.bodyText.resizeTextMaxSize = 22;
-            instance.bodyText.color = new Color(0.30f, 0.15f, 0.05f);
+            instance.bodyText.color = new Color(1f, 0.92f, 0.55f);
             instance.bodyText.lineSpacing = 1.3f;
         }
 

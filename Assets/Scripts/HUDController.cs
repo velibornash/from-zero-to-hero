@@ -8,17 +8,18 @@ public class HUDController : MonoBehaviour
     public static int Gold = 10;
     public static int Wood = 0;
     public static int Food = 0;
+    public static int Stone = 0;
     public static int Day = 1;
     public const string ChapterName = "Chapter I: The Awakening";
     static bool hasWon;
 
-    Text goldText, woodText, foodText, dayText, eventText;
+    Text goldText, woodText, foodText, stoneText, dayText, eventText;
     List<string> events = new List<string>();
     List<float> eventTimestamps = new List<float>();
     const float EVENT_LIFETIME = 8f;
     static HUDController instance;
 
-    Sprite goldSprite, woodSprite, foodSprite;
+    Sprite goldSprite, woodSprite, foodSprite, stoneSprite, ribbonBgSprite;
 
     void Awake() { instance = this; }
 
@@ -29,6 +30,13 @@ public class HUDController : MonoBehaviour
         goldSprite = LoadIcon("HUDIcons/gold_icon");
         woodSprite = LoadIcon("HUDIcons/wood_icon");
         foodSprite = LoadIcon("HUDIcons/wheat_icon");
+        stoneSprite = LoadIcon("HUDIcons/stone_icon");
+        var ribbonTex = Resources.Load<Texture2D>("HUDIcons/ribbon_bg");
+        if (ribbonTex != null)
+        {
+            ribbonTex.filterMode = FilterMode.Bilinear;
+            ribbonBgSprite = Sprite.Create(ribbonTex, new Rect(0, 0, ribbonTex.width, ribbonTex.height), new Vector2(0.5f, 0.5f));
+        }
         BuildHUD();
         PushEvent("Welcome to From Zero To Hero");
     }
@@ -37,7 +45,10 @@ public class HUDController : MonoBehaviour
     {
         var tex = Resources.Load<Texture2D>(path);
         if (tex != null)
+        {
+            tex.filterMode = FilterMode.Bilinear;
             return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
+        }
         return null;
     }
 
@@ -72,42 +83,42 @@ public class HUDController : MonoBehaviour
         barRt.anchorMin = new Vector2(0, 1);
         barRt.anchorMax = new Vector2(1, 1);
         barRt.pivot = new Vector2(0.5f, 1);
-        barRt.offsetMin = new Vector2(0, -96);
+        barRt.offsetMin = new Vector2(0, -140);
         barRt.offsetMax = new Vector2(0, 0);
 
+        // Ribbon — transparent parts show the 3D map behind
         var barImg = topBar.AddComponent<Image>();
-        barImg.color = new Color(0.38f, 0.06f, 0.04f);
+        if (ribbonBgSprite != null)
+        {
+            Debug.Log("HUDController: ribbon bg loaded OK, size=" + ribbonBgSprite.texture.width + "x" + ribbonBgSprite.texture.height);
+            barImg.sprite = ribbonBgSprite;
+            barImg.type = Image.Type.Simple;
+            barImg.color = Color.white;
+            barImg.preserveAspect = false;
+        }
+        else
+        {
+            Debug.LogWarning("HUDController: ribbon bg NOT loaded, using fallback red");
+            barImg.color = new Color(0.38f, 0.06f, 0.04f);
+        }
         barImg.raycastTarget = true;
 
-        // Gold trim lines (top and bottom edges)
-        for (int i = 0; i < 2; i++)
-        {
-            var trim = new GameObject(i == 0 ? "GoldTrimTop" : "GoldTrimBottom");
-            trim.transform.SetParent(topBar.transform, false);
-            var tRt = trim.AddComponent<RectTransform>();
-            tRt.anchorMin = new Vector2(0, i == 0 ? 1 : 0);
-            tRt.anchorMax = new Vector2(1, i == 0 ? 1 : 0);
-            tRt.pivot = new Vector2(0.5f, i == 0 ? 1 : 0);
-            tRt.anchoredPosition = Vector2.zero;
-            tRt.sizeDelta = new Vector2(0, 4);
-            var tImg = trim.AddComponent<Image>();
-            tImg.color = new Color(0.90f, 0.70f, 0.18f);
-            tImg.raycastTarget = false;
-        }
-
-        float x = 24f;
+        float x = 300f;
         const float iconSize = 60f;
-        const float labelY = -18f;
+        const float labelY = -32f;
 
         goldText = BuildResourceSlot(topBar.transform, ref x, goldSprite, "10", iconSize, labelY,
             new Color(1f, 0.95f, 0.40f));
-        x += 12f;
+        x += 8f;
         woodText = BuildResourceSlot(topBar.transform, ref x, woodSprite, "0", iconSize, labelY,
             new Color(0.95f, 0.82f, 0.50f));
-        x += 12f;
+        x += 8f;
+        stoneText = BuildResourceSlot(topBar.transform, ref x, stoneSprite, "0", iconSize, labelY,
+            new Color(0.75f, 0.75f, 0.75f));
+        x += 8f;
         foodText = BuildResourceSlot(topBar.transform, ref x, foodSprite, "0", iconSize, labelY,
             new Color(1f, 0.90f, 0.35f));
-        x += 24f;
+        x += 16f;
 
         MakeVerticalSeparator(topBar.transform, x);
         x += 16f;
@@ -148,8 +159,8 @@ public class HUDController : MonoBehaviour
         hRt.anchorMin = new Vector2(1, 0.5f);
         hRt.anchorMax = new Vector2(1, 0.5f);
         hRt.pivot = new Vector2(1, 0.5f);
-        hRt.anchoredPosition = new Vector2(-80, 0);
-        hRt.sizeDelta = new Vector2(280, 44);
+        hRt.anchoredPosition = new Vector2(-400, 0);
+        hRt.sizeDelta = new Vector2(120, 44);
 
         // Simple background
         var bg = new GameObject("BG");
@@ -193,12 +204,12 @@ public class HUDController : MonoBehaviour
         iconRt.anchorMin = new Vector2(0, 1);
         iconRt.anchorMax = new Vector2(0, 1);
         iconRt.pivot = new Vector2(0, 1);
-        iconRt.anchoredPosition = new Vector2(x, 0);
+        iconRt.anchoredPosition = new Vector2(x, -18);
         x += iconSize;
 
-        var text = MakeText(parent, "Value_" + initialValue, new Vector2(x, labelY), new Vector2(120, 50),
+        var text = MakeText(parent, "Value_" + initialValue, new Vector2(x, labelY), new Vector2(80, 50),
             initialValue, 34, FontStyle.Bold, valueColor, TextAnchor.MiddleLeft);
-        x += 120;
+        x += 80;
         return text;
     }
 
@@ -210,8 +221,8 @@ public class HUDController : MonoBehaviour
         rt.anchorMin = new Vector2(0, 1);
         rt.anchorMax = new Vector2(0, 1);
         rt.pivot = new Vector2(0, 1);
-        rt.anchoredPosition = new Vector2(x, -22);
-        rt.sizeDelta = new Vector2(2, 70);
+        rt.anchoredPosition = new Vector2(x, -32);
+        rt.sizeDelta = new Vector2(2, 80);
         var img = sep.AddComponent<Image>();
         img.color = new Color(0.55f, 0.40f, 0.18f, 0.7f);
         img.raycastTarget = false;
@@ -223,6 +234,7 @@ public class HUDController : MonoBehaviour
 
         if (goldText != null) goldText.text = $"{Gold}";
         if (woodText != null) woodText.text = $"{Wood}";
+        if (stoneText != null) stoneText.text = $"{Stone}";
         if (foodText != null) foodText.text = $"{Food}";
         if (dayText != null) dayText.text = ChapterName;
 
@@ -297,6 +309,7 @@ public class HUDController : MonoBehaviour
     {
         Gold = 10;
         Wood = 0;
+        Stone = 0;
         Food = 0;
         Day = 1;
         hasWon = false;
