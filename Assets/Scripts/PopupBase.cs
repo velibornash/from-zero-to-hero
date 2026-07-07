@@ -18,7 +18,10 @@ public class PopupBase : MonoBehaviour
     // Standard dimensions
     static bool s_forceMobile;
     public static void ToggleMobile() { s_forceMobile = !s_forceMobile; }
-    public static bool IsMobile => s_forceMobile || Application.isMobilePlatform || Screen.width < 800;
+    public static bool IsMobile => s_forceMobile || Application.isMobilePlatform
+        || Screen.width < 800
+        || Screen.dpi > 250f
+        || Screen.height > Screen.width * 1.85f;
     public float PanelWidth => IsMobile ? Screen.width * 0.85f : 560f;
     public float PanelHeight => IsMobile ? Screen.height * 0.65f : 500f;
     public const float TITLE_BAR_HEIGHT = 70f;
