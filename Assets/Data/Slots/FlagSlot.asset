@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BuildSlotData
   slotName: Flag
   cost: 10
-  buildingPrefab: {fileID: 6226355057008830794, guid: 549534eb5ed5f4d7c8dd612b11a645a3, type: 3}
+  buildingPrefab: {fileID: 2752735953648958828, guid: 549534eb5ed5f4d7c8dd612b11a645a3, type: 3}
   position: {x: -2, y: 0, z: -48}
   rotation: {x: 0, y: 0, z: 0}
   scale: {x: 1, y: 1, z: 1}
