@@ -2517,6 +2517,10 @@ public class Setup3DScene
         light.transform.rotation = Quaternion.Euler(50, -30, 0);
         light.intensity = 1.3f;
         light.shadows = LightShadows.None;
+
+        var dayNight = new GameObject("DayNightCycle");
+        var cycle = dayNight.AddComponent<DayNightCycle>();
+        cycle.directionalLight = light;
     }
 
     static void SetupTreeResources()
