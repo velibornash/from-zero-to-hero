@@ -462,9 +462,8 @@ public class BuildSlot : MonoBehaviour
                     string elderMsg = GetElderMessage();
                     if (elderMsg != null)
                         ElderPopup.Instance?.Show(elderMsg, 5f);
-                    ShowCompletionPopup();
                 }
-                catch (System.Exception ex) { Debug.LogWarning($"ShowCompletionPopup failed: {ex.Message}"); }
+                catch (System.Exception ex) { Debug.LogWarning($"ElderPopup failed: {ex.Message}"); }
             }
         }
         catch (System.Exception e)
@@ -676,33 +675,52 @@ public class BuildSlot : MonoBehaviour
 
     void SpawnWorker()
     {
-        var worker = new GameObject("Worker_" + data.slotName);
-        worker.transform.position = transform.position + new Vector3(2.2f, 0f, 2.2f);
-        worker.transform.rotation = Quaternion.Euler(0f, Random.Range(0f, 360f), 0f);
+        GameObject worker;
+        var rangerPrefab = Resources.Load<GameObject>("Ranger");
+        if (rangerPrefab != null)
+        {
+            worker = (GameObject)Object.Instantiate(rangerPrefab,
+                transform.position + new Vector3(-3f, 0f, 0f),
+                Quaternion.Euler(0f, Random.Range(0f, 360f), 0f));
+            worker.name = "Worker_" + data.slotName;
+            worker.transform.localScale = Vector3.one * 2.2f;
 
-        var body = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-        body.name = "Body";
-        body.transform.SetParent(worker.transform);
-        body.transform.localPosition = new Vector3(0f, 0.9f, 0f);
-        body.transform.localScale = new Vector3(0.5f, 0.9f, 0.5f);
-        body.GetComponent<Renderer>().sharedMaterial = MakeMat(new Color(0.3f, 0.45f, 0.7f));
-        Destroy(body.GetComponent<CapsuleCollider>());
+            // Ensure an Animator exists (prefab may not have clips imported)
+            var animator = worker.GetComponentInChildren<Animator>();
+            if (animator == null) animator = worker.AddComponent<Animator>();
+            animator.applyRootMotion = false;
+        }
+        else
+        {
+            Debug.LogWarning("Ranger prefab not found in Resources — using fallback worker.");
+            worker = new GameObject("Worker_" + data.slotName);
+            worker.transform.position = transform.position + new Vector3(-3f, 0f, 0f);
+            worker.transform.rotation = Quaternion.Euler(0f, Random.Range(0f, 360f), 0f);
 
-        var head = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        head.name = "Head";
-        head.transform.SetParent(worker.transform);
-        head.transform.localPosition = new Vector3(0f, 1.8f, 0f);
-        head.transform.localScale = Vector3.one * 0.4f;
-        head.GetComponent<Renderer>().sharedMaterial = MakeMat(new Color(0.95f, 0.8f, 0.65f));
-        Destroy(head.GetComponent<SphereCollider>());
+            var body = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            body.name = "Body";
+            body.transform.SetParent(worker.transform);
+            body.transform.localPosition = new Vector3(0f, 0.9f, 0f);
+            body.transform.localScale = new Vector3(0.5f, 0.9f, 0.5f);
+            body.GetComponent<Renderer>().sharedMaterial = MakeMat(new Color(0.55f, 0.42f, 0.28f));
+            Destroy(body.GetComponent<CapsuleCollider>());
 
-        var hat = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-        hat.name = "Hat";
-        hat.transform.SetParent(worker.transform);
-        hat.transform.localPosition = new Vector3(0f, 2.05f, 0f);
-        hat.transform.localScale = new Vector3(0.5f, 0.25f, 0.5f);
-        hat.GetComponent<Renderer>().sharedMaterial = MakeMat(new Color(0.2f, 0.15f, 0.1f));
-        Destroy(hat.GetComponent<CapsuleCollider>());
+            var head = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            head.name = "Head";
+            head.transform.SetParent(worker.transform);
+            head.transform.localPosition = new Vector3(0f, 1.8f, 0f);
+            head.transform.localScale = Vector3.one * 0.4f;
+            head.GetComponent<Renderer>().sharedMaterial = MakeMat(new Color(0.95f, 0.8f, 0.65f));
+            Destroy(head.GetComponent<SphereCollider>());
+
+            var hat = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            hat.name = "Hat";
+            hat.transform.SetParent(worker.transform);
+            hat.transform.localPosition = new Vector3(0f, 2.05f, 0f);
+            hat.transform.localScale = new Vector3(0.5f, 0.25f, 0.5f);
+            hat.GetComponent<Renderer>().sharedMaterial = MakeMat(new Color(0.2f, 0.15f, 0.1f));
+            Destroy(hat.GetComponent<CapsuleCollider>());
+        }
 
         var ai = worker.AddComponent<WorkerAI>();
         ai.resourceType = "wood";

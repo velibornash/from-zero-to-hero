@@ -51,7 +51,7 @@ public class Setup3DScene
         SetupEnemySpawner();
         SetupVillageWalls();
         PlacePlayer();
-        PlaceTestNPC();
+        // PlaceTestNPC();  // removed - was creating blue superhero pillar at gate
         CreateSlots();
         SetupUI();
         SetupCamera();
@@ -2524,10 +2524,10 @@ public class Setup3DScene
 
         cycle.lightColorGradient = new Gradient();
         var colors = new GradientColorKey[] {
-            new GradientColorKey(new Color(1f, 0.9f, 0.7f), 0f),
-            new GradientColorKey(new Color(1f, 0.95f, 0.85f), 0.3f),
-            new GradientColorKey(new Color(1f, 0.8f, 0.5f), 0.7f),
-            new GradientColorKey(new Color(0.8f, 0.4f, 0.2f), 1f)
+            new GradientColorKey(new Color(1f, 0.65f, 0.35f), 0f),
+            new GradientColorKey(new Color(1f, 0.95f, 0.85f), 0.25f),
+            new GradientColorKey(new Color(1f, 1f, 0.9f), 0.5f),
+            new GradientColorKey(new Color(0.5f, 0.2f, 0.1f), 1f)
         };
         var alphas = new GradientAlphaKey[] {
             new GradientAlphaKey(1f, 0f), new GradientAlphaKey(1f, 1f)
@@ -2535,26 +2535,26 @@ public class Setup3DScene
         cycle.lightColorGradient.SetKeys(colors, alphas);
 
         cycle.lightIntensityCurve = new AnimationCurve(
-            new Keyframe(0f, 0.3f), new Keyframe(0.3f, 1.2f),
-            new Keyframe(0.7f, 1.3f), new Keyframe(1f, 0.2f));
+            new Keyframe(0f, 0.15f), new Keyframe(0.25f, 1.5f),
+            new Keyframe(0.5f, 1.6f), new Keyframe(1f, 0.1f));
 
         cycle.ambientColorGradient = new Gradient();
         var ambColors = new GradientColorKey[] {
-            new GradientColorKey(new Color(0.1f, 0.1f, 0.2f), 0f),
-            new GradientColorKey(new Color(0.5f, 0.6f, 0.7f), 0.3f),
-            new GradientColorKey(new Color(0.7f, 0.75f, 0.8f), 0.5f),
-            new GradientColorKey(new Color(0.5f, 0.4f, 0.3f), 0.8f),
-            new GradientColorKey(new Color(0.1f, 0.1f, 0.2f), 1f)
+            new GradientColorKey(new Color(0.03f, 0.03f, 0.08f), 0f),
+            new GradientColorKey(new Color(0.4f, 0.5f, 0.7f), 0.25f),
+            new GradientColorKey(new Color(0.75f, 0.8f, 0.85f), 0.5f),
+            new GradientColorKey(new Color(0.1f, 0.08f, 0.05f), 0.85f),
+            new GradientColorKey(new Color(0.03f, 0.03f, 0.08f), 1f)
         };
         cycle.ambientColorGradient.SetKeys(ambColors, alphas);
 
         cycle.fogColorGradient = new Gradient();
         var fogColors = new GradientColorKey[] {
-            new GradientColorKey(new Color(0.05f, 0.05f, 0.15f), 0f),
-            new GradientColorKey(new Color(0.4f, 0.5f, 0.3f), 0.3f),
-            new GradientColorKey(new Color(0.35f, 0.55f, 0.25f), 0.6f),
-            new GradientColorKey(new Color(0.15f, 0.2f, 0.1f), 0.85f),
-            new GradientColorKey(new Color(0.05f, 0.05f, 0.15f), 1f)
+            new GradientColorKey(new Color(0.02f, 0.02f, 0.06f), 0f),
+            new GradientColorKey(new Color(0.5f, 0.55f, 0.35f), 0.25f),
+            new GradientColorKey(new Color(0.5f, 0.65f, 0.35f), 0.5f),
+            new GradientColorKey(new Color(0.05f, 0.08f, 0.03f), 0.85f),
+            new GradientColorKey(new Color(0.02f, 0.02f, 0.06f), 1f)
         };
         cycle.fogColorGradient.SetKeys(fogColors, alphas);
 
@@ -2563,6 +2563,9 @@ public class Setup3DScene
 
         var elderPopup = new GameObject("ElderPopup");
         elderPopup.AddComponent<ElderPopup>();
+
+        var welcome = new GameObject("WelcomeScreenUI");
+        welcome.AddComponent<WelcomeScreenUI>();
     }
 
     static void SetupTreeResources()
@@ -2602,6 +2605,19 @@ public class Setup3DScene
             {
                 var prefab = PrefabUtility.SaveAsPrefabAsset(staffGo, staffDst);
                 Debug.Log($"Created Staff prefab at {staffDst}");
+            }
+        }
+
+        // Ranger prefab for runtime workers
+        string rangerSrc = "Assets/3D/KayKit/KayKit_Adventurers_2.0_FREE/Characters/fbx/Ranger.fbx";
+        string rangerDst = "Assets/Resources/Ranger.prefab";
+        if (!File.Exists(rangerDst))
+        {
+            var rangerGo = AssetDatabase.LoadAssetAtPath<GameObject>(rangerSrc);
+            if (rangerGo != null)
+            {
+                var prefab = PrefabUtility.SaveAsPrefabAsset(rangerGo, rangerDst);
+                Debug.Log($"Created Ranger prefab at {rangerDst}");
             }
         }
 

@@ -1,9 +1,11 @@
 # FAZA 1 — Make the Game Fun
 
 ## TASK 1 — Hero Movement & Feel ✓
-- Acceleration/deceleration → `Vector3.MoveTowards` at 25 units/s²
-- Camera: fog, mobile touch orbit/zoom
-- Next: footstep particles, subtle jump (spacebar), speed curve (ease-in)
+- [x] Acceleration/deceleration → `Vector3.MoveTowards` at 25 units/s²
+- [x] Camera: fog, mobile touch orbit/zoom
+- [x] HP bar as ScreenSpaceOverlay tracking hero
+- [x] Animator controllers restored (hero, barbarian, wolf)
+- [ ] Next: footstep particles, subtle jump (spacebar), speed curve (ease-in)
 
 ## TASK 2 — Resource Gathering (WOOD)
 - [x] Fix hero acceleration (was sliding)
@@ -20,9 +22,11 @@
 - [ ] Modify **HUDController.cs** — add `AddResource(type, amount)` method
 
 ## TASK 3 — Lumber Mill Automation
-- Build Lumber Mill → spawns NPC woodcutter
-- NPC patrols nearby tree, periodically adds Wood to player inventory
-- Reuse `NPCPatrol` with `idleOnly=false`
+- [x] Resource buildings (church/flag) spawn NPC worker
+- [x] Worker uses Ranger character model from KayKit set
+- [x] `WorkerAI` patrols to resource nodes and gathers wood
+- [ ] Dedicated Lumber Mill building + woodcutter loop
+- [ ] Reuse `NPCPatrol` with `idleOnly=false`
 
 ## TASK 4 — Feedback Everywhere
 - Floating text for: gold earned, wood chopped, building complete, quest update
@@ -33,11 +37,13 @@
 - NPCs have health, can die
 - Hero must defend villagers
 
-## TASK 6 — Day Cycle
-- Morning → gather, Afternoon → build, Evening → defend, Night → rewards
-- 3–4 minute day length
-- UI clock/indicator
-- Night: reduced visibility, more wolves
+## TASK 6 — Day Cycle ✓
+- [x] 3m day / 2m night cycle via `DayNightCycle`
+- [x] Sun rotation + ambient/fog gradients
+- [x] UI clock/indicator at top center
+- [x] Brighter day, darker night
+- [ ] Morning → gather, Afternoon → build, Evening → defend, Night → rewards
+- [ ] Night: reduced visibility, more wolves
 
 ## TASK 7 — Hero Attack Upgrade
 - Weapon upgrade via Lumber Mill → bigger range, more damage
@@ -67,9 +73,11 @@
 - Boss wolf every 5 waves
 
 ## TASK 13 — Tutorial
-- First-time player guidance
-- Highlight key objects
-- Context-sensitive hints
+- [x] Welcome screen on first launch
+- [x] Nikola Tesla introduction via `ElderPopup`
+- [x] Elder popup on building completion
+- [ ] Highlight key objects
+- [ ] Context-sensitive hints
 
 ## TASK 14 — Save/Load
 - Save game state (resources, buildings, day)

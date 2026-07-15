@@ -100,15 +100,15 @@ public class HUDController : MonoBehaviour
     void BuildHUD()
     {
         bool mob = PopupBase.IsMobile;
-        float iconSize = mob ? 57f : 76f;
-        float labelY = mob ? -45f : -60f;
-        float valW = mob ? 58f : 86f;
-        int valFont = mob ? 27 : 38;
-        int fontSize = mob ? 19 : 30;
-        int reportsFont = mob ? 17 : 23;
+        float iconSize = mob ? 46f : 61f;
+        float labelY = mob ? -36f : -48f;
+        float valW = mob ? 46f : 69f;
+        int valFont = mob ? 22 : 30;
+        int fontSize = mob ? 15 : 24;
+        int reportsFont = mob ? 14 : 18;
 
         // Ribbon
-        float ribbonH = mob ? 140f : 200f;
+        float ribbonH = mob ? 112f : 160f;
         float ribbonW = mob ? 0.88f : 0.78f;
         float margin = (1f - ribbonW) * 0.5f;
 
@@ -136,11 +136,11 @@ public class HUDController : MonoBehaviour
         barImg.raycastTarget = true;
 
         // Calculate total content width for centering
-        float gap = mob ? 8f : 14f;
+        float gap = mob ? 6f : 11f;
         float sepW = 2f;
-        float chapterW = mob ? 290f : 400f;
+        float chapterW = mob ? 500f : 740f;
         float totalW = (iconSize + valW + gap) * 4f + gap + sepW + gap + chapterW;
-        float startX = (1920f - totalW) * 0.5f - (mob ? 90f : 150f);
+        float startX = (1920f - totalW) * 0.5f;
         float x = startX;
 
         goldText = BuildResourceSlot(topBar.transform, ref x, goldSprite, "10", iconSize, labelY,
@@ -159,16 +159,61 @@ public class HUDController : MonoBehaviour
         MakeVerticalSeparator(topBar.transform, x);
         x += gap;
 
-        dayText = MakeText(topBar.transform, "Chapter", new Vector2(x, labelY - 4f), new Vector2(chapterW, 36),
-            ChapterName, fontSize, FontStyle.Bold,
-            new Color(1f, 0.95f, 0.55f), TextAnchor.MiddleLeft);
-        dayText.resizeTextForBestFit = true;
-        dayText.resizeTextMinSize = 10;
-        dayText.resizeTextMaxSize = fontSize;
+        // Chapter button (clickable image instead of text)
+        var chBtnGo = new GameObject("ChapterBtn");
+        chBtnGo.transform.SetParent(topBar.transform, false);
+        var chBtnRt = chBtnGo.AddComponent<RectTransform>();
+        chBtnRt.anchorMin = new Vector2(0, 1);
+        chBtnRt.anchorMax = new Vector2(0, 1);
+        chBtnRt.pivot = new Vector2(0, 1);
+        chBtnRt.anchoredPosition = new Vector2(x, labelY - 7f);
+        chBtnRt.sizeDelta = new Vector2(chapterW * 0.5f, mob ? 40f : 50f);
+
+        var chImg = chBtnGo.AddComponent<Image>();
+        var chTex = Resources.Load<Texture2D>("Chapters/ch1");
+        if (chTex != null)
+        {
+            chImg.sprite = Sprite.Create(chTex, new Rect(0, 0, chTex.width, chTex.height), Vector2.one * 0.5f);
+            chImg.type = Image.Type.Simple;
+            chImg.color = Color.white;
+        }
+        else
+        {
+            chImg.color = new Color(0.4f, 0.25f, 0.10f, 0.8f);
+        }
+
+        var chBtn = chBtnGo.AddComponent<Button>();
+        chBtn.targetGraphic = chImg;
+        chBtn.onClick.AddListener(() =>
+        {
+            if (ChapterSelectUI.Instance != null)
+                ChapterSelectUI.Instance.Toggle();
+        });
+
+        // Chapter title overlay
+        var chLabel = new GameObject("ChLabel");
+        chLabel.transform.SetParent(chBtnGo.transform, false);
+        var chLblRt = chLabel.AddComponent<RectTransform>();
+        chLblRt.anchorMin = Vector2.zero;
+        chLblRt.anchorMax = Vector2.one;
+        chLblRt.offsetMin = new Vector2(8, 4);
+        chLblRt.offsetMax = new Vector2(-8, -4);
+        dayText = chLabel.AddComponent<Text>();
+        dayText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        dayText.fontSize = mob ? 12 : 16;
+        dayText.fontStyle = FontStyle.Bold;
+        dayText.color = new Color(1f, 0.95f, 0.55f);
+        dayText.alignment = TextAnchor.MiddleLeft;
+        dayText.text = ChapterName;
+        dayText.raycastTarget = false;
+        var chOutline = chLabel.AddComponent<Outline>();
+        chOutline.effectColor = new Color(0, 0, 0, 0.7f);
+        chOutline.effectDistance = new Vector2(1, 1);
+        x += chapterW;
 
         // Reports panel (top right)
-        float rw = mob ? 220f : 350f;
-        float rh = mob ? 200f : 300f;
+        float rw = mob ? 204f : 396f;
+        float rh = mob ? 200f : 340f;
         var evPanel = UIStyleHelper.MakeOrnatePanel(transform, (int)rw, (int)rh);
         var evRt = evPanel.GetComponent<RectTransform>();
         evRt.anchorMin = new Vector2(1, 1);

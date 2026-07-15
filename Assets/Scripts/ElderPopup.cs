@@ -39,6 +39,13 @@ public class ElderPopup : MonoBehaviour
             if (c.renderMode == RenderMode.ScreenSpaceOverlay) { canvas = c; break; }
         if (canvas == null) return;
 
+        bool mob = PopupBase.IsMobile;
+        float pw = mob ? 320f : 500f;
+        float ph = mob ? 90f : 120f;
+        float portraitSize = mob ? 56f : 80f;
+        float padding = mob ? 6f : 10f;
+        int fontSize = mob ? 14 : 18;
+
         panel = new GameObject("ElderPopup");
         panel.transform.SetParent(canvas.transform, false);
         var panelRt = panel.AddComponent<RectTransform>();
@@ -46,7 +53,7 @@ public class ElderPopup : MonoBehaviour
         panelRt.anchorMax = new Vector2(0.5f, 0);
         panelRt.pivot = new Vector2(0.5f, 0);
         panelRt.anchoredPosition = new Vector2(0, 20);
-        panelRt.sizeDelta = new Vector2(500, 120);
+        panelRt.sizeDelta = new Vector2(pw, ph);
 
         var bg = panel.AddComponent<Image>();
         bg.color = new Color(0.12f, 0.08f, 0.04f, 0.92f);
@@ -57,13 +64,15 @@ public class ElderPopup : MonoBehaviour
         elderRt.anchorMin = new Vector2(0, 0.5f);
         elderRt.anchorMax = new Vector2(0, 0.5f);
         elderRt.pivot = new Vector2(0, 0.5f);
-        elderRt.anchoredPosition = new Vector2(10, 0);
-        elderRt.sizeDelta = new Vector2(80, 80);
+        elderRt.anchoredPosition = new Vector2(padding, 0);
+        elderRt.sizeDelta = new Vector2(portraitSize, portraitSize);
         elderImage = elderGo.AddComponent<Image>();
         elderImage.color = Color.white;
         elderImage.raycastTarget = false;
 
-        var elderTex = Resources.Load<Texture2D>("Chapters/elder");
+        var elderTex = Resources.Load<Texture2D>("Chapters/tesla");
+        if (elderTex == null)
+            elderTex = Resources.Load<Texture2D>("Chapters/elder");
         if (elderTex != null)
         {
             var sprite = Sprite.Create(elderTex, new Rect(0, 0, elderTex.width, elderTex.height), Vector2.one * 0.5f);
@@ -79,15 +88,18 @@ public class ElderPopup : MonoBehaviour
         var textRt = textGo.AddComponent<RectTransform>();
         textRt.anchorMin = new Vector2(0, 0);
         textRt.anchorMax = new Vector2(1, 1);
-        textRt.offsetMin = new Vector2(100, 10);
-        textRt.offsetMax = new Vector2(-15, -10);
+        textRt.offsetMin = new Vector2(portraitSize + padding * 2, padding);
+        textRt.offsetMax = new Vector2(-padding, -padding);
         bodyText = textGo.AddComponent<Text>();
         bodyText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        bodyText.fontSize = 18;
+        bodyText.fontSize = fontSize;
         bodyText.fontStyle = FontStyle.Bold;
         bodyText.color = new Color(1f, 0.92f, 0.7f);
         bodyText.alignment = TextAnchor.MiddleLeft;
         bodyText.text = "";
         bodyText.raycastTarget = false;
+        var outline = textGo.AddComponent<Outline>();
+        outline.effectColor = new Color(0, 0, 0, 0.7f);
+        outline.effectDistance = new Vector2(1, 1);
     }
 }

@@ -181,7 +181,33 @@ public class ChapterSelectUI : MonoBehaviour
             unlocked ? new Color(1f, 0.9f, 0.6f) : new Color(0.4f, 0.4f, 0.4f),
             TextAnchor.MiddleCenter);
 
-        if (completed)
+        bool isCurrent = chapter == CurrentChapter;
+        if (isCurrent)
+        {
+            var statusGo = new GameObject("Check");
+            statusGo.transform.SetParent(card.transform, false);
+            var statusRt = statusGo.AddComponent<RectTransform>();
+            statusRt.anchorMin = new Vector2(0.5f, 0.5f);
+            statusRt.anchorMax = new Vector2(0.5f, 0.5f);
+            statusRt.pivot = new Vector2(0.5f, 0.5f);
+            statusRt.anchoredPosition = new Vector2(0, 0);
+            statusRt.sizeDelta = new Vector2(150, 36);
+            var bg = statusGo.AddComponent<Image>();
+            bg.color = new Color(0.1f, 0.25f, 0.1f, 0.85f);
+            bg.raycastTarget = false;
+            var statusText = statusGo.AddComponent<Text>();
+            statusText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            statusText.fontSize = 16;
+            statusText.fontStyle = FontStyle.Bold;
+            statusText.color = new Color(0.4f, 0.95f, 0.4f);
+            statusText.alignment = TextAnchor.MiddleCenter;
+            statusText.text = "IN PROGRESS";
+            statusText.raycastTarget = false;
+            var outline = statusGo.AddComponent<Outline>();
+            outline.effectColor = new Color(0, 0, 0, 0.7f);
+            outline.effectDistance = new Vector2(1, 1);
+        }
+        else if (completed)
         {
             MakeText(card.transform, "Check",
                 new Vector2(0, 0), new Vector2(60, 60),
@@ -189,7 +215,7 @@ public class ChapterSelectUI : MonoBehaviour
                 new Color(0.3f, 0.9f, 0.3f), TextAnchor.MiddleCenter);
         }
 
-        if (unlocked && !completed)
+        if (unlocked && !isCurrent)
         {
             MakeButton(card.transform, "PlayBtn",
                 new Vector2(0, -h * 0.5f + 70), new Vector2(160, 40),
