@@ -451,10 +451,19 @@ public class BuildSlot : MonoBehaviour
             // Spawn Mage on mage tile slots (6-9)
             if (slotIndex >= 6 && slotIndex <= 9)
                 SpawnMageOnTile();
-            // Show popup LAST (won't break the rest if it throws)
+            // Spawn worker for resource buildings (0=church, 1=flag)
+            if (slotIndex <= 1)
+                SpawnWorker();
+            // Show elder popup
             if (data != null)
             {
-                try { ShowCompletionPopup(); }
+                try
+                {
+                    string elderMsg = GetElderMessage();
+                    if (elderMsg != null)
+                        ElderPopup.Instance?.Show(elderMsg, 5f);
+                    ShowCompletionPopup();
+                }
                 catch (System.Exception ex) { Debug.LogWarning($"ShowCompletionPopup failed: {ex.Message}"); }
             }
         }
@@ -695,10 +704,24 @@ public class BuildSlot : MonoBehaviour
         hat.GetComponent<Renderer>().sharedMaterial = MakeMat(new Color(0.2f, 0.15f, 0.1f));
         Destroy(hat.GetComponent<CapsuleCollider>());
 
-        var patrol = worker.AddComponent<NPCPatrol>();
-        patrol.idleOnly = true;
-        patrol.patrolRadius = 2f;
-        patrol.moveSpeed = 0f;
+        var ai = worker.AddComponent<WorkerAI>();
+        ai.resourceType = "wood";
+        ai.gatherInterval = 12f;
+        ai.gatherRange = 25f;
+        ai.gatherAmount = 2;
+    }
+
+    string GetElderMessage()
+    {
+        if (slotIndex == 0)
+            return "The church is raised! Our village has a heart. Now build the Serbian flag to show our pride!";
+        if (slotIndex == 1)
+            return "The banner flies high! Our watchtowers can now be built to protect the village.";
+        if (slotIndex >= 2 && slotIndex <= 5)
+            return "A watchtower stands guard! The village is safer. Keep building to unlock the mages.";
+        if (slotIndex >= 6 && slotIndex <= 9)
+            return "A mage joins our defense! Their magic will smite our enemies.";
+        return null;
     }
 
     void SpawnMageOnTile()

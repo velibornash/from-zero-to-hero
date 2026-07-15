@@ -10,7 +10,7 @@ public class ResourceNode : MonoBehaviour
     public int amount = 5;
     public GameObject altPrefab;
 
-    bool harvested;
+    public bool harvested;
 
     void Awake()
     {
