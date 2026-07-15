@@ -683,7 +683,7 @@ public class BuildSlot : MonoBehaviour
                 transform.position + new Vector3(-3f, 0f, 0f),
                 Quaternion.Euler(0f, Random.Range(0f, 360f), 0f));
             worker.name = "Worker_" + data.slotName;
-            worker.transform.localScale = Vector3.one * 2.2f;
+            worker.transform.localScale = Vector3.one * 1.6f;
 
             // Ensure an Animator exists (prefab may not have clips imported)
             var animator = worker.GetComponentInChildren<Animator>();
@@ -724,8 +724,8 @@ public class BuildSlot : MonoBehaviour
 
         var ai = worker.AddComponent<WorkerAI>();
         ai.resourceType = "wood";
-        ai.gatherInterval = 12f;
-        ai.gatherRange = 25f;
+        ai.gatherInterval = 5f;
+        ai.gatherRange = 300f;
         ai.gatherAmount = 2;
     }
 

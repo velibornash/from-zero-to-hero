@@ -18,13 +18,6 @@ public class WorkerAI : MonoBehaviour
     {
         homePos = transform.position;
         controller = GetComponent<CharacterController>();
-        if (controller == null)
-        {
-            controller = gameObject.AddComponent<CharacterController>();
-            controller.height = 3f;
-            controller.radius = 0.6f;
-            controller.center = new Vector3(0, 1.5f, 0);
-        }
         timer = gatherInterval * 0.5f;
     }
 
@@ -54,6 +47,7 @@ public class WorkerAI : MonoBehaviour
             dir.y = 0;
             if (dir.sqrMagnitude < 2f)
             {
+                Debug.Log($"[Worker {name}] reached resource, gathering...");
                 gathering = true;
                 gatherTimer = 2f;
                 currentTarget = null;
@@ -61,8 +55,8 @@ public class WorkerAI : MonoBehaviour
             else
             {
                 Vector3 move = dir.normalized * 3f * Time.deltaTime;
-                move.y = -1f * Time.deltaTime;
-                controller.Move(move);
+                transform.position += move;
+                transform.position = new Vector3(transform.position.x, 0f, transform.position.z);
                 transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dir), 0.1f);
             }
         }
@@ -79,6 +73,7 @@ public class WorkerAI : MonoBehaviour
 
         if (resourceType == "wood")
         {
+            Debug.Log($"[Worker {name}] searching trees. Count={TreeController.AllTrees.Count}");
             foreach (var tree in TreeController.AllTrees)
             {
                 if (tree.chopped) continue;
@@ -88,6 +83,7 @@ public class WorkerAI : MonoBehaviour
         }
         else
         {
+            Debug.Log($"[Worker {name}] searching nodes. Count={ResourceNode.AllNodes.Count}");
             foreach (var node in ResourceNode.AllNodes)
             {
                 if (node.harvested) continue;
@@ -97,9 +93,15 @@ public class WorkerAI : MonoBehaviour
         }
 
         if (bestT != null)
+        {
+            Debug.Log($"[Worker {name}] target found: {bestT.name} at distance {best:F1}");
             currentTarget = bestT;
+        }
         else
+        {
+            Debug.Log($"[Worker {name}] no resource found, retry in 3s");
             timer = 3f;
+        }
     }
 
     void ReturnHome()
@@ -109,12 +111,13 @@ public class WorkerAI : MonoBehaviour
         if (dir.sqrMagnitude > 1f)
         {
             Vector3 move = dir.normalized * 2f * Time.deltaTime;
-            move.y = -1f * Time.deltaTime;
-            controller.Move(move);
+            transform.position += move;
+            transform.position = new Vector3(transform.position.x, 0f, transform.position.z);
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dir), 0.1f);
         }
         else
         {
+            Debug.Log($"[Worker {name}] at home, waiting {gatherInterval}s");
             timer = gatherInterval;
         }
     }
