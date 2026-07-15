@@ -40,7 +40,7 @@ public class DayNightCycle : MonoBehaviour
     void Start()
     {
         if (directionalLight == null)
-            directionalLight = FindFirstObjectByType<Light>();
+            directionalLight = FindAnyObjectByType<Light>();
         CreateDayUI();
     }
 

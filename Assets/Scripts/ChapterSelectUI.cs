@@ -145,7 +145,7 @@ public class ChapterSelectUI : MonoBehaviour
         {
             var bgSprite = Sprite.Create(bgTex, new Rect(0, 0, bgTex.width, bgTex.height), Vector2.one * 0.5f);
             var bg = new GameObject("BG");
-            bg.transform.SetParent(card, false);
+            bg.transform.SetParent(card.transform, false);
             var bgRt = bg.AddComponent<RectTransform>();
             bgRt.anchorMin = Vector2.zero;
             bgRt.anchorMax = Vector2.one;
@@ -161,7 +161,7 @@ public class ChapterSelectUI : MonoBehaviour
         if (!unlocked)
         {
             var lockGo = new GameObject("Lock");
-            lockGo.transform.SetParent(card, false);
+            lockGo.transform.SetParent(card.transform, false);
             var lockRt = lockGo.AddComponent<RectTransform>();
             lockRt.anchorMin = new Vector2(0.5f, 0.5f);
             lockRt.anchorMax = new Vector2(0.5f, 0.5f);
