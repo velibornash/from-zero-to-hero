@@ -14,7 +14,7 @@ public class PlayerController3D : MonoBehaviour
 
     public static int maxHealth = 100;
     public static int Health = 100;
-    public float regenRate = 5f;
+    public float regenRate = 1.5f;
     public float regenDelay = 1f;
     public float villageRadius = 80f;
     public static bool IsDead = false;

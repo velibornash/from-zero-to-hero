@@ -183,6 +183,7 @@ public class Enemy : MonoBehaviour
         var hero = target.GetComponent<PlayerController3D>();
         if (hero != null)
         {
+            Debug.Log($"[Enemy {enemyName}] damaging hero for {heroDamage}");
             hero.TakeDamage(heroDamage);
             lastAttackTime = Time.time;
         }
