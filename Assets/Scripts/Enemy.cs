@@ -109,21 +109,14 @@ public class Enemy : MonoBehaviour
         else
         {
             currentVelocity = Vector3.MoveTowards(currentVelocity, Vector3.zero, acceleration * 3f * Time.fixedDeltaTime);
-            if (currentVelocity.sqrMagnitude < 0.01f)
+            rb.linearVelocity = new Vector3(currentVelocity.x, 0, currentVelocity.z);
+
+            if (anim != null && anim.runtimeAnimatorController != null)
             {
-                currentVelocity = Vector3.zero;
-                rb.linearVelocity = Vector3.zero;
-                if (anim != null && anim.runtimeAnimatorController != null)
-                {
-                    anim.SetFloat("Speed", 0f);
-                    if (hasAttackParam) anim.SetTrigger("Attack");
-                }
-                TryDamageHero();
+                anim.SetFloat("Speed", 0f);
+                if (hasAttackParam) anim.SetTrigger("Attack");
             }
-            else
-            {
-                rb.linearVelocity = new Vector3(currentVelocity.x, 0, currentVelocity.z);
-            }
+            TryDamageHero();
 
             if (dist > 0.01f)
             {

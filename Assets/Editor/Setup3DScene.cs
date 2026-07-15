@@ -2521,6 +2521,48 @@ public class Setup3DScene
         var dayNight = new GameObject("DayNightCycle");
         var cycle = dayNight.AddComponent<DayNightCycle>();
         cycle.directionalLight = light;
+
+        cycle.lightColorGradient = new Gradient();
+        var colors = new GradientColorKey[] {
+            new GradientColorKey(new Color(1f, 0.9f, 0.7f), 0f),
+            new GradientColorKey(new Color(1f, 0.95f, 0.85f), 0.3f),
+            new GradientColorKey(new Color(1f, 0.8f, 0.5f), 0.7f),
+            new GradientColorKey(new Color(0.8f, 0.4f, 0.2f), 1f)
+        };
+        var alphas = new GradientAlphaKey[] {
+            new GradientAlphaKey(1f, 0f), new GradientAlphaKey(1f, 1f)
+        };
+        cycle.lightColorGradient.SetKeys(colors, alphas);
+
+        cycle.lightIntensityCurve = new AnimationCurve(
+            new Keyframe(0f, 0.3f), new Keyframe(0.3f, 1.2f),
+            new Keyframe(0.7f, 1.3f), new Keyframe(1f, 0.2f));
+
+        cycle.ambientColorGradient = new Gradient();
+        var ambColors = new GradientColorKey[] {
+            new GradientColorKey(new Color(0.1f, 0.1f, 0.2f), 0f),
+            new GradientColorKey(new Color(0.5f, 0.6f, 0.7f), 0.3f),
+            new GradientColorKey(new Color(0.7f, 0.75f, 0.8f), 0.5f),
+            new GradientColorKey(new Color(0.5f, 0.4f, 0.3f), 0.8f),
+            new GradientColorKey(new Color(0.1f, 0.1f, 0.2f), 1f)
+        };
+        cycle.ambientColorGradient.SetKeys(ambColors, alphas);
+
+        cycle.fogColorGradient = new Gradient();
+        var fogColors = new GradientColorKey[] {
+            new GradientColorKey(new Color(0.05f, 0.05f, 0.15f), 0f),
+            new GradientColorKey(new Color(0.4f, 0.5f, 0.3f), 0.3f),
+            new GradientColorKey(new Color(0.35f, 0.55f, 0.25f), 0.6f),
+            new GradientColorKey(new Color(0.15f, 0.2f, 0.1f), 0.85f),
+            new GradientColorKey(new Color(0.05f, 0.05f, 0.15f), 1f)
+        };
+        cycle.fogColorGradient.SetKeys(fogColors, alphas);
+
+        var chapterUI = new GameObject("ChapterSelectUI");
+        chapterUI.AddComponent<ChapterSelectUI>();
+
+        var elderPopup = new GameObject("ElderPopup");
+        elderPopup.AddComponent<ElderPopup>();
     }
 
     static void SetupTreeResources()
