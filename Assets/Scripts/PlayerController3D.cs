@@ -92,11 +92,13 @@ public class PlayerController3D : MonoBehaviour
 
     void Update()
     {
-        if (IsDead) return;
-        HandleMovement();
-        HandleAttack();
-        HandleInteraction();
-        HandleHealthRegen();
+        if (!IsDead)
+        {
+            HandleMovement();
+            HandleAttack();
+            HandleInteraction();
+            HandleHealthRegen();
+        }
         UpdateWorldHealthBar();
     }
 
@@ -315,7 +317,28 @@ public class PlayerController3D : MonoBehaviour
 
     void Die()
     {
+        if (IsDead) return;
         IsDead = true;
+
+        // Stop movement and animation
+        currentVelocity = Vector3.zero;
+        if (anim != null)
+        {
+            anim.SetFloat("Speed", 0f);
+            anim.speed = 1f;
+        }
+        if (controller != null)
+        {
+            controller.Move(Vector3.down * Time.deltaTime);
+        }
+        if (modelRoot != null)
+        {
+            var lp = modelRoot.localPosition;
+            lp.y = baseModelY;
+            modelRoot.localPosition = lp;
+            modelRoot.localRotation = Quaternion.identity;
+        }
+
         HUDController.PushEvent("Hero has fallen! The village is in ruins...");
         // Trigger game over after a short delay
         Invoke(nameof(ShowGameOver), 1.5f);
